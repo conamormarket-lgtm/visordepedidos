@@ -5,8 +5,8 @@ const OrderDetails = ({ order }) => {
     if (!order) return null;
 
     return (
-        // Main Container: "Mica" material effect - transparent glass
-        <div className="w-1/2 p-8 overflow-y-auto flex flex-col h-full relative backdrop-blur-xl bg-white/30 border-l border-white/30 shadow-none">
+        // Main Container: Adapts to vertical tablets (w-full) and large screens (w-1/2)
+        <div className="w-full xl:w-1/2 p-8 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none">
 
             {/* Header Section */}
             <div className="flex flex-col mb-8 pb-6 border-b border-slate-200/60">

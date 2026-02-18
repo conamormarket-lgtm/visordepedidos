@@ -4,8 +4,13 @@ import { convertDriveLink } from '../utils/drive';
 const ImageCarousel = ({ images }) => {
     if (!images || images.length === 0) {
         return (
-            <div className="w-1/2 bg-gray-200 flex items-center justify-center text-gray-400">
-                Sin imágenes
+            <div className="w-full xl:w-1/2 bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold py-32 xl:py-0 border-b xl:border-b-0 xl:border-r border-white/40">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 rounded-full bg-slate-300/50 flex items-center justify-center">
+                        <span className="text-3xl">📷</span>
+                    </div>
+                    <span className="tracking-widest uppercase text-xs opacity-60">Sin imágenes adjuntas</span>
+                </div>
             </div>
         );
     }
@@ -16,12 +21,10 @@ const ImageCarousel = ({ images }) => {
     // The design shows a list of images on the left.
 
     return (
-        <div className="w-1/2 bg-white/30 backdrop-blur-sm border-r border-white/30 overflow-y-auto h-full p-4 space-y-4 relative no-scrollbar">
+        <div className="w-full xl:w-1/2 bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-x-auto xl:overflow-y-auto h-auto xl:h-full p-4 flex flex-row xl:flex-col gap-4 relative no-scrollbar">
             {images.map((img, idx) => (
-                <div key={idx} className="relative group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-                    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold px-2 py-1 rounded z-10">
-                        {/* ID badge if needed */}
-                    </span>
+                <div key={idx} className="relative group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-zoom-in flex-shrink-0 w-[90%] xl:w-full"
+                    onClick={() => window.open(convertDriveLink(img), '_blank')}>
                     <img
                         src={convertDriveLink(img)}
                         alt={`Diseño ${idx + 1}`}
@@ -29,10 +32,7 @@ const ImageCarousel = ({ images }) => {
                         loading="lazy"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                            e.target.style.display = 'none'; // Hide if completely failed
-                            // Alternatively show placeholder:
-                            // e.target.src = 'https://placehold.co/600x400?text=Error';
-                            // e.target.style.display = 'block';
+                            e.target.style.display = 'none';
                         }}
                     />
                 </div>
