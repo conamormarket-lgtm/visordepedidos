@@ -28,65 +28,28 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
     };
 
     return (
-        <div className="pt-4 px-4 z-30 relative">
-            <div className="bg-white/40 backdrop-blur-xl border border-white/40 rounded-3xl shadow-lg relative overflow-hidden pb-4">
+        <div className="pt-3 px-4 z-30 relative">
+            <div className="bg-white/40 backdrop-blur-xl border border-white/40 rounded-3xl shadow-lg relative overflow-hidden px-6 py-3">
+                <div className="flex justify-between items-center gap-4">
 
-                {/* Top Bar */}
-                <div className="px-8 pt-4 mb-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                            <Monitor size={20} />
+                    {/* Left: Title - Compact */}
+                    <div className="flex items-center gap-3 min-w-fit">
+                        <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/10">
+                            <Monitor size={18} />
                         </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-slate-800 leading-tight">Visor de Pedidos</h1>
-                            <p className="text-xs font-medium text-slate-800/60">Sistema de Producción v1.0</p>
+                        <div className="hidden sm:block">
+                            <h1 className="text-sm font-bold text-slate-800 leading-tight">Visor de Pedidos</h1>
+                            <p className="text-[10px] font-medium text-slate-800/60">Producción v1.0</p>
                         </div>
                     </div>
 
-                    {/* Search Pill */}
-                    <div className={`transition-all duration-300 ease-out ${isSearchOpen ? 'w-80' : 'w-12'}`}>
-                        {isSearchOpen ? (
-                            <div className="relative group">
-                                <Search className="absolute left-4 top-3 text-slate-500 w-4 h-4" />
-                                <input
-                                    type="text"
-                                    autoFocus
-                                    placeholder="Buscar ID o Teléfono..."
-                                    className="w-full pl-10 pr-10 py-2.5 bg-white/50 hover:bg-white/80 border-2 border-transparent hover:border-blue-100 focus:bg-white focus:border-blue-500/50 rounded-2xl text-sm font-semibold text-slate-800 outline-none transition-all shadow-inner placeholder:text-slate-500"
-                                    value={searchTerm}
-                                    onChange={handleSearchChange}
-                                    onBlur={() => !searchTerm && setIsSearchOpen(false)}
-                                />
-                                <button
-                                    onClick={() => {
-                                        setSearchTerm("");
-                                        onSearch("");
-                                        setIsSearchOpen(false);
-                                    }}
-                                    className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700"
-                                >
-                                    <X size={16} />
-                                </button>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={() => setIsSearchOpen(true)}
-                                className="w-12 h-12 flex items-center justify-center bg-white/50 hover:bg-white border border-white/40 hover:border-white/60 rounded-2xl text-slate-700 transition-all shadow-sm"
-                            >
-                                <Search size={20} />
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Navigation Tabs - Sliding Background */}
-                <div className="px-6 pb-4">
-                    <div className="flex justify-center">
-                        <div className="bg-slate-100/80 p-1.5 rounded-2xl flex relative shadow-inner backdrop-blur-sm border border-white/20">
+                    {/* Center: Navigation Tabs - More Compact */}
+                    <div className="flex-1 flex justify-center overflow-hidden">
+                        <div className="bg-slate-200/50 p-1 rounded-xl flex relative shadow-inner backdrop-blur-sm border border-white/20">
 
                             {/* Sliding Background */}
                             <div
-                                className="absolute bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-md transition-all duration-300 ease-out h-[calc(100%-0.75rem)] top-1.5"
+                                className="absolute bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg shadow-md transition-all duration-300 ease-out h-[calc(100%-0.5rem)] top-1"
                                 style={{
                                     left: tabStyle.left,
                                     width: tabStyle.width
@@ -101,10 +64,10 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                                         ref={el => tabsRef.current[idx] = el}
                                         onClick={() => onTabChange(stage)}
                                         className={`
-                                            relative px-8 py-2.5 rounded-xl text-sm font-bold transition-colors duration-300 z-10
+                                            relative px-4 sm:px-6 py-1.5 rounded-lg text-xs font-bold transition-colors duration-300 z-10 whitespace-nowrap
                                             ${isActive
                                                 ? 'text-white'
-                                                : 'text-slate-500 hover:text-slate-700'
+                                                : 'text-slate-600 hover:text-slate-800'
                                             }
                                         `}
                                     >
@@ -113,6 +76,41 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                                 );
                             })}
                         </div>
+                    </div>
+
+                    {/* Right: Search - Compact */}
+                    <div className={`flex justify-end transition-all duration-300 ease-out ${isSearchOpen ? 'w-48 sm:w-64' : 'w-10'}`}>
+                        {isSearchOpen ? (
+                            <div className="relative w-full">
+                                <Search className="absolute left-3 top-2.5 text-slate-500 w-3.5 h-3.5" />
+                                <input
+                                    type="text"
+                                    autoFocus
+                                    placeholder="ID o Tel..."
+                                    className="w-full pl-8 pr-8 py-1.5 bg-white/60 hover:bg-white/90 border border-transparent focus:bg-white focus:border-blue-500/30 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all shadow-sm placeholder:text-slate-400"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    onBlur={() => !searchTerm && setIsSearchOpen(false)}
+                                />
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm("");
+                                        onSearch("");
+                                        setIsSearchOpen(false);
+                                    }}
+                                    className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className="w-10 h-10 flex items-center justify-center bg-white/40 hover:bg-white/80 border border-white/30 rounded-xl text-slate-700 transition-all shadow-sm"
+                            >
+                                <Search size={18} />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
