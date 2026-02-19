@@ -22,8 +22,10 @@ function App() {
     const [operators, setOperators] = useState(["Sin Asignar"]);
 
     // Swipe Logic
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
+    const [touchStartX, setTouchStartX] = useState(null);
+    const [touchStartY, setTouchStartY] = useState(null);
+    const [touchEndX, setTouchEndX] = useState(null);
+    const [touchEndY, setTouchEndY] = useState(null);
     const [animDirection, setAnimDirection] = useState('right'); // 'right' means sliding IN from right (Next), 'left' means IN from left (Prev)
     const minSwipeDistance = 50;
 
@@ -87,22 +89,34 @@ function App() {
     }, [currentStage, allOrders, searchTerm]);
 
     const onTouchStart = (e) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
+        setTouchEndX(null);
+        setTouchEndY(null);
+        setTouchStartX(e.targetTouches[0].clientX);
+        setTouchStartY(e.targetTouches[0].clientY);
     };
 
-    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchMove = (e) => {
+        setTouchEndX(e.targetTouches[0].clientX);
+        setTouchEndY(e.targetTouches[0].clientY);
+    };
 
     const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
+        if (touchStartX === null || touchEndX === null || touchStartY === null || touchEndY === null) return;
 
-        if (isLeftSwipe) {
-            handleNext();
-        } else if (isRightSwipe) {
-            handlePrev();
+        const distanceX = touchStartX - touchEndX;
+        const distanceY = touchStartY - touchEndY;
+
+        // Solo procesar si el movimiento es predominantemente horizontal
+        // (La distancia en X debe ser mayor que la distancia en Y)
+        if (Math.abs(distanceX) > Math.abs(distanceY)) {
+            const isLeftSwipe = distanceX > minSwipeDistance;
+            const isRightSwipe = distanceX < -minSwipeDistance;
+
+            if (isLeftSwipe) {
+                handleNext();
+            } else if (isRightSwipe) {
+                handlePrev();
+            }
         }
     };
 
