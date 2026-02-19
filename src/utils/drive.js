@@ -11,7 +11,7 @@ export const convertDriveLink = (url) => {
     const parts = url.split('/');
     const dIndex = parts.indexOf('d');
     if (dIndex !== -1 && parts.length > dIndex + 1) {
-        id = parts[dIndex + 1];
+        id = parts[dIndex + 1].split(/[?#]/)[0]; // Limpiar cualquier parámetro después del ID
     } else {
         try {
             const urlObj = new URL(url);

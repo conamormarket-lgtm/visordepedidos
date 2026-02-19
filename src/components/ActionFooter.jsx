@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ChevronDown, User, UserPlus, CheckCircle } from 
 const ActionFooter = ({
     currentOrderIndex,
     totalOrders,
+    currentStage,
     onAssign,
     onComplete,
     assignedTo
@@ -106,7 +107,12 @@ const ActionFooter = ({
                 {/* Subtle sheen effect */}
                 <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
 
-                <span className="text-xl font-black tracking-wider uppercase drop-shadow-sm">Marcar como Preparado</span>
+                <span className="text-xl font-black tracking-wider uppercase drop-shadow-sm">
+                    {currentStage === 'preparacion' ? 'Marcar como Preparado' :
+                        currentStage === 'estampado' ? 'Marcar como Estampado' :
+                            currentStage === 'empaquetado' ? 'Marcar como Empaquetado' :
+                                'Marcar como Completado'}
+                </span>
             </button>
         </div>
     );

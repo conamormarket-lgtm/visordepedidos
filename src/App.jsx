@@ -7,6 +7,7 @@ import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
 import { subscribeToOrders, updateOrderStage, assignOperator } from './services/orders';
 import { STAGES } from './constants';
+import { securityMonitor } from './utils/securityMonitor';
 // Assuming Search is imported from a library like lucide-react or similar
 // import { Search } from 'lucide-react'; // Add this if Search is a component
 
@@ -16,12 +17,67 @@ function App() {
     const [filteredOrders, setFilteredOrders] = useState([]); // Store filtered results
     const [currentIndex, setCurrentIndex] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isLocked, setIsLocked] = useState(securityMonitor.getIsLocked());
+    const [lockReason, setLockReason] = useState("");
 
     // Swipe Logic
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
     const [animDirection, setAnimDirection] = useState('right'); // 'right' means sliding IN from right (Next), 'left' means IN from left (Prev)
     const minSwipeDistance = 50;
+
+    // Monitor de seguridad y Suscripción Global de Pedidos (Ahorro de lecturas)
+    useEffect(() => {
+        // Suscripción al monitor
+        const unsubMonitor = securityMonitor.subscribe((status, reason) => {
+            setIsLocked(status);
+            if (reason) setLockReason(reason);
+        });
+
+        // Suscripción ÚNICA a Firebase para todas las etapas relevantes
+        // Esto evita volver a leer los mismos ~250 docs cada vez que se cambia de pestaña
+        const unsubscribeOrders = subscribeToOrders((fetchedOrders) => {
+            console.log("App: Pedidos actualizados desde Firebase", fetchedOrders.length);
+            setAllOrders(fetchedOrders);
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            // Mock Data Fallback removed for brevity, assuming online data
+        });
+
+        return () => {
+            unsubMonitor();
+            unsubscribeOrders();
+        };
+    }, []); // SIN DEPENDENCIAS: Se ejecuta una sola vez al cargar la app
+
+    // Filtrado local por etapa actual (Cero costo de red)
+    useEffect(() => {
+        let stageOrders = allOrders.filter(o => o.status === currentStage);
+
+        // Orden especial para preparación: primero 'Listo para Preparar', luego el resto
+        if (currentStage === STAGES.PREPARACION) {
+            stageOrders = [...stageOrders].sort((a, b) => {
+                const priority = { "Listo para Preparar": 1, "En Pausa por Stock": 2 };
+                return (priority[a.estadoGeneral] || 3) - (priority[b.estadoGeneral] || 3);
+            });
+        }
+
+        if (searchTerm) {
+            const lowerTerm = searchTerm.toLowerCase();
+            const filtered = stageOrders.filter(o =>
+                (o.orderId && o.orderId.toString().toLowerCase().includes(lowerTerm)) ||
+                (o.phone && o.phone.toString().includes(lowerTerm))
+            );
+            setFilteredOrders(filtered);
+        } else {
+            setFilteredOrders(stageOrders);
+        }
+
+        // Reset index bounds check
+        if (currentIndex >= stageOrders.length && stageOrders.length > 0) {
+            setCurrentIndex(0);
+        }
+    }, [currentStage, allOrders, searchTerm]);
 
     const onTouchStart = (e) => {
         setTouchEnd(null);
@@ -42,87 +98,6 @@ function App() {
             handlePrev();
         }
     };
-
-    // Effect to subscribe and update both lists
-    useEffect(() => {
-        const unsubscribe = subscribeToOrders((fetchedOrders) => {
-            const stageOrders = fetchedOrders.filter(o => o.status === currentStage);
-            setAllOrders(stageOrders);
-
-            // Re-apply filter if search term exists, otherwise set to all
-            if (searchTerm) {
-                const lowerTerm = searchTerm.toLowerCase();
-                const filtered = stageOrders.filter(o =>
-                    (o.orderId && o.orderId.toString().toLowerCase().includes(lowerTerm)) ||
-                    (o.phone && o.phone.toString().includes(lowerTerm))
-                );
-                setFilteredOrders(filtered);
-            } else {
-                setFilteredOrders(stageOrders);
-            }
-
-            // Reset index bounds check
-            if (currentIndex >= stageOrders.length && stageOrders.length > 0) {
-                setCurrentIndex(0);
-            }
-        }, (error) => {
-            console.error("Firebase Error:", error);
-            // Mock Data Fallback
-            const mocks = [
-                {
-                    id: 'sample-1',
-                    orderId: '5952',
-                    status: 'preparacion',
-                    images: ['https://placehold.co/800x600?text=Diseño+Muestra'],
-                    deliveryType: 'AGENCIA',
-                    destination: 'Piura, Paita, Paita',
-                    phone: '927 958 742',
-                    products: { 'Box 2 Poleras Parejas': 1 },
-                    sizes: 'Polera Blanco (S) - Polera Blanco (S)',
-                    observations: 'regalo a elegir',
-                    comments: 'Comentario de prueba',
-                    isPriority: true,
-                    date: { seconds: 1771344000 },
-                    preparacion: { enPausa: false }
-                },
-                {
-                    id: 'sample-2',
-                    orderId: '5848',
-                    status: 'preparacion',
-                    images: ['https://placehold.co/800x600?text=Diseño+2'],
-                    deliveryType: 'DELIVERY',
-                    destination: 'Lima, San Borja',
-                    phone: '999 888 777',
-                    products: { 'Pijamas': 7 },
-                    sizes: 'Varias tallas XL, L, M',
-                    observations: '',
-                    isPriority: false,
-                    date: { seconds: 1771430400 },
-                    preparacion: { enPausa: true, operador: 'JUAN' }
-                }
-            ];
-            const stageMocks = mocks.filter(o => o.status === currentStage);
-            setAllOrders(stageMocks);
-            setFilteredOrders(stageMocks);
-        });
-
-        return () => unsubscribe && unsubscribe();
-    }, [currentStage]); // Note: searchTerm dependency handled separately
-
-    // Effect to handle local search filtering
-    useEffect(() => {
-        if (!searchTerm) {
-            setFilteredOrders(allOrders);
-        } else {
-            const lowerTerm = searchTerm.toLowerCase();
-            const filtered = allOrders.filter(o =>
-                (o.orderId && o.orderId.toString().toLowerCase().includes(lowerTerm)) ||
-                (o.phone && o.phone.toString().includes(lowerTerm))
-            );
-            setFilteredOrders(filtered);
-            setCurrentIndex(0); // Reset to first result on search
-        }
-    }, [searchTerm, allOrders]);
 
     const handleTabChange = (stage) => {
         setCurrentStage(stage);
@@ -192,6 +167,7 @@ function App() {
                 <ActionFooter
                     currentOrderIndex={currentIndex}
                     totalOrders={filteredOrders.length}
+                    currentStage={currentStage}
                     onPrev={handlePrev}
                     onNext={handleNext}
                     onAssign={handleAssign}
@@ -219,6 +195,29 @@ function App() {
                     </div>
                 )}
             </div>
+
+            {/* Emergency Brake Overlay */}
+            {isLocked && (
+                <div className="fixed inset-0 z-[9999] bg-red-600/95 backdrop-blur-md flex flex-col items-center justify-center text-white p-8 text-center">
+                    <div className="bg-white text-red-600 rounded-full p-6 mb-6 animate-bounce">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
+                    </div>
+                    <h1 className="text-5xl font-black mb-4 tracking-tighter">SISTEMA BLOQUEADO</h1>
+                    <p className="text-2xl font-light max-w-2xl mb-8">
+                        Se ha detectado un consumo inusual de recursos (posible bucle de sincronización).
+                        El freno de emergencia se ha activado para evitar cargos excesivos.
+                    </p>
+                    <div className="bg-black/20 p-4 rounded-lg font-mono text-sm border border-white/20">
+                        Motivo: {lockReason || `>${'300'} op/seg o ráfaga inusual.`}
+                    </div>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-10 px-8 py-3 bg-white text-red-600 rounded-xl font-bold hover:bg-red-50 transition-colors shadow-lg"
+                    >
+                        RECARGAR APLICACIÓN
+                    </button>
+                </div>
+            )}
         </Layout>
     );
 }
