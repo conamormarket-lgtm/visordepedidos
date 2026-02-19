@@ -21,7 +21,7 @@ const ImageCarousel = ({ images }) => {
     // The design shows a list of images on the left.
 
     return (
-        <div className="w-full xl:w-1/2 bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[50vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth">
+        <div className="w-full xl:w-1/2 bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[60vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth">
             {images.map((img, idx) => (
                 <div key={idx} className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-shrink-0 w-full"
                     onClick={() => window.open(convertDriveLink(img), '_blank')}>

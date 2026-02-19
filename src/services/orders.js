@@ -74,6 +74,19 @@ const normalizeStage = (stage) => {
     };
 };
 
+/**
+ * Ordena recursivamente las llaves de un objeto para que JSON.stringify 
+ * produzca siempre el mismo resultado independientemente del orden original.
+ */
+const sortObjectKeys = (obj) => {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(sortObjectKeys);
+    return Object.keys(obj).sort().reduce((acc, key) => {
+        acc[key] = sortObjectKeys(obj[key]);
+        return acc;
+    }, {});
+};
+
 const normalizeOrder = (doc) => {
     const data = doc.data();
     const visualId = resolveVisualId(data, doc.id);
@@ -90,20 +103,18 @@ const normalizeOrder = (doc) => {
     const deliveryType = isDelivery ? "DELIVERY" : "AGENCIA";
     const fullDestination = [dept, prov, dist].filter(Boolean).join(", ");
 
-    // Images from diseño map
+    // Images 
     let images = [];
     const rawImages = data.diseño?.urlImagen;
+    if (Array.isArray(rawImages)) images = rawImages;
+    else if (typeof rawImages === 'string') images = rawImages.split(/\s+/).filter(Boolean);
 
-    if (Array.isArray(rawImages)) {
-        images = rawImages;
-    } else if (typeof rawImages === 'string') {
-        images = rawImages.split(/\s+/).filter(Boolean);
-    }
-
-    // Products Logic
+    // Products Logic: Ensure sorted keys for consistent JSON stringify
     const productList = {};
     if (Array.isArray(data.productos)) {
-        data.productos.forEach(item => {
+        // Sort products by name to avoid order-based mismatches
+        const sortedItems = [...data.productos].sort((a, b) => (a.producto || "").localeCompare(b.producto || ""));
+        sortedItems.forEach(item => {
             if (item.producto && item.cantidad > 0) {
                 productList[item.producto] = (productList[item.producto] || 0) + item.cantidad;
             }
@@ -113,16 +124,22 @@ const normalizeOrder = (doc) => {
     // Map estadoGeneral to internal status
     let internalStatus = "otro";
     const estGen = data.estadoGeneral || "";
+    if (estGen === "Listo para Preparar" || estGen === "En Pausa por Stock") internalStatus = "preparacion";
+    else if (estGen === "En Estampado") internalStatus = "estampado";
+    else if (estGen === "En Empaquetado") internalStatus = "empaquetado";
 
-    if (estGen === "Listo para Preparar" || estGen === "En Pausa por Stock") {
-        internalStatus = "preparacion";
-    } else if (estGen === "En Estampado") {
-        internalStatus = "estampado";
-    } else if (estGen === "En Empaquetado") {
-        internalStatus = "empaquetado";
+    // Comments Logic
+    let commentText = "";
+    if (Array.isArray(data.comentarios)) {
+        commentText = data.comentarios
+            .map(c => c.texto)
+            .filter(t => typeof t === 'string' && t.trim() !== "")
+            .join(" | ");
+    } else if (typeof data.comentarios === 'string') {
+        commentText = data.comentarios;
     }
 
-    return {
+    const orderData = {
         id: doc.id,
         orderId: visualId,
         date: normalizeDate(data.fechaEnvio),
@@ -133,15 +150,7 @@ const normalizeOrder = (doc) => {
         products: productList,
         sizes: data.prendas,
         observations: data.observacion,
-        comments: (function () {
-            if (Array.isArray(data.comentarios)) {
-                return data.comentarios
-                    .map(c => c.texto)
-                    .filter(t => typeof t === 'string' && t.trim() !== "")
-                    .join(" | ");
-            }
-            return typeof data.comentarios === 'string' ? data.comentarios : "";
-        })(),
+        comments: commentText,
         status: internalStatus,
         estadoGeneral: estGen,
         preparacion: normalizeStage(data.preparacion),
@@ -150,6 +159,9 @@ const normalizeOrder = (doc) => {
         isStockPaused: estGen === "En Pausa por Stock" || data.preparacion?.enPausa || false,
         images: images,
     };
+
+    // DEVOLVER OBJETO CON LLAVES ORDENADAS (Garantiza comparaciones consistentes)
+    return sortObjectKeys(orderData);
 };
 
 // Local Cache logic to minimize UI re-renders and bridge sessions
@@ -210,9 +222,10 @@ export const subscribeToOrders = (callback, onError) => {
                 // added or modified
                 const normalized = normalizeOrder(change.doc);
                 if (orderIdx !== -1) {
-                    // COMPARE: Only update if content is different
-                    // Using stringify for quick deep comparison of relevant parts
-                    if (JSON.stringify(newOrders[orderIdx]) !== JSON.stringify(normalized)) {
+                    const oldStr = JSON.stringify(newOrders[orderIdx]);
+                    const newStr = JSON.stringify(normalized);
+
+                    if (oldStr !== newStr) {
                         newOrders[orderIdx] = normalized;
                         hasChanges = true;
                     }
@@ -223,7 +236,7 @@ export const subscribeToOrders = (callback, onError) => {
             }
         });
 
-        if (hasChanges || localOrders.length === 0) {
+        if (hasChanges || (snapshot.docs.length > 0 && localOrders.length === 0)) {
             console.log("Monitor: Detectados cambios en Firebase. Actualizando...");
             localOrders = newOrders;
             saveCache(newOrders);
