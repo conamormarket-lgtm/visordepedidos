@@ -212,6 +212,10 @@ export const subscribeToOrders = (callback, onError) => {
     let localOrders = getCache();
     if (localOrders.length > 0) {
         console.log("Monitor: Cargando desde caché local...", localOrders.length);
+        // IMPORTANTE: Poblar el mapa de IDs desde la caché para que getRealId funcione de inmediato
+        localOrders.forEach(o => {
+            if (o.orderId && o.id) _pedidosIdMap.set(o.orderId, o.id);
+        });
         callback(localOrders);
     }
 
@@ -285,12 +289,15 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     if (newStatus === "preparacion") newEstadoGeneral = "Listo para Preparar";
     else if (newStatus === "estampado") newEstadoGeneral = "En Estampado";
     else if (newStatus === "empaquetado") newEstadoGeneral = "En Empaquetado";
-    else if (newStatus === "despacho") newEstadoGeneral = "Finalizado"; // Or whatever corresponds
+    else if (newStatus === "despacho") newEstadoGeneral = "Finalizado";
 
+    // Al completar una etapa, registramos fecha de fin y entrada de la siguiente
     const updateData = {
         ...(newEstadoGeneral && { estadoGeneral: newEstadoGeneral }),
         [`${currentStage}.estado`]: "Completado",
         [`${currentStage}.fechaFin`]: new Date(),
+        // Si hay una siguiente etapa mapeada internamente, registramos su entrada
+        ...(newStatus !== 'despacho' && { [`${newStatus}.fechaEntrada`]: new Date() }),
         ...updates
     };
 

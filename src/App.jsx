@@ -176,7 +176,7 @@ function App() {
                     totalOrders={filteredOrders.length}
                     currentStage={currentStage}
                     operators={operators}
-                    onAssign={(op) => assignOperator(currentOrder.orderId, currentStage, op)}
+                    onAssign={(op) => assignOperator(currentOrder.id, currentStage, op)}
                     onComplete={handleComplete}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                 />
