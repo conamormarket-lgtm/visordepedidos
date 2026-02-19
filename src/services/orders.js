@@ -15,18 +15,65 @@ const COLLECTION_NAME = "pedidos";
 const _pedidosIdMap = new Map();
 
 const resolveVisualId = (data, docId) => {
-    // Priority: data.id (Number), then data.numeroPedido, then Firestore docId
-    const rawId = data.id || data.numeroPedido || docId;
+    // We want the numeric ID. 
+    // Sometimes 'id' or 'numeroPedido' is auto-filled with the same random string as docId.
+    const candidates = [data.numeroPedido, data.id];
 
-    // Check if it's purely numeric (e.g., "005513" or 5513)
-    if (/^\d+$/.test(rawId)) {
-        return parseInt(rawId, 10).toString();
+    // 1. Try to find a purely numeric candidate first
+    for (const cand of candidates) {
+        if (cand && /^\d+$/.test(cand.toString())) {
+            return parseInt(cand.toString(), 10).toString();
+        }
     }
 
-    return rawId;
+    // 2. If docId itself is numeric (happens in some imports), use it
+    if (/^\d+$/.test(docId)) {
+        return parseInt(docId, 10).toString();
+    }
+
+    // 3. If everything is alphanumeric, avoid returning a 20-char random string if possible
+    // If data.numeroPedido or data.id is NOT the same as docId, it might be a manual ID
+    for (const cand of candidates) {
+        if (cand && cand !== docId && cand.toString().length < 15) {
+            return cand.toString();
+        }
+    }
+
+    // 4. Final fallback: if it's the 20-char random ID, at least we clean it or show it clearly
+    // But we'll return the first 6 chars to make it "readable" as a reference if it's a system ID
+    const finalId = data.numeroPedido || data.id || docId;
+    if (finalId.length >= 20 && !/\d/.test(finalId.substring(0, 5))) {
+        return finalId.substring(0, 7).toUpperCase(); // e.g. "0FSNT21"
+    }
+
+    return finalId;
 };
 
 // Normalize order data for UI consumption
+// Helper to ensure dates are plain objects for JSON comparison
+const normalizeDate = (date) => {
+    if (!date) return null;
+    if (typeof date.toDate === 'function') {
+        const d = date.toDate();
+        return { seconds: Math.floor(d.getTime() / 1000), nanoseconds: 0 };
+    }
+    if (date.seconds !== undefined) {
+        return { seconds: date.seconds, nanoseconds: date.nanoseconds || 0 };
+    }
+    return date;
+};
+
+// Helper to normalize stage objects
+const normalizeStage = (stage) => {
+    if (!stage) return {};
+    return {
+        ...stage,
+        fechaEntrada: normalizeDate(stage.fechaEntrada),
+        fechaSalida: normalizeDate(stage.fechaSalida),
+        fechaFin: normalizeDate(stage.fechaFin)
+    };
+};
+
 const normalizeOrder = (doc) => {
     const data = doc.data();
     const visualId = resolveVisualId(data, doc.id);
@@ -45,7 +92,6 @@ const normalizeOrder = (doc) => {
 
     // Images from diseño map
     let images = [];
-    // Try to get images from diseño.urlImagen (some records have it here)
     const rawImages = data.diseño?.urlImagen;
 
     if (Array.isArray(rawImages)) {
@@ -54,7 +100,7 @@ const normalizeOrder = (doc) => {
         images = rawImages.split(/\s+/).filter(Boolean);
     }
 
-    // Products Logic: Real field is 'productos' (array of objects), but UI expects an object {name: qty}
+    // Products Logic
     const productList = {};
     if (Array.isArray(data.productos)) {
         data.productos.forEach(item => {
@@ -76,36 +122,31 @@ const normalizeOrder = (doc) => {
         internalStatus = "empaquetado";
     }
 
-    // Comments Logic: Real field 'comentarios' is often an array of {texto, autor, fecha}
-    let commentText = "";
-    if (Array.isArray(data.comentarios)) {
-        commentText = data.comentarios
-            .map(c => c.texto)
-            .filter(t => typeof t === 'string' && t.trim() !== "")
-            .join(" | ");
-    } else if (typeof data.comentarios === 'string') {
-        commentText = data.comentarios;
-    }
-
     return {
-        id: doc.id, // Real Firebase ID
-        orderId: visualId, // Normalized Visual ID
-        date: data.fechaEnvio,
+        id: doc.id,
+        orderId: visualId,
+        date: normalizeDate(data.fechaEnvio),
         destination: fullDestination,
         deliveryType,
-        isPriority: data.esPrioridad === true || data.EsPrioridad === true, // Check both cases
+        isPriority: data.esPrioridad === true || data.EsPrioridad === true,
         phone: data.clienteContacto,
         products: productList,
         sizes: data.prendas,
-        observations: data.observacion, // Real field is 'observacion'
-        comments: commentText, // Processed string
+        observations: data.observacion,
+        comments: (function () {
+            if (Array.isArray(data.comentarios)) {
+                return data.comentarios
+                    .map(c => c.texto)
+                    .filter(t => typeof t === 'string' && t.trim() !== "")
+                    .join(" | ");
+            }
+            return typeof data.comentarios === 'string' ? data.comentarios : "";
+        })(),
         status: internalStatus,
         estadoGeneral: estGen,
-        // Stage specific data
-        preparacion: data.preparacion || {},
-        estampado: data.estampado || {},
-        empaquetado: data.empaquetado || {},
-        // Stock Pause logic based on estadoGeneral or internal field
+        preparacion: normalizeStage(data.preparacion),
+        estampado: normalizeStage(data.estampado),
+        empaquetado: normalizeStage(data.empaquetado),
         isStockPaused: estGen === "En Pausa por Stock" || data.preparacion?.enPausa || false,
         images: images,
     };

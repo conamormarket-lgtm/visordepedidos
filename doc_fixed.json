@@ -1,0 +1,178 @@
+{
+  "activador": "O",
+  "anadidos": "",
+  "tiempos": {
+    "empaquetado": 301899000000,
+    "diseño": 301899153312,
+    "preparacion": 301899000000,
+    "estampado": 301899000000,
+    "reparto": 301899000000,
+    "cobranza": 0,
+    "total": 291774235739
+  },
+  "clienteContacto": "931638459",
+  "vendedor": "FLOR",
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1753938016,
+    "nanoseconds": 0
+  },
+  "clienteCorreo": "Espinozabuenonayeli2@gmail.com",
+  "id": "0fSNT21so7Gy4tGZBYhJ",
+  "envioApellidos": "malpartida bueno ",
+  "fechaEnvio": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1754352000,
+    "nanoseconds": 0
+  },
+  "clienteDepartamento": "LIMA",
+  "clienteNumeroDocumento": "62230229",
+  "lineaProducto": "PAREJAS",
+  "envioDepartamento": "Lima",
+  "prendas": "Polera Negro (XL) - Polera Negro (L)",
+  "clienteNombre": "Nayeli",
+  "preparacion": {
+    "fechaSalida": null,
+    "estado": "",
+    "operador": "ELEGIR",
+    "fechaEntrada": {
+      "type": "firestore/timestamp/1.0",
+      "seconds": 1771435188,
+      "nanoseconds": 414000000
+    }
+  },
+  "esPersonalizado": false,
+  "esMostacero": false,
+  "cantidad": 1,
+  "empaquetado": {
+    "estado": "",
+    "fechaEntrada": null,
+    "operador": "",
+    "fechaSalida": null
+  },
+  "observacion": "regalo a elegir",
+  "montoAdelanto": 60,
+  "envioDistrito": "Puente Piedra",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1771439620,
+    "nanoseconds": 958000000
+  },
+  "clienteProvincia": "Lima",
+  "clienteTipoDocumento": "DNI",
+  "estadoGeneral": "Listo para Preparar",
+  "status": "preparacion",
+  "clienteContactoSecundario": "",
+  "whatsappOrigen": "Par 0",
+  "cobranza": {
+    "estado": "Pagado",
+    "pago1": 149,
+    "fechaSalida": {
+      "type": "firestore/timestamp/1.0",
+      "seconds": 1771435188,
+      "nanoseconds": 414000000
+    },
+    "pago2": 0
+  },
+  "envioProvincia": "Lima",
+  "canalVenta": "Re-Compra",
+  "historialModificaciones": [
+    {
+      "usuarioEmail": "admin@sistema.com",
+      "usuarioId": "user-admin-123",
+      "timestamp": {
+        "type": "firestore/timestamp/1.0",
+        "seconds": 1771435188,
+        "nanoseconds": 414000000
+      },
+      "accion": "Avanzado a Preparación",
+      "detalle": "Pedido movido a Listo para Preparar por admin@sistema.com"
+    }
+  ],
+  "montoMostacero": 0,
+  "envioContacto": "931 638 459",
+  "clienteDistrito": "Puente Piedra",
+  "estampado": {
+    "operador": "ELEGIR",
+    "fechaEntrada": null,
+    "estado": "",
+    "fechaSalida": null
+  },
+  "importado": true,
+  "productos": [
+    {
+      "productoId": "1x Box 2 Poleras Parejas",
+      "cantidad": 1,
+      "producto": "Box 2 Poleras Parejas"
+    },
+    {
+      "producto": "",
+      "cantidad": 0
+    },
+    {
+      "cantidad": 0,
+      "producto": ""
+    },
+    {
+      "cantidad": 0,
+      "producto": ""
+    }
+  ],
+  "envioTipoDocumento": "DNI",
+  "esPrioridad": false,
+  "montoPendiente": 0,
+  "envioNumeroDocumento": "62230229",
+  "regalos": [],
+  "diseño": {
+    "urlImagen": "https://drive.google.com/file/d/1YItbb6Bg0_bOWgA4jP5Wu3zR_3N-BKWG/view?usp=drive_link",
+    "diseñadorNombre": "MECHE",
+    "fechaSalida": {
+      "type": "firestore/timestamp/1.0",
+      "seconds": 1753994149,
+      "nanoseconds": 5000000
+    },
+    "estado": "TERMINADO",
+    "fechaEntrada": {
+      "type": "firestore/timestamp/1.0",
+      "seconds": 1753938156,
+      "nanoseconds": 792000000
+    },
+    "diseñadorAsignado": "MECHE"
+  },
+  "reparto": {
+    "fechaFinalizado": null,
+    "fechaEntrada": null,
+    "repartidor": "",
+    "estado": "",
+    "fechaSalida": null
+  },
+  "agenciaEnvio": "",
+  "montoTotal": 209,
+  "envioDireccion": "",
+  "envioNombres": "Nayeli",
+  "productosRegalo": [],
+  "comentarios": [
+    {
+      "fecha": null,
+      "texto": "",
+      "autor": ""
+    },
+    {
+      "texto": "",
+      "fecha": null,
+      "autor": ""
+    },
+    {
+      "texto": "",
+      "fecha": null,
+      "autor": ""
+    },
+    {
+      "autor": "",
+      "texto": "",
+      "fecha": null
+    }
+  ],
+  "talla": "",
+  "clienteApellidos": "malpartida bueno "
+}
