@@ -4,7 +4,7 @@ import { convertDriveLink } from '../utils/drive';
 const ImageCarousel = ({ images }) => {
     if (!images || images.length === 0) {
         return (
-            <div className="w-full xl:w-1/2 bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold py-32 xl:py-0 border-b xl:border-b-0 xl:border-r border-white/40">
+            <div className="w-full bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold h-[70vh] border-b border-white/40">
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-16 h-16 rounded-full bg-slate-300/50 flex items-center justify-center">
                         <span className="text-3xl">📷</span>
@@ -21,7 +21,7 @@ const ImageCarousel = ({ images }) => {
     // The design shows a list of images on the left.
 
     return (
-        <div className="w-full xl:w-1/2 bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[60vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth">
+        <div className="w-full bg-white/30 backdrop-blur-sm border-b border-white/30 overflow-y-auto h-[70vh] p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth">
             {images.map((img, idx) => (
                 <div key={idx} className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-shrink-0 w-full"
                     onClick={() => window.open(convertDriveLink(img), '_blank')}>

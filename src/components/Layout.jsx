@@ -11,7 +11,7 @@ const Layout = ({ children, header, footer, ...props }) => {
 
             <div className="relative z-10 flex flex-col h-full">
                 {header}
-                <main className="flex-1 overflow-auto p-4 flex gap-4">
+                <main className="flex-1 overflow-auto p-2 md:p-4 flex flex-col xl:flex-row gap-4">
                     {children}
                 </main>
                 {footer}
