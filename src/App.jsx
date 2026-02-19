@@ -5,7 +5,7 @@ import ImageCarousel from './components/ImageCarousel';
 import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
-import { subscribeToOrders, updateOrderStage, assignOperator } from './services/orders';
+import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators } from './services/orders';
 import { STAGES } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 // Assuming Search is imported from a library like lucide-react or similar
@@ -19,6 +19,7 @@ function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isLocked, setIsLocked] = useState(securityMonitor.getIsLocked());
     const [lockReason, setLockReason] = useState("");
+    const [operators, setOperators] = useState(["Sin Asignar"]);
 
     // Swipe Logic
     const [touchStart, setTouchStart] = useState(null);
@@ -44,9 +45,15 @@ function App() {
             // Mock Data Fallback removed for brevity, assuming online data
         });
 
+        // Suscripción a OPERARIOS (Configuración dinámica)
+        const unsubscribeOperators = subscribeToOperators((list) => {
+            setOperators(list);
+        });
+
         return () => {
             unsubMonitor();
             unsubscribeOrders();
+            unsubscribeOperators();
         };
     }, []); // SIN DEPENDENCIAS: Se ejecuta una sola vez al cargar la app
 
@@ -168,9 +175,8 @@ function App() {
                     currentOrderIndex={currentIndex}
                     totalOrders={filteredOrders.length}
                     currentStage={currentStage}
-                    onPrev={handlePrev}
-                    onNext={handleNext}
-                    onAssign={handleAssign}
+                    operators={operators}
+                    onAssign={(op) => assignOperator(currentOrder.orderId, currentStage, op)}
                     onComplete={handleComplete}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                 />

@@ -14,6 +14,29 @@ const COLLECTION_NAME = "pedidos";
 // Global map to link visual ID with document ID (Smart Mapping)
 const _pedidosIdMap = new Map();
 
+/**
+ * Suscribe a la lista de operarios configurada en Firebase
+ * Documento: configuracion/general
+ * Campo: operarios (array)
+ */
+export const subscribeToOperators = (callback) => {
+    const configRef = doc(db, "configuracion", "general");
+    return onSnapshot(configRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            const list = Array.isArray(data.operarios) ? data.operarios : [];
+            // Siempre aseguramos que 'Sin Asignar' esté presente si no viene de la DB
+            if (list.length === 0) {
+                callback(["Sin Asignar"]);
+            } else {
+                callback(list);
+            }
+        } else {
+            callback(["Sin Asignar"]);
+        }
+    });
+};
+
 const resolveVisualId = (data, docId) => {
     // We want the numeric ID. 
     // Sometimes 'id' or 'numeroPedido' is auto-filled with the same random string as docId.

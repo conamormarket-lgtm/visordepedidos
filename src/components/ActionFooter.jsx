@@ -7,9 +7,9 @@ const ActionFooter = ({
     currentStage,
     onAssign,
     onComplete,
-    assignedTo
+    assignedTo,
+    operators = []
 }) => {
-    const operators = ["Sin Asignar", "Operador 1", "Operador 2", "Operador 3"];
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
