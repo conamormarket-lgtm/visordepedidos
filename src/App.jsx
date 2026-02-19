@@ -38,7 +38,7 @@ function App() {
         // Suscripción ÚNICA a Firebase para todas las etapas relevantes
         // Esto evita volver a leer los mismos ~250 docs cada vez que se cambia de pestaña
         const unsubscribeOrders = subscribeToOrders((fetchedOrders) => {
-            console.log("App: Pedidos actualizados desde Firebase", fetchedOrders.length);
+            console.log(`Estado: Lista de pedidos actualizada. Total en memoria: ${fetchedOrders.length}`);
             setAllOrders(fetchedOrders);
         }, (error) => {
             console.error("Firebase Error:", error);
