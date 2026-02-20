@@ -289,7 +289,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     if (newStatus === "preparacion") newEstadoGeneral = "Listo para Preparar";
     else if (newStatus === "estampado") newEstadoGeneral = "En Estampado";
     else if (newStatus === "empaquetado") newEstadoGeneral = "En Empaquetado";
-    else if (newStatus === "despacho") newEstadoGeneral = "Finalizado";
+    else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
     // Al completar una etapa, registramos fecha de fin y entrada de la siguiente
     const updateData = {
