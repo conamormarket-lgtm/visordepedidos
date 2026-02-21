@@ -53,7 +53,7 @@ function agruparPrendas(prendas) {
     return Array.from(byPrenda.values());
 }
 
-export async function descontarInventarioPorPedido(pedidoId) {
+export async function descontarInventarioPorPedido(pedidoId, userLog) {
     try {
         const pedidoRef = doc(db, "pedidos", pedidoId);
         const statsRef = doc(db, COLLECTION_METADATA, "inventory_stats");
@@ -146,7 +146,7 @@ export async function descontarInventarioPorPedido(pedidoId) {
                             ref: logDocRef,
                             data: {
                                 timestamp: serverTimestamp(),
-                                user: "Visor Pedidos (Sistema)",
+                                user: userLog || "Visor Pedidos (Sistema)",
                                 action: "Salida",
                                 details: `Descuento automático por pedido #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${canTake})`,
                                 quantity: canTake,

@@ -307,7 +307,16 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
 
     // NUEVO: DESCONTAR INVENTARIO 
     if (newStatus === "estampado" && currentStage === "preparacion") {
-        await descontarInventarioPorPedido(realId);
+        const docSnap = await require("firebase/firestore").getDoc(orderRef);
+        let userToLog = "Visor Pedidos (Sistema)";
+        if (docSnap.exists()) {
+            const currentData = docSnap.data();
+            const operator = currentData.estampado?.operador || currentData.estampado?.operadorNombre;
+            if (operator && operator !== "Sin Asignar") {
+                userToLog = operator;
+            }
+        }
+        await descontarInventarioPorPedido(realId, userToLog);
     }
 };
 
