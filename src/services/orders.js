@@ -8,6 +8,7 @@ import {
     updateDoc
 } from "firebase/firestore";
 import { securityMonitor } from "../utils/securityMonitor";
+import { descontarInventarioPorPedido } from "./inventory";
 
 const COLLECTION_NAME = "pedidos";
 
@@ -303,6 +304,11 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
 
     securityMonitor.registerOperation(1);
     await updateDoc(orderRef, updateData);
+
+    // NUEVO: DESCONTAR INVENTARIO 
+    if (newStatus === "estampado" && currentStage === "preparacion") {
+        await descontarInventarioPorPedido(realId);
+    }
 };
 
 export const assignOperator = async (orderId, stage, operator) => {
