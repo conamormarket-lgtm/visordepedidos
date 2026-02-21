@@ -95,9 +95,55 @@ const OrderDetails = ({ order }) => {
                         <Ruler size={14} className="text-amber-500" />
                         <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-wider">Tallas</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-800">
-                        {typeof order.sizes === 'string' ? order.sizes : JSON.stringify(order.sizes)}
-                    </p>
+                    {(() => {
+                        let sizesObj = order.sizes;
+                        if (typeof sizesObj === 'string') {
+                            try {
+                                if (sizesObj.startsWith('"') && sizesObj.endsWith('"')) {
+                                    sizesObj = JSON.parse(sizesObj);
+                                }
+                                sizesObj = JSON.parse(sizesObj);
+                            } catch (e) {
+                                return <p className="text-sm font-medium text-slate-800">{order.sizes}</p>;
+                            }
+                        }
+
+                        if (Array.isArray(sizesObj)) {
+                            return (
+                                <div className="space-y-2 mt-2">
+                                    {sizesObj.map((item, index) => {
+                                        if (typeof item === 'string') {
+                                            return (
+                                                <div key={index} className="text-sm font-medium text-slate-800 bg-white/60 p-2 rounded-lg border border-amber-100/50">
+                                                    {item}
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div key={index} className="flex flex-wrap items-center gap-2 bg-white/60 p-2 rounded-lg border border-amber-100/50">
+                                                {item.cantidad !== undefined && (
+                                                    <span className="flex items-center justify-center min-w-[24px] h-[24px] px-1.5 bg-amber-200 text-amber-800 rounded font-bold text-xs shadow-sm">
+                                                        {item.cantidad}
+                                                    </span>
+                                                )}
+                                                {item.tipoPrenda && (
+                                                    <span className="text-xs font-bold text-slate-700">{item.tipoPrenda}</span>
+                                                )}
+                                                {item.color && (
+                                                    <span className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-sm uppercase tracking-wider">{item.color}</span>
+                                                )}
+                                                {item.talla && (
+                                                    <span className="text-xs font-black text-amber-900 bg-gradient-to-br from-amber-100 to-amber-200 px-2 py-0.5 rounded-md border border-amber-300 shadow-sm">{item.talla}</span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        }
+
+                        return <p className="text-sm font-medium text-slate-800">{JSON.stringify(sizesObj)}</p>;
+                    })()}
                 </div>
 
                 {/* Observations */}
