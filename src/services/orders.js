@@ -5,6 +5,7 @@ import {
     query,
     where,
     doc,
+    getDoc,
     updateDoc
 } from "firebase/firestore";
 import { securityMonitor } from "../utils/securityMonitor";
@@ -307,16 +308,20 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
 
     // NUEVO: DESCONTAR INVENTARIO 
     if (newStatus === "estampado" && currentStage === "preparacion") {
-        const docSnap = await require("firebase/firestore").getDoc(orderRef);
-        let userToLog = "Visor Pedidos (Sistema)";
-        if (docSnap.exists()) {
-            const currentData = docSnap.data();
-            const operator = currentData.estampado?.operador || currentData.estampado?.operadorNombre;
-            if (operator && operator !== "Sin Asignar") {
-                userToLog = operator;
+        try {
+            const docSnap = await getDoc(orderRef);
+            let userToLog = "Visor Pedidos (Sistema)";
+            if (docSnap.exists()) {
+                const currentData = docSnap.data();
+                const operator = currentData.estampado?.operador || currentData.estampado?.operadorNombre;
+                if (operator && operator !== "Sin Asignar") {
+                    userToLog = operator;
+                }
             }
+            await descontarInventarioPorPedido(realId, userToLog);
+        } catch (error) {
+            console.error("Error intentando descontar inventario:", error);
         }
-        await descontarInventarioPorPedido(realId, userToLog);
     }
 };
 
