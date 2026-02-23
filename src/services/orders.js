@@ -321,7 +321,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
             let userToLog = "Visor Pedidos (Sistema)";
             if (docSnap.exists()) {
                 const currentData = docSnap.data();
-                const operator = currentData.estampado?.operador || currentData.estampado?.operadorNombre;
+                const operator = currentData.preparacion?.operador || currentData.preparacion?.operadorNombre;
                 if (operator && operator !== "Sin Asignar") {
                     userToLog = operator;
                 }
