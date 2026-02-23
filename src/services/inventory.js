@@ -148,7 +148,7 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                                 timestamp: serverTimestamp(),
                                 user: userLog || "Visor Pedidos (Sistema)",
                                 action: "Salida",
-                                details: `${userLog || "Visor Pedidos (Sistema)"} - #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${canTake})`,
+                                details: `Descuento automático por pedido #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${canTake})`,
                                 quantity: canTake,
                                 metadata: {
                                     type: itemType,
