@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Package, AlertTriangle, Truck, Home, Ruler } from 'lucide-react';
+import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle } from 'lucide-react';
 
 const OrderDetails = ({ order }) => {
     if (!order) return null;
@@ -88,6 +88,26 @@ const OrderDetails = ({ order }) => {
                         ))}
                     </div>
                 </div>
+
+                {/* Added Items (Items agregados) */}
+                {order.itemsAgregados && order.itemsAgregados.length > 0 && (
+                    <div className="bg-white/80 rounded-xl border border-blue-100/60 shadow-sm overflow-hidden">
+                        <div className="bg-blue-50/80 px-4 py-2 border-b border-blue-100 flex items-center gap-2">
+                            <PlusCircle size={14} className="text-blue-500" />
+                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Ítems Agregados</span>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                            {order.itemsAgregados.map((item, idx) => (
+                                <div key={`agregado-${idx}`} className="p-2.5 flex items-center gap-3">
+                                    <span className="flex items-center justify-center w-7 h-7 bg-blue-100 text-blue-700 rounded-lg font-bold text-sm shadow-sm border border-blue-200">
+                                        {item.qty}
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-700">{item.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Specs / Sizes */}
                 <div className="bg-amber-50/40 rounded-xl border border-amber-100/60 p-3">

@@ -136,12 +136,19 @@ const normalizeOrder = (doc) => {
 
     // Products Logic: Ensure sorted keys for consistent JSON stringify
     const productList = {};
+    const itemsAgregados = [];
     if (Array.isArray(data.productos)) {
         // Sort products by name to avoid order-based mismatches
         const sortedItems = [...data.productos].sort((a, b) => (a.producto || "").localeCompare(b.producto || ""));
         sortedItems.forEach(item => {
             if (item.producto && item.cantidad > 0) {
                 productList[item.producto] = (productList[item.producto] || 0) + item.cantidad;
+            }
+            // Agregados logic
+            const itemName = item.nombre || item.producto || item.productoId || '';
+            const itemQty = item.cantidad || 0;
+            if (itemName && itemQty > 0) {
+                itemsAgregados.push({ name: itemName, qty: itemQty });
             }
         });
     }
@@ -173,6 +180,7 @@ const normalizeOrder = (doc) => {
         isPriority: data.esPrioridad === true || data.EsPrioridad === true,
         phone: data.clienteContacto,
         products: productList,
+        itemsAgregados,
         sizes: data.prendas,
         observations: data.observacion,
         comments: commentText,
