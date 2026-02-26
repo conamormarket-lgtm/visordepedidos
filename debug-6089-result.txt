@@ -1,0 +1,12 @@
+Doc ID: 6089
+estadoGeneral: En Pausa por Stock
+
+Tipo de urlImagen: string
+Es Array: false
+
+STRING de 85 chars:
+Tiene saltos de linea: false
+Valor (JSON): "https://drive.google.com/file/d/1XG6QIcDr114czEJQje0wo97opq0IttR4/view?usp=drive_link"
+
+Partes al splitear por whitespace: 1
+  [0]: https://drive.google.com/file/d/1XG6QIcDr114czEJQje0wo97opq0IttR4/view?usp=drive_link
