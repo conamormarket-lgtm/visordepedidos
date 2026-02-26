@@ -1,0 +1,30 @@
+﻿  "anadidos" [hex: 61 6e 61 64 69 64 6f 73]
+  "clienteProvincia" [hex: 63 6c 69 65 6e 74 65 50 72 6f 76 69 6e 63 69 61]
+  "dise├▒o" [hex: 64 69 73 65 f1 6f]
+  "clienteDistrito" [hex: 63 6c 69 65 6e 74 65 44 69 73 74 72 69 74 6f]
+  "esPersonalizado" [hex: 65 73 50 65 72 73 6f 6e 61 6c 69 7a 61 64 6f]
+  "empaquetado" [hex: 65 6d 70 61 71 75 65 74 61 64 6f]
+  "estampado" [hex: 65 73 74 61 6d 70 61 64 6f]
+  "clienteContacto" [hex: 63 6c 69 65 6e 74 65 43 6f 6e 74 61 63 74 6f]
+
+=== dise├▒o keys ===
+Via literal dise├▒o: EXISTE
+Via unicode dise\u00f1o: EXISTE
+
+=== keys dentro de dise├▒o ===
+  "estado" [hex: 65 73 74 61 64 6f] = "TERMINADO"
+  "dise├▒adorNombre" [hex: 64 69 73 65 f1 61 64 6f 72 4e 6f 6d 62 72 65] = "YACI"
+  "fechaEntrada" [hex: 66 65 63 68 61 45 6e 74 72 61 64 61] = {"type":"firestore/timestamp/1.0","seconds":1771422718,"nanoseconds":541000000}
+  "fechaSalida" [hex: 66 65 63 68 61 53 61 6c 69 64 61] = {"type":"firestore/timestamp/1.0","seconds":1771521795,"nanoseconds":999000000}
+  "urlImagen" [hex: 75 72 6c 49 6d 61 67 65 6e] = "https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link"
+  "dise├▒adorAsignado" [hex: 64 69 73 65 f1 61 64 6f 72 41 73 69 67 6e 61 64 6f] = "YACI"
+
+=== Simulando normalizeOrder ===
+rawImages: https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link
+ÔåÆ Es string, images = [
+  'https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link'
+]
+
+Resultado final images: [
+  'https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link'
+]

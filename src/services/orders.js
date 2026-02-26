@@ -128,11 +128,15 @@ const normalizeOrder = (doc) => {
     const deliveryType = isDelivery ? "DELIVERY" : "AGENCIA";
     const fullDestination = [dept, prov, dist].filter(Boolean).join(", ");
 
-    // Images 
+    // Images — solo se aceptan URLs reales (que comiencen con "http")
+    // Algunos pedidos tienen texto basura como "SIN", "DISEÑO", "-" en este campo
     let images = [];
     const rawImages = data.diseño?.urlImagen;
-    if (Array.isArray(rawImages)) images = rawImages;
-    else if (typeof rawImages === 'string') images = rawImages.split(/\s+/).filter(Boolean);
+    if (Array.isArray(rawImages)) {
+        images = rawImages.filter(u => typeof u === 'string' && u.startsWith('http'));
+    } else if (typeof rawImages === 'string') {
+        images = rawImages.split(/\s+/).filter(u => u.startsWith('http'));
+    }
 
     // Products Logic: Ensure sorted keys for consistent JSON stringify
     const productList = {};
@@ -239,11 +243,58 @@ export const subscribeToOrders = (callback, onError) => {
         ])
     );
 
+    let isFirstSnapshot = true;
+
     return onSnapshot(q, (snapshot) => {
         // Registrar el número de documentos leídos/cambiados
         securityMonitor.registerOperation(snapshot.docChanges().length);
 
         let hasChanges = false;
+
+        // PRIMER SNAPSHOT: comparar TODOS los documentos contra el caché.
+        // Esto garantiza que si un pedido fue modificado en Firestore mientras
+        // la app estaba cerrada (ej: se agregó una imagen en diseño pero no
+        // cambió estadoGeneral), el caché obsoleto se actualice correctamente.
+        if (isFirstSnapshot) {
+            isFirstSnapshot = false;
+            const freshOrders = [];
+
+            snapshot.docs.forEach((docSnap) => {
+                const normalized = normalizeOrder(docSnap);
+                freshOrders.push(normalized);
+
+                const cachedIdx = localOrders.findIndex(o => o.id === docSnap.id);
+                if (cachedIdx === -1) {
+                    hasChanges = true; // Doc nuevo no estaba en caché
+                } else {
+                    const oldStr = JSON.stringify(localOrders[cachedIdx]);
+                    const newStr = JSON.stringify(normalized);
+                    if (oldStr !== newStr) {
+                        hasChanges = true; // Doc cambió vs. caché
+                        console.log(`Monitor: Pedido ${normalized.orderId} desactualizado en caché. Actualizando imágenes/datos.`);
+                    }
+                }
+            });
+
+            // Detectar docs que estaban en caché pero ya no están en Firebase
+            localOrders.forEach(o => {
+                if (!snapshot.docs.find(d => d.id === o.id)) {
+                    hasChanges = true;
+                }
+            });
+
+            if (hasChanges || localOrders.length === 0) {
+                console.log("Monitor: Primer snapshot - datos actualizados desde Firebase.");
+                localOrders = freshOrders;
+                saveCache(freshOrders);
+                callback(freshOrders);
+            } else {
+                console.log("Monitor: Primer snapshot - caché local al día. Sin cambios.");
+            }
+            return;
+        }
+
+        // SNAPSHOTS POSTERIORES: solo procesar cambios incrementales
         const newOrders = [...localOrders];
 
         snapshot.docChanges().forEach((change) => {
@@ -273,7 +324,7 @@ export const subscribeToOrders = (callback, onError) => {
             }
         });
 
-        if (hasChanges || (snapshot.docs.length > 0 && localOrders.length === 0)) {
+        if (hasChanges) {
             console.log("Monitor: Detectados cambios en Firebase. Actualizando...");
             localOrders = newOrders;
             saveCache(newOrders);

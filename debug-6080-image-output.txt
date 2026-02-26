@@ -1,0 +1,80 @@
+﻿=== KEYS del documento ===
+  "clienteProvincia" [hex: 63 6c 69 65 6e 74 65 50 72 6f 76 69 6e 63 69 61]
+  "envioDistrito" [hex: 65 6e 76 69 6f 44 69 73 74 72 69 74 6f]
+  "vendedor" [hex: 76 65 6e 64 65 64 6f 72]
+  "esPrioridad" [hex: 65 73 50 72 69 6f 72 69 64 61 64]
+  "envioDireccionLima" [hex: 65 6e 76 69 6f 44 69 72 65 63 63 69 6f 6e 4c 69 6d 61]
+  "createdAt" [hex: 63 72 65 61 74 65 64 41 74]
+  "montoTotal" [hex: 6d 6f 6e 74 6f 54 6f 74 61 6c]
+  "envioProvincia" [hex: 65 6e 76 69 6f 50 72 6f 76 69 6e 63 69 61]
+  "whatsappOrigen" [hex: 77 68 61 74 73 61 70 70 4f 72 69 67 65 6e]
+  "numeroPedido" [hex: 6e 75 6d 65 72 6f 50 65 64 69 64 6f]
+  "id" [hex: 69 64]
+  "observacion" [hex: 6f 62 73 65 72 76 61 63 69 6f 6e]
+  "lineaProducto" [hex: 6c 69 6e 65 61 50 72 6f 64 75 63 74 6f]
+  "envioApellidos" [hex: 65 6e 76 69 6f 41 70 65 6c 6c 69 64 6f 73]
+  "clienteCorreo" [hex: 63 6c 69 65 6e 74 65 43 6f 72 72 65 6f]
+  "productos" [hex: 70 72 6f 64 75 63 74 6f 73]
+  "esPersonalizado" [hex: 65 73 50 65 72 73 6f 6e 61 6c 69 7a 61 64 6f]
+  "empaquetado" [hex: 65 6d 70 61 71 75 65 74 61 64 6f]
+  "clienteApellidos" [hex: 63 6c 69 65 6e 74 65 41 70 65 6c 6c 69 64 6f 73]
+  "comentarios" [hex: 63 6f 6d 65 6e 74 61 72 69 6f 73]
+  "preparacion" [hex: 70 72 65 70 61 72 61 63 69 6f 6e]
+  "estadoGeneral" [hex: 65 73 74 61 64 6f 47 65 6e 65 72 61 6c]
+  "clienteContacto" [hex: 63 6c 69 65 6e 74 65 43 6f 6e 74 61 63 74 6f]
+  "envioNombres" [hex: 65 6e 76 69 6f 4e 6f 6d 62 72 65 73]
+  "montoPendiente" [hex: 6d 6f 6e 74 6f 50 65 6e 64 69 65 6e 74 65]
+  "regalos" [hex: 72 65 67 61 6c 6f 73]
+  "montoAdelanto" [hex: 6d 6f 6e 74 6f 41 64 65 6c 61 6e 74 6f]
+  "estampado" [hex: 65 73 74 61 6d 70 61 64 6f]
+  "agenciaEnvio" [hex: 61 67 65 6e 63 69 61 45 6e 76 69 6f]
+  "clienteDepartamento" [hex: 63 6c 69 65 6e 74 65 44 65 70 61 72 74 61 6d 65 6e 74 6f]
+  "updatedAt" [hex: 75 70 64 61 74 65 64 41 74]
+  "fechaEnvio" [hex: 66 65 63 68 61 45 6e 76 69 6f]
+  "historialModificaciones" [hex: 68 69 73 74 6f 72 69 61 6c 4d 6f 64 69 66 69 63 61 63 69 6f 6e 65 73]
+  "prendas" [hex: 70 72 65 6e 64 61 73]
+  "importado" [hex: 69 6d 70 6f 72 74 61 64 6f]
+  "clienteContactoSecundario" [hex: 63 6c 69 65 6e 74 65 43 6f 6e 74 61 63 74 6f 53 65 63 75 6e 64 61 72 69 6f]
+  "reparto" [hex: 72 65 70 61 72 74 6f]
+  "clienteDistrito" [hex: 63 6c 69 65 6e 74 65 44 69 73 74 72 69 74 6f]
+  "anadidos" [hex: 61 6e 61 64 69 64 6f 73]
+  "esMostacero" [hex: 65 73 4d 6f 73 74 61 63 65 72 6f]
+  "status" [hex: 73 74 61 74 75 73]
+  "montoMostacero" [hex: 6d 6f 6e 74 6f 4d 6f 73 74 61 63 65 72 6f]
+  "clienteNumeroDocumento" [hex: 63 6c 69 65 6e 74 65 4e 75 6d 65 72 6f 44 6f 63 75 6d 65 6e 74 6f]
+  "envioTipoDocumento" [hex: 65 6e 76 69 6f 54 69 70 6f 44 6f 63 75 6d 65 6e 74 6f]
+  "envioContacto" [hex: 65 6e 76 69 6f 43 6f 6e 74 61 63 74 6f]
+  "clienteTipoDocumento" [hex: 63 6c 69 65 6e 74 65 54 69 70 6f 44 6f 63 75 6d 65 6e 74 6f]
+  "envioDepartamento" [hex: 65 6e 76 69 6f 44 65 70 61 72 74 61 6d 65 6e 74 6f]
+  "activador" [hex: 61 63 74 69 76 61 64 6f 72]
+  "envioNumeroDocumento" [hex: 65 6e 76 69 6f 4e 75 6d 65 72 6f 44 6f 63 75 6d 65 6e 74 6f]
+  "talla" [hex: 74 61 6c 6c 61]
+  "productosRegalo" [hex: 70 72 6f 64 75 63 74 6f 73 52 65 67 61 6c 6f]
+  "cantidad" [hex: 63 61 6e 74 69 64 61 64]
+  "canalVenta" [hex: 63 61 6e 61 6c 56 65 6e 74 61]
+  "cobranza" [hex: 63 6f 62 72 61 6e 7a 61]
+  "tiempos" [hex: 74 69 65 6d 70 6f 73]
+  "clienteNombre" [hex: 63 6c 69 65 6e 74 65 4e 6f 6d 62 72 65]
+  "dise├▒o" [hex: 64 69 73 65 f1 6f]
+
+=== dise├▒o keys ===
+Via literal dise├▒o: EXISTE
+Via unicode dise\u00f1o: EXISTE
+
+=== keys dentro de dise├▒o ===
+  "fechaEntrada" [hex: 66 65 63 68 61 45 6e 74 72 61 64 61] = {"type":"firestore/timestamp/1.0","seconds":1771422718,"nanoseconds":541000000}
+  "dise├▒adorNombre" [hex: 64 69 73 65 f1 61 64 6f 72 4e 6f 6d 62 72 65] = "YACI"
+  "fechaSalida" [hex: 66 65 63 68 61 53 61 6c 69 64 61] = {"type":"firestore/timestamp/1.0","seconds":1771521795,"nanoseconds":999000000}
+  "estado" [hex: 65 73 74 61 64 6f] = "TERMINADO"
+  "urlImagen" [hex: 75 72 6c 49 6d 61 67 65 6e] = "https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link"
+  "dise├▒adorAsignado" [hex: 64 69 73 65 f1 61 64 6f 72 41 73 69 67 6e 61 64 6f] = "YACI"
+
+=== Simulando normalizeOrder ===
+rawImages: https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link
+ÔåÆ Es string, images = [
+  'https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link'
+]
+
+Resultado final images: [
+  'https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link'
+]

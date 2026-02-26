@@ -1,0 +1,66 @@
+﻿Buscando pedido 6080...
+
+=== Encontrado via numeroPedido == '6080' ===
+Doc ID: 6080
+estadoGeneral: En Pausa por Stock
+
+--- Campo dise├▒o completo ---
+{
+  "estado": "TERMINADO",
+  "dise├▒adorNombre": "YACI",
+  "fechaEntrada": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1771422718,
+    "nanoseconds": 541000000
+  },
+  "dise├▒adorAsignado": "YACI",
+  "urlImagen": "https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link",
+  "fechaSalida": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1771521795,
+    "nanoseconds": 999000000
+  }
+}
+
+--- Buscando campos de imagen en el documento ---
+[IMAGEN] dise├▒o.urlImagen: https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link
+
+--- Todos los campos de dise├▒o ---
+  dise├▒o.estado = "TERMINADO"
+  dise├▒o.dise├▒adorNombre = "YACI"
+  dise├▒o.fechaEntrada = {"type":"firestore/timestamp/1.0","seconds":1771422718,"nanoseconds":541000000}
+  dise├▒o.dise├▒adorAsignado = "YACI"
+  dise├▒o.urlImagen = "https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link"
+  dise├▒o.fechaSalida = {"type":"firestore/timestamp/1.0","seconds":1771521795,"nanoseconds":999000000}
+=== Encontrado via id == '6080' ===
+Doc ID: 6080
+estadoGeneral: En Pausa por Stock
+
+--- Campo dise├▒o completo ---
+{
+  "estado": "TERMINADO",
+  "dise├▒adorNombre": "YACI",
+  "fechaEntrada": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1771422718,
+    "nanoseconds": 541000000
+  },
+  "dise├▒adorAsignado": "YACI",
+  "urlImagen": "https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link",
+  "fechaSalida": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1771521795,
+    "nanoseconds": 999000000
+  }
+}
+
+--- Buscando campos de imagen en el documento ---
+[IMAGEN] dise├▒o.urlImagen: https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link
+
+--- Todos los campos de dise├▒o ---
+  dise├▒o.estado = "TERMINADO"
+  dise├▒o.dise├▒adorNombre = "YACI"
+  dise├▒o.fechaEntrada = {"type":"firestore/timestamp/1.0","seconds":1771422718,"nanoseconds":541000000}
+  dise├▒o.dise├▒adorAsignado = "YACI"
+  dise├▒o.urlImagen = "https://drive.google.com/file/d/1tLfdfFKb6AViKB0C5IfLPG8Hn30MBfqr/view?usp=drive_link"
+  dise├▒o.fechaSalida = {"type":"firestore/timestamp/1.0","seconds":1771521795,"nanoseconds":999000000}

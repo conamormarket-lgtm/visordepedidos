@@ -1,0 +1,30 @@
+﻿
+Total pedidos activos: 345
+[URL RARA] Pedido 5966: 
+raw="SIN"
+[URL RARA] Pedido 5966: 
+raw="DISE├æO"
+[URL RARA] Pedido 6033: 
+raw="-"
+[URL RARA] Pedido 6067: 
+raw="SIN"
+[URL RARA] Pedido 6067: 
+raw="DISE├æO"
+[URL RARA] Pedido 6078: 
+raw="SIN"
+[URL RARA] Pedido 6078: 
+raw="DISE├æO"
+[URL RARA] Pedido 6084: 
+raw="SIN"
+[URL RARA] Pedido 6084: 
+raw="DISE├æO"
+[URL RARA] Pedido 6218: 
+raw="SIN"
+[URL RARA] Pedido 6218: 
+raw="DISE├æOO"
+=== RESUMEN ===
+Sin imagen (campo vac├¡o): 1
+Con imagen v├ílida:        543
+URLs raras/inv├ílidas:     11
+
+
