@@ -125,8 +125,8 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                         <button
                             onClick={handleToggleSearch}
                             className={`w-10 h-10 flex items-center justify-center border rounded-xl transition-all duration-200 shadow-sm ${isSearchOpen
-                                    ? 'bg-blue-600 border-blue-700 text-white'
-                                    : 'bg-white/40 hover:bg-white/80 border-white/30 text-slate-700'
+                                ? 'bg-blue-600 border-blue-700 text-white'
+                                : 'bg-white/40 hover:bg-white/80 border-white/30 text-slate-700'
                                 }`}
                             title={isSearchOpen ? "Cerrar búsqueda" : "Buscar pedido"}
                         >
@@ -145,19 +145,31 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                 </div>
 
                 {/* ── Subsección de búsqueda (se despliega debajo) ── */}
+                {/* Usamos un wrapper con altura fija para no depender de max-height */}
                 <div
-                    className="overflow-hidden transition-all duration-300 ease-in-out"
-                    style={{ maxHeight: isSearchOpen ? '64px' : '0px' }}
+                    style={{
+                        height: isSearchOpen ? '56px' : '0px',
+                        overflow: 'hidden',
+                        transition: 'height 150ms ease-out'
+                    }}
                 >
-                    <div className="px-6 pb-3">
+                    <div
+                        className="px-6 pb-3"
+                        style={{
+                            willChange: 'transform, opacity',
+                            transform: isSearchOpen ? 'translateY(0)' : 'translateY(-8px)',
+                            opacity: isSearchOpen ? 1 : 0,
+                            transition: 'transform 150ms ease-out, opacity 100ms ease-out'
+                        }}
+                    >
                         {/* Separador sutil */}
                         <div className="w-full h-px bg-white/40 mb-3" />
 
                         <div className="flex items-center gap-3">
                             {/* Indicador de modo */}
                             <span className={`text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap transition-all duration-200 ${searchTerm.length >= 6
-                                    ? 'bg-purple-100 text-purple-700'
-                                    : 'bg-blue-100 text-blue-700'
+                                ? 'bg-purple-100 text-purple-700'
+                                : 'bg-blue-100 text-blue-700'
                                 }`}>
                                 {searchTerm.length >= 6 ? 'DNI / Teléfono' : 'Nº Pedido'}
                             </span>
