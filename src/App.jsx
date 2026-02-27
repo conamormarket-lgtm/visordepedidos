@@ -66,17 +66,38 @@ function App() {
         // Orden especial para preparación: primero 'Listo para Preparar', luego el resto
         if (currentStage === STAGES.PREPARACION) {
             stageOrders = [...stageOrders].sort((a, b) => {
-                const priority = { "Listo para Preparar": 1, "En Pausa por Stock": 2 };
-                return (priority[a.estadoGeneral] || 3) - (priority[b.estadoGeneral] || 3);
+                // 1º criterio: esPrioridad (true primero)
+                const aPriority = a.esPrioridad ? 0 : 1;
+                const bPriority = b.esPrioridad ? 0 : 1;
+                if (aPriority !== bPriority) return aPriority - bPriority;
+                // 2º criterio: estadoGeneral dentro de cada grupo
+                const subPriority = { "Listo para Preparar": 1, "En Pausa por Stock": 2 };
+                return (subPriority[a.estadoGeneral] || 3) - (subPriority[b.estadoGeneral] || 3);
+            });
+        } else {
+            // Para el resto de etapas: esPrioridad === true primero
+            stageOrders = [...stageOrders].sort((a, b) => {
+                const aPriority = a.esPrioridad ? 0 : 1;
+                const bPriority = b.esPrioridad ? 0 : 1;
+                return aPriority - bPriority;
             });
         }
 
         if (searchTerm) {
-            const lowerTerm = searchTerm.toLowerCase();
-            const filtered = stageOrders.filter(o =>
-                (o.orderId && o.orderId.toString().toLowerCase().includes(lowerTerm)) ||
-                (o.phone && o.phone.toString().includes(lowerTerm))
-            );
+            const term = searchTerm.trim();
+            let filtered;
+            if (term.length <= 5) {
+                // Búsqueda por número de pedido (orderId)
+                filtered = stageOrders.filter(o =>
+                    o.orderId && o.orderId.toString().includes(term)
+                );
+            } else {
+                // Búsqueda por DNI o teléfono del cliente (6+ dígitos)
+                filtered = stageOrders.filter(o =>
+                    (o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(term)) ||
+                    (o.phone && o.phone.toString().includes(term))
+                );
+            }
             setFilteredOrders(filtered);
         } else {
             setFilteredOrders(stageOrders);

@@ -96,17 +96,22 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-2">
-                        {/* Search - Compact */}
-                        <div className={`flex justify-end transition-all duration-300 ease-out ${isSearchOpen ? 'w-48 sm:w-64' : 'w-10'}`}>
-                            {isSearchOpen ? (
-                                <div className="relative w-full">
-                                    <Search className="absolute left-3 top-2.5 text-slate-500 w-3.5 h-3.5" />
+                    <div className="flex items-center gap-2 relative">
+                        {/* Search - Se despliega en posición absoluta para no empujar los tabs */}
+                        <div className="relative">
+                            {/* Input flotante: se expande hacia la izquierda sobre el header */}
+                            {isSearchOpen && (
+                                <div
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 z-50"
+                                    style={{ width: '15rem' }}
+                                >
+                                    <Search className="absolute left-3 top-2.5 text-slate-500 w-3.5 h-3.5 z-10" />
                                     <input
-                                        type="text"
+                                        type="number"
+                                        inputMode="numeric"
                                         autoFocus
-                                        placeholder="ID o Tel..."
-                                        className="w-full pl-8 pr-8 py-1.5 bg-white/60 hover:bg-white/90 border border-transparent focus:bg-white focus:border-blue-500/30 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all shadow-sm placeholder:text-slate-400"
+                                        placeholder={searchTerm.length >= 6 ? "DNI o Teléfono" : "Nº de Pedido"}
+                                        className="w-full pl-8 pr-8 py-1.5 bg-white/95 border border-blue-400/50 shadow-lg focus:border-blue-500/80 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all placeholder:text-slate-400"
                                         value={searchTerm}
                                         onChange={handleSearchChange}
                                         onBlur={() => !searchTerm && setIsSearchOpen(false)}
@@ -122,14 +127,17 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                                         <X size={14} />
                                     </button>
                                 </div>
-                            ) : (
-                                <button
-                                    onClick={() => setIsSearchOpen(true)}
-                                    className="w-10 h-10 flex items-center justify-center bg-white/40 hover:bg-white/80 border border-white/30 rounded-xl text-slate-700 transition-all shadow-sm"
-                                >
-                                    <Search size={18} />
-                                </button>
                             )}
+                            {/* Botón lupa: siempre visible */}
+                            <button
+                                onClick={() => setIsSearchOpen(prev => !prev)}
+                                className={`w-10 h-10 flex items-center justify-center border rounded-xl transition-all shadow-sm ${isSearchOpen
+                                        ? 'bg-blue-600 border-blue-700 text-white'
+                                        : 'bg-white/40 hover:bg-white/80 border-white/30 text-slate-700'
+                                    }`}
+                            >
+                                <Search size={18} />
+                            </button>
                         </div>
 
                         {/* Fullscreen Button */}
