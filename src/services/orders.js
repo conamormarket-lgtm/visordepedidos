@@ -384,6 +384,37 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     }
 };
 
+/**
+ * Revierte un pedido a su etapa anterior.
+ * @param {string} orderId - Document ID real del pedido
+ * @param {string} prevStage - La etapa a la que se quiere volver (ej: 'preparacion')
+ * @param {string} completedStage - La etapa que se marcó como completada (ej: 'estampado')
+ * @param {object} prevSnapshot - Snapshot parcial de los campos a restaurar
+ */
+export const undoOrderStage = async (orderId, prevStage, completedStage, prevSnapshot) => {
+    const realId = getRealId(orderId);
+    const orderRef = doc(db, COLLECTION_NAME, realId);
+
+    // Map prevStage back to estadoGeneral
+    let prevEstadoGeneral = "";
+    if (prevStage === "preparacion") prevEstadoGeneral = "Listo para Preparar";
+    else if (prevStage === "estampado") prevEstadoGeneral = "En Estampado";
+    else if (prevStage === "empaquetado") prevEstadoGeneral = "En Empaquetado";
+
+    const restoreData = {
+        estadoGeneral: prevEstadoGeneral,
+        // Revertir el estado de la etapa que se "completó" erróneamente
+        [`${completedStage}.estado`]: prevSnapshot[`${completedStage}.estado`] || null,
+        [`${completedStage}.fechaEntrada`]: prevSnapshot[`${completedStage}.fechaEntrada`] || null,
+        // Revertir la etapa que antes estaba activa (quitar su fechaFin)
+        [`${prevStage}.estado`]: prevSnapshot[`${prevStage}.estado`] || "En Progreso",
+        [`${prevStage}.fechaFin`]: null,
+    };
+
+    securityMonitor.registerOperation(1);
+    await updateDoc(orderRef, restoreData);
+};
+
 export const assignOperator = async (orderId, stage, operator) => {
     const realId = getRealId(orderId);
     const orderRef = doc(db, COLLECTION_NAME, realId);

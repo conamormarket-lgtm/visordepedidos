@@ -5,7 +5,7 @@ import ImageCarousel from './components/ImageCarousel';
 import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
-import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators } from './services/orders';
+import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage } from './services/orders';
 import { STAGES } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 // Assuming Search is imported from a library like lucide-react or similar
@@ -20,6 +20,7 @@ function App() {
     const [isLocked, setIsLocked] = useState(securityMonitor.getIsLocked());
     const [lockReason, setLockReason] = useState("");
     const [operators, setOperators] = useState(["Sin Asignar"]);
+    const [lastAction, setLastAction] = useState(null); // { orderId, prevStage, completedStage, prevSnapshot }
 
     // Swipe Logic
     const [touchStartX, setTouchStartX] = useState(null);
@@ -175,17 +176,47 @@ function App() {
 
     const handleComplete = async () => {
         const currentOrder = filteredOrders[currentIndex];
-        if (currentOrder) {
-            // Logic for next stage
-            let nextStage = null;
-            if (currentStage === STAGES.PREPARACION) nextStage = STAGES.ESTAMPADO;
-            else if (currentStage === STAGES.ESTAMPADO) nextStage = STAGES.EMPAQUETADO;
-            else if (currentStage === STAGES.EMPAQUETADO) nextStage = 'despacho';
+        if (!currentOrder) return;
 
-            if (nextStage) {
-                await updateOrderStage(currentOrder.id, nextStage, currentStage);
-            }
+        // Bloqueo: requiere operador asignado (que no sea 'Sin Asignar')
+        const assignedOperator = currentOrder?.[currentStage]?.operador;
+        if (!assignedOperator || assignedOperator === 'Sin Asignar') {
+            // No hacer nada; el componente ActionFooter muestra el bloqueo visualmente
+            return;
         }
+
+        // Logic for next stage
+        let nextStage = null;
+        if (currentStage === STAGES.PREPARACION) nextStage = STAGES.ESTAMPADO;
+        else if (currentStage === STAGES.ESTAMPADO) nextStage = STAGES.EMPAQUETADO;
+        else if (currentStage === STAGES.EMPAQUETADO) nextStage = 'despacho';
+
+        if (nextStage) {
+            // Guardar snapshot ANTES de moverse para poder deshacer
+            const prevSnapshot = {
+                [`${currentStage}.estado`]: currentOrder[currentStage]?.estado || null,
+                [`${currentStage}.fechaFin`]: currentOrder[currentStage]?.fechaFin || null,
+                [`${nextStage}.estado`]: currentOrder[nextStage]?.estado || null,
+                [`${nextStage}.fechaEntrada`]: currentOrder[nextStage]?.fechaEntrada || null,
+            };
+
+            setLastAction({
+                orderId: currentOrder.id,
+                orderVisualId: currentOrder.orderId,
+                prevStage: currentStage,
+                completedStage: nextStage,
+                prevSnapshot,
+            });
+
+            await updateOrderStage(currentOrder.id, nextStage, currentStage);
+        }
+    };
+
+    const handleUndo = async () => {
+        if (!lastAction) return;
+        const { orderId, prevStage, completedStage, prevSnapshot } = lastAction;
+        await undoOrderStage(orderId, prevStage, completedStage, prevSnapshot);
+        setLastAction(null);
     };
 
     const currentOrder = filteredOrders[currentIndex];
@@ -213,6 +244,8 @@ function App() {
                     operators={operators}
                     onAssign={(op) => assignOperator(currentOrder.id, currentStage, op)}
                     onComplete={handleComplete}
+                    onUndo={handleUndo}
+                    lastAction={lastAction}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                 />
             }
