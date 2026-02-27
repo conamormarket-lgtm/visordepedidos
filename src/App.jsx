@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from './components/Layout';
 import Header from './components/Header';
 import ImageCarousel from './components/ImageCarousel';
@@ -153,19 +154,31 @@ function App() {
         setSearchTerm(term);
     };
 
-    const handleNext = () => {
+    const handleNext = useCallback(() => {
         if (currentIndex < filteredOrders.length - 1) {
             setAnimDirection('right');
             setCurrentIndex(prev => prev + 1);
         }
-    };
+    }, [currentIndex, filteredOrders.length]);
 
-    const handlePrev = () => {
+    const handlePrev = useCallback(() => {
         if (currentIndex > 0) {
             setAnimDirection('left');
             setCurrentIndex(prev => prev - 1);
         }
-    };
+    }, [currentIndex]);
+
+    // Navegación por teclado (solo desktop)
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ignorar si el usuario está escribiendo en un input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'ArrowRight') handleNext();
+            if (e.key === 'ArrowLeft') handlePrev();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleNext, handlePrev]);
 
     const handleAssign = async (operator) => {
         const currentOrder = filteredOrders[currentIndex];
@@ -250,24 +263,62 @@ function App() {
                 />
             }
         >
-            <div
-                key={currentIndex}
-                className={`flex flex-col xl:flex-row w-full h-full border border-white/60 rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm shadow-xl transition-all duration-300 ${!currentOrder ? 'opacity-80' : ''} ${animDirection === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
-            >
-                {filteredOrders.length > 0 ? (
-                    <>
-                        {/* Ensure ImageCarousel handles null images gracefully */}
-                        <ImageCarousel images={currentOrder?.images || []} />
-                        <OrderDetails order={currentOrder} />
-                    </>
-                ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-4">
-                        {/* <Search size={48} className="opacity-20" /> */}
-                        <span className="text-xl font-bold opacity-50">
-                            {searchTerm ? "No se encontraron pedidos con ese criterio" : "No hay pedidos en esta etapa"}
-                        </span>
+            {/* Wrapper relativo para posicionar las flechas laterales */}
+            <div className="relative w-full h-full flex items-stretch">
+
+                {/* Flecha IZQUIERDA — solo desktop */}
+                <button
+                    onClick={handlePrev}
+                    disabled={currentIndex === 0 || filteredOrders.length === 0}
+                    className={`hidden xl:flex items-center justify-center shrink-0 w-14 self-stretch rounded-l-2xl transition-all duration-200 group
+                        ${currentIndex === 0 || filteredOrders.length === 0
+                            ? 'opacity-20 cursor-not-allowed bg-transparent'
+                            : 'opacity-80 hover:opacity-100 hover:bg-white/30 cursor-pointer active:scale-95'
+                        }`}
+                    aria-label="Pedido anterior"
+                >
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/70 backdrop-blur-sm shadow-lg border border-white/60 transition-all duration-200
+                        ${currentIndex === 0 || filteredOrders.length === 0 ? '' : 'group-hover:bg-white group-hover:shadow-xl group-hover:scale-110'}`}>
+                        <ChevronLeft size={24} className="text-slate-700 stroke-[2.5px]" />
                     </div>
-                )}
+                </button>
+
+                {/* Card del pedido */}
+                <div
+                    key={currentIndex}
+                    className={`flex flex-col xl:flex-row flex-1 min-w-0 h-full border border-white/60 rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm shadow-xl transition-all duration-300 ${!currentOrder ? 'opacity-80' : ''} ${animDirection === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
+                >
+                    {filteredOrders.length > 0 ? (
+                        <>
+                            <ImageCarousel images={currentOrder?.images || []} />
+                            <OrderDetails order={currentOrder} />
+                        </>
+                    ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-4">
+                            <span className="text-xl font-bold opacity-50">
+                                {searchTerm ? "No se encontraron pedidos con ese criterio" : "No hay pedidos en esta etapa"}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Flecha DERECHA — solo desktop */}
+                <button
+                    onClick={handleNext}
+                    disabled={currentIndex >= filteredOrders.length - 1 || filteredOrders.length === 0}
+                    className={`hidden xl:flex items-center justify-center shrink-0 w-14 self-stretch rounded-r-2xl transition-all duration-200 group
+                        ${currentIndex >= filteredOrders.length - 1 || filteredOrders.length === 0
+                            ? 'opacity-20 cursor-not-allowed bg-transparent'
+                            : 'opacity-80 hover:opacity-100 hover:bg-white/30 cursor-pointer active:scale-95'
+                        }`}
+                    aria-label="Siguiente pedido"
+                >
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/70 backdrop-blur-sm shadow-lg border border-white/60 transition-all duration-200
+                        ${currentIndex >= filteredOrders.length - 1 || filteredOrders.length === 0 ? '' : 'group-hover:bg-white group-hover:shadow-xl group-hover:scale-110'}`}>
+                        <ChevronRight size={24} className="text-slate-700 stroke-[2.5px]" />
+                    </div>
+                </button>
+
             </div>
 
             {/* Emergency Brake Overlay */}
