@@ -39,6 +39,27 @@ export const subscribeToOperators = (callback) => {
     });
 };
 
+/**
+ * Suscribe en tiempo real al documento configuracion/contadores.
+ * Este documento es mantenido por el Sistema Gestión con increment()
+ * en cada cambio de estadoGeneral — es la misma fuente de verdad que usa.
+ */
+export const subscribeToCounters = (callback) => {
+    const countersRef = doc(db, "configuracion", "contadores");
+    return onSnapshot(countersRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            callback({
+                preparacion: data.preparacion ?? null,
+                estampado: data.estampado ?? null,
+                empaquetado: data.empaquetado ?? null,
+            });
+        } else {
+            callback(null);
+        }
+    });
+};
+
 const resolveVisualId = (data, docId) => {
     // We want the numeric ID. 
     // Sometimes 'id' or 'numeroPedido' is auto-filled with the same random string as docId.
@@ -221,10 +242,45 @@ const saveCache = (data) => {
     }
 };
 
+/**
+ * Elimina pedidos duplicados causados por el mismo numeroPedido con y sin ceros al inicio.
+ * Ejemplo: "006295" y "6295" son el mismo pedido — se conserva el sin ceros (canónico).
+ * Igual que hace el Sistema Gestión en su reconciliación progresiva.
+ */
+const deduplicateOrders = (orders) => {
+    const seen = new Map(); // clave: número sin ceros → orden canónico
+    const result = [];
+
+    for (const order of orders) {
+        const rawNum = String(order.orderId || order.id || '');
+        const normalizedNum = rawNum.replace(/^0+/, '') || rawNum;
+        const hasLeadingZeros = rawNum !== normalizedNum && rawNum.startsWith('0');
+
+        if (!seen.has(normalizedNum)) {
+            // Primera vez que vemos este número — guardarlo
+            seen.set(normalizedNum, { order, hasLeadingZeros });
+            result.push(order);
+        } else {
+            const existing = seen.get(normalizedNum);
+            if (existing.hasLeadingZeros && !hasLeadingZeros) {
+                // El existente tiene ceros y el nuevo no → reemplazar por el canónico
+                const idx = result.findIndex(o => o === existing.order);
+                if (idx !== -1) result[idx] = order;
+                seen.set(normalizedNum, { order, hasLeadingZeros: false });
+            }
+            // Si el existente ya es canónico (sin ceros), solo ignorar el duplicado
+        }
+    }
+
+    return result;
+};
+
 export const subscribeToOrders = (callback, onError) => {
+
     // 1. Inmediate load from Storage Cache
     let localOrders = getCache();
     if (localOrders.length > 0) {
+        localOrders = deduplicateOrders(localOrders);
         console.log("Monitor: Cargando desde caché local...", localOrders.length);
         // IMPORTANTE: Poblar el mapa de IDs desde la caché para que getRealId funcione de inmediato
         localOrders.forEach(o => {
@@ -283,11 +339,14 @@ export const subscribeToOrders = (callback, onError) => {
                 }
             });
 
+            // Deduplicar por numeroPedido (elimina duplicados con ceros al inicio)
+            const dedupedOrders = deduplicateOrders(freshOrders);
+
             if (hasChanges || localOrders.length === 0) {
                 console.log("Monitor: Primer snapshot - datos actualizados desde Firebase.");
-                localOrders = freshOrders;
-                saveCache(freshOrders);
-                callback(freshOrders);
+                localOrders = dedupedOrders;
+                saveCache(dedupedOrders);
+                callback(dedupedOrders);
             } else {
                 console.log("Monitor: Primer snapshot - caché local al día. Sin cambios.");
             }
