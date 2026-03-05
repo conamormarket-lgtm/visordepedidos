@@ -493,3 +493,31 @@ export const toggleStockPause = async (orderId, isPaused) => {
         "preparacion.enPausa": isPaused
     });
 };
+
+/**
+ * Guarda los datos de agencia de envío dentro del subdocumento `empaquetado` del pedido.
+ * Campos guardados:
+ *   empaquetado.agencia         → "SHALOM" | "EVA"
+ *   empaquetado.origenAgencia   → sucursal de origen (Shalom)
+ *   empaquetado.destinoAgencia  → sucursal de destino (Shalom)
+ *   empaquetado.mercaderia      → tipo de paquete (Shalom)
+ */
+export const saveAgenciaData = async (orderId, { agencia, origen, destino, mercaderia }) => {
+    const realId = getRealId(orderId);
+    const orderRef = doc(db, COLLECTION_NAME, realId);
+
+    const updateData = {
+        "empaquetado.agencia": agencia?.toUpperCase() || null,
+    };
+
+    if (agencia === 'shalom') {
+        updateData["empaquetado.origenAgencia"] = origen || null;
+        updateData["empaquetado.destinoAgencia"] = destino || null;
+        updateData["empaquetado.mercaderia"] = mercaderia || null;
+    }
+
+    securityMonitor.registerOperation(1);
+    await updateDoc(orderRef, updateData);
+    console.log(`[Agencia] Pedido ${orderId} → agencia guardada:`, updateData);
+};
+
