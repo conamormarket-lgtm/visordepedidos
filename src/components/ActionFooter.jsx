@@ -146,9 +146,9 @@ const ActionFooter = ({
                             <button
                                 type="button"
                                 onClick={() => setAgenciaModalOpen(true)}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all duration-200"
+                                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold shadow-md active:scale-95 transition-all duration-200"
                             >
-                                <Truck size={14} />
+                                <Truck size={18} />
                                 <span>Agencia</span>
                             </button>
                         )}

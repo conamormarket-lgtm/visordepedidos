@@ -248,39 +248,39 @@ const AgenciaModal = ({ onClose, onSave, pedidoId }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
             style={{ background: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(6px)' }}>
-            <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up-fade"
+            <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up-fade"
                 style={{ maxHeight: '92vh' }}>
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-800 to-slate-900">
+                <div className="flex items-center justify-between px-7 py-6 border-b border-slate-100 bg-gradient-to-r from-slate-800 to-slate-900">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
-                            <Truck size={18} className="text-white" />
+                        <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center">
+                            <Truck size={22} className="text-white" />
                         </div>
                         <div>
-                            <h2 className="text-base font-black text-white">Datos de Agencia</h2>
+                            <h2 className="text-lg font-black text-white">Datos de Agencia</h2>
                             {pedidoId && <p className="text-xs text-white/50 font-medium">Pedido #{pedidoId}</p>}
                         </div>
                     </div>
                     <button onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                        <X size={16} className="text-white" />
+                        className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                        <X size={18} className="text-white" />
                     </button>
                 </div>
 
-                <div className="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5">
+                <div className="overflow-y-auto flex-1 px-7 py-6 flex flex-col gap-6">
 
                     {/* Selección de agencia */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Agencia de envío</label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Agencia de envío</label>
+                        <div className="grid grid-cols-2 gap-4">
                             {/* Shalom */}
                             <button type="button" onClick={() => setAgencia('shalom')}
-                                className={`flex flex-col items-center justify-center gap-2 py-4 rounded-2xl border-2 transition-all duration-200 font-bold text-sm
+                                className={`flex flex-col items-center justify-center gap-2 py-5 rounded-2xl border-2 transition-all duration-200 font-bold text-base
                                     ${agencia === 'shalom'
                                         ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-md shadow-amber-100'
                                         : 'border-slate-200 bg-white text-slate-500 hover:border-amber-300 hover:bg-amber-50/50'}`}>
-                                <span className="text-2xl">🟡</span>
+                                <span className="text-3xl">🟡</span>
                                 <span>SHALOM</span>
                                 {agencia === 'shalom' && (
                                     <span className="text-xs bg-amber-400 text-white px-2 py-0.5 rounded-full font-bold">Seleccionada</span>
@@ -289,11 +289,11 @@ const AgenciaModal = ({ onClose, onSave, pedidoId }) => {
 
                             {/* EVA */}
                             <button type="button" onClick={() => setAgencia('eva')}
-                                className={`flex flex-col items-center justify-center gap-2 py-4 rounded-2xl border-2 transition-all duration-200 font-bold text-sm
+                                className={`flex flex-col items-center justify-center gap-2 py-5 rounded-2xl border-2 transition-all duration-200 font-bold text-base
                                     ${agencia === 'eva'
                                         ? 'border-blue-400 bg-blue-50 text-blue-700 shadow-md shadow-blue-100'
                                         : 'border-slate-200 bg-white text-slate-500 hover:border-blue-300 hover:bg-blue-50/50'}`}>
-                                <span className="text-2xl">🔵</span>
+                                <span className="text-3xl">🔵</span>
                                 <span>EVA</span>
                                 {agencia === 'eva' && (
                                     <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold">Seleccionada</span>
@@ -353,13 +353,13 @@ const AgenciaModal = ({ onClose, onSave, pedidoId }) => {
                 </div>
 
                 {/* Footer / botones */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 flex gap-3">
+                <div className="px-7 py-5 border-t border-slate-100 bg-slate-50/60 flex gap-3">
                     <button type="button" onClick={onClose}
-                        className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-100 transition-colors">
+                        className="flex-1 py-3.5 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-100 transition-colors">
                         Cancelar
                     </button>
                     <button type="button" onClick={handleSave} disabled={!canSave || saving}
-                        className={`flex-2 flex-grow-[2] py-3 rounded-xl font-black text-sm transition-all duration-200
+                        className={`flex-2 flex-grow-[2] py-3.5 rounded-xl font-black text-sm transition-all duration-200
                             ${canSave && !saving
                                 ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg active:scale-[0.98]'
                                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
