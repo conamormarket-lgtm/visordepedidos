@@ -87,17 +87,23 @@ function App() {
 
         if (searchTerm) {
             const term = searchTerm.trim();
+            const isNumeric = /^\d+$/.test(term);
+
             let filtered;
-            if (term.length <= 5) {
-                // Búsqueda por número de pedido (orderId)
+            if (isNumeric) {
+                // Búsqueda numérica: orderId, teléfono y DNI simultáneamente
                 filtered = stageOrders.filter(o =>
-                    o.orderId && o.orderId.toString().includes(term)
+                    (o.orderId && o.orderId.toString().includes(term)) ||
+                    (o.phone && o.phone.toString().includes(term)) ||
+                    (o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(term))
                 );
             } else {
-                // Búsqueda por DNI o teléfono del cliente (6+ dígitos)
+                // Búsqueda de texto: por destino u observaciones
+                const termLower = term.toLowerCase();
                 filtered = stageOrders.filter(o =>
-                    (o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(term)) ||
-                    (o.phone && o.phone.toString().includes(term))
+                    (o.destination && o.destination.toLowerCase().includes(termLower)) ||
+                    (o.observations && o.observations.toLowerCase().includes(termLower)) ||
+                    (o.comments && o.comments.toLowerCase().includes(termLower))
                 );
             }
             setFilteredOrders(filtered);
