@@ -240,19 +240,10 @@ function App() {
 
     const currentOrder = filteredOrders[currentIndex];
 
-    // Un pedido es "POR MAYOR" si:
-    //   a) alguno de sus productos se llama exactamente "POR MAYOR", O
-    //   b) el campo observations contiene "POR MAYOR" (parcial, sin importar mayúsculas)
-    // Y además no tiene imágenes → ocultamos el carrusel y la info ocupa todo el ancho
-    const isPorMayorSinImagen = !!(
+    // Si el pedido no tiene imágenes, ocultamos el carrusel y la info ocupa todo el ancho
+    const sinImagen = !!(
         currentOrder &&
-        (!currentOrder.images || currentOrder.images.length === 0) &&
-        (
-            (currentOrder.products &&
-                Object.keys(currentOrder.products).some(k => k.trim().toUpperCase() === 'POR MAYOR')) ||
-            (currentOrder.observations &&
-                currentOrder.observations.toUpperCase().includes('POR MAYOR'))
-        )
+        (!currentOrder.images || currentOrder.images.length === 0)
     );
 
     return (
@@ -313,10 +304,10 @@ function App() {
                 >
                     {filteredOrders.length > 0 ? (
                         <>
-                            {!isPorMayorSinImagen && (
+                            {!sinImagen && (
                                 <ImageCarousel images={currentOrder?.images || []} />
                             )}
-                            <OrderDetails order={currentOrder} fullWidth={isPorMayorSinImagen} />
+                            <OrderDetails order={currentOrder} fullWidth={sinImagen} />
                         </>
                     ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-4">
