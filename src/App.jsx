@@ -6,7 +6,7 @@ import ImageCarousel from './components/ImageCarousel';
 import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
-import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, saveAgenciaData } from './services/orders';
+import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage } from './services/orders';
 import { STAGES } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 // Assuming Search is imported from a library like lucide-react or similar
@@ -267,7 +267,7 @@ function App() {
                     lastAction={lastAction}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                     currentOrderId={currentOrder?.id}
-                    onSaveAgencia={(data) => saveAgenciaData(currentOrder.id, data)}
+                    currentOrder={currentOrder}
                 />
             }
         >

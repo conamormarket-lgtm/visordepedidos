@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle } from 'lucide-react';
+import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building2 } from 'lucide-react';
 
 const OrderDetails = ({ order }) => {
     if (!order) return null;
@@ -44,6 +44,14 @@ const OrderDetails = ({ order }) => {
                     <div className="flex items-center gap-2 px-3 py-1 bg-slate-50/80 rounded-lg border border-slate-100 text-slate-600">
                         <span className="text-xs font-semibold">📷 {order.images?.length || 0} fotos</span>
                     </div>
+
+                    {/* Agencia de envío registrada en el pedido (agenciaEnvio de Firebase) */}
+                    {order.agenciaEnvio && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-violet-50 rounded-lg border border-violet-200 text-violet-800">
+                            <Building2 size={14} className="stroke-[2px] shrink-0" />
+                            <span className="text-xs font-black uppercase tracking-wide">{order.agenciaEnvio}</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

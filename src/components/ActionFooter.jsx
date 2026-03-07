@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Truck } from 'lucide-react';
-import AgenciaModal from './AgenciaModal';
+import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Printer, Loader2 } from 'lucide-react';
+import { printTicket } from '../services/printService';
 
 const ActionFooter = ({
     currentOrderIndex,
@@ -13,11 +13,12 @@ const ActionFooter = ({
     assignedTo,
     operators = [],
     currentOrderId,
-    onSaveAgencia
+    currentOrder,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [undoCountdown, setUndoCountdown] = useState(null);
-    const [agenciaModalOpen, setAgenciaModalOpen] = useState(false);
+    const [printStatus, setPrintStatus] = useState(null); // null | 'loading' | 'success' | 'error'
+    const [printError, setPrintError] = useState('');
     const countdownRef = useRef(null);
     const dropdownRef = useRef(null);
 
@@ -57,6 +58,22 @@ const ActionFooter = ({
         };
     }, [lastAction]);
 
+    const handlePrint = async () => {
+        if (!currentOrder || printStatus === 'loading') return;
+        setPrintStatus('loading');
+        setPrintError('');
+        try {
+            await printTicket(currentOrder);
+            setPrintStatus('success');
+            setTimeout(() => setPrintStatus(null), 3000);
+        } catch (err) {
+            console.error('[Print] Error:', err.message);
+            setPrintError(err.message);
+            setPrintStatus('error');
+            setTimeout(() => { setPrintStatus(null); setPrintError(''); }, 6000);
+        }
+    };
+
     const handleSelect = (op) => {
         onAssign(op);
         setIsOpen(false);
@@ -73,10 +90,28 @@ const ActionFooter = ({
             : currentStage === 'empaquetado' ? 'Empaquetado'
                 : currentStage;
 
+
     const completeLabel = currentStage === 'preparacion' ? 'Marcar como Preparado'
         : currentStage === 'estampado' ? 'Marcar como Estampado'
             : currentStage === 'empaquetado' ? 'Marcar como Empaquetado'
                 : 'Marcar como Completado';
+
+    // Estilos y contenido del botón de impresión según estado
+    const printBtnStyle = printStatus === 'success'
+        ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-md shadow-emerald-500/30'
+        : printStatus === 'error'
+            ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-md shadow-rose-500/30'
+            : printStatus === 'loading'
+                ? 'bg-slate-700 text-white opacity-80 cursor-wait'
+                : 'bg-slate-800 hover:bg-slate-700 text-white shadow-md active:scale-95';
+
+    const printBtnContent = printStatus === 'loading'
+        ? <><Loader2 size={17} className="animate-spin" /><span>Imprimiendo...</span></>
+        : printStatus === 'success'
+            ? <><CheckCircle size={17} /><span>¡Impreso!</span></>
+            : printStatus === 'error'
+                ? <><AlertTriangle size={17} /><span>Error</span></>
+                : <><Printer size={17} /><span>Imprimir Ticket</span></>;
 
     return (
         <>
@@ -140,16 +175,16 @@ const ActionFooter = ({
                         )}
                     </div>
 
-                    {/* Right column: Agencia (empaquetado) + Deshacer */}
+                    {/* Right column: Imprimir Ticket (empaquetado) + Deshacer */}
                     <div className="justify-self-end flex flex-col items-end gap-2">
                         {currentStage === 'empaquetado' && (
                             <button
                                 type="button"
-                                onClick={() => setAgenciaModalOpen(true)}
-                                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold shadow-md active:scale-95 transition-all duration-200"
+                                onClick={handlePrint}
+                                disabled={!currentOrder || printStatus === 'loading'}
+                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${printBtnStyle}`}
                             >
-                                <Truck size={18} />
-                                <span>Agencia</span>
+                                {printBtnContent}
                             </button>
                         )}
 
@@ -168,6 +203,14 @@ const ActionFooter = ({
                         )}
                     </div>
                 </div>
+
+                {/* Error de impresión */}
+                {printStatus === 'error' && printError && (
+                    <div className="flex items-start gap-2.5 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2.5">
+                        <AlertTriangle size={16} className="text-rose-500 shrink-0 mt-0.5" />
+                        <span className="text-sm font-semibold text-rose-700">{printError}</span>
+                    </div>
+                )}
 
                 {/* Alerta si no hay operador asignado */}
                 {!isOperatorAssigned && (
@@ -197,23 +240,9 @@ const ActionFooter = ({
                     </span>
                 </button>
             </div>
-
-            {/* Modal de Agencia */}
-            {agenciaModalOpen && (
-                <AgenciaModal
-                    onClose={() => setAgenciaModalOpen(false)}
-                    pedidoId={currentOrderId}
-                    onSave={async (data) => {
-                        try {
-                            if (onSaveAgencia) await onSaveAgencia(data);
-                        } catch (err) {
-                            console.error('[Agencia] Error al guardar:', err);
-                        }
-                    }}
-                />
-            )}
         </>
     );
 };
 
 export default ActionFooter;
+

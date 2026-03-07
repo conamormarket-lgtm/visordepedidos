@@ -216,6 +216,13 @@ const normalizeOrder = (doc) => {
         empaquetado: normalizeStage(data.empaquetado),
         isStockPaused: estGen === "En Pausa por Stock" || data.preparacion?.enPausa || false,
         images: images,
+        // ── Campos de envío / impresión de etiqueta ──────────────────────────
+        envioNombres: data.envioNombres || '',
+        envioApellidos: data.envioApellidos || '',
+        envioNumeroDocumento: data.envioNumeroDocumento || '',
+        envioContacto: data.envioContacto || '',
+        agenciaEnvio: data.agenciaEnvio || '',
+        envioDireccionLima: data.envioDireccionLima || '',
     };
 
     // DEVOLVER OBJETO CON LLAVES ORDENADAS (Garantiza comparaciones consistentes)
