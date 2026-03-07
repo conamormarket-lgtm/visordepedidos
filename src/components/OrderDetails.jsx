@@ -1,12 +1,12 @@
 import React from 'react';
 import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building2 } from 'lucide-react';
 
-const OrderDetails = ({ order }) => {
+const OrderDetails = ({ order, fullWidth = false }) => {
     if (!order) return null;
 
     return (
-        // Main Container: Adapts to vertical tablets (w-full) and large screens (w-1/2)
-        <div className="w-full xl:w-[30%] p-5 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none flex-1">
+        // Main Container: fullWidth = sin imagen (POR MAYOR) → ocupa todo el ancho
+        <div className={`${fullWidth ? 'w-full' : 'w-full xl:w-[30%]'} p-5 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none flex-1`}>
 
             {/* Header Section */}
             <div className="flex flex-col mb-4 pb-4 border-b border-slate-200/60">
