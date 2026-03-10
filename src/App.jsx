@@ -188,8 +188,12 @@ function App() {
 
     const handleAssign = async (operator) => {
         const currentOrder = filteredOrders[currentIndex];
-        if (currentOrder) {
-            await assignOperator(currentOrder.id, currentStage, operator);
+        if (!currentOrder) return;
+        try {
+            console.log(`[App] handleAssign: opciones → orderId=${currentOrder.id}, stage=${currentStage}, operator=${operator}, estadoGeneral=${currentOrder.estadoGeneral}`);
+            await assignOperator(currentOrder.id, currentStage, operator, currentOrder.estadoGeneral);
+        } catch (err) {
+            console.error('[App] Error al asignar operador:', err);
         }
     };
 
@@ -267,7 +271,7 @@ function App() {
                     totalOrders={filteredOrders.length}
                     currentStage={currentStage}
                     operators={operators}
-                    onAssign={(op) => assignOperator(currentOrder.id, currentStage, op)}
+                    onAssign={handleAssign}
                     onComplete={handleComplete}
                     onUndo={handleUndo}
                     lastAction={lastAction}

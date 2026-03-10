@@ -527,23 +527,19 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
     await updateDoc(orderRef, restoreData);
 };
 
-export const assignOperator = async (orderId, stage, operator) => {
+/**
+ * Asigna un operario a una etapa del pedido.
+ * @param {string} orderId - ID del documento Firestore
+ * @param {string} stage - 'preparacion' | 'estampado' | 'empaquetado'
+ * @param {string} operator - Nombre del operario
+ * @param {string} [estadoGeneral] - estadoGeneral actual (pasado desde el componente para evitar un getDoc extra)
+ */
+export const assignOperator = async (orderId, stage, operator, estadoGeneral) => {
     const realId = getRealId(orderId);
     const orderRef = doc(db, COLLECTION_NAME, realId);
 
-    // Leer estadoGeneral actual para reescribirlo correctamente
-    let estadoGeneralActual = null;
-    try {
-        const docSnap = await getDoc(orderRef);
-        if (docSnap.exists()) {
-            estadoGeneralActual = docSnap.data().estadoGeneral || null;
-        }
-    } catch (e) {
-        console.warn("[assignOperator] No se pudo leer estadoGeneral:", e);
-    }
-
     // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
-    // Usar new Date() para los objetos del historial (patrón del sistema principal).
+    // Usar new Date() para los objetos del historial (patrón exacto del sistema principal).
     const nowDate = new Date();
 
     // Entrada de historial compatible con el sistema principal
@@ -560,12 +556,14 @@ export const assignOperator = async (orderId, stage, operator) => {
         [`${stage}.operadorNombre`]: operator,
         updatedAt: serverTimestamp(),
         historialModificaciones: arrayUnion(historialEntry),
-        // Reescribir estadoGeneral si lo conocemos (mantener sincronía con sistema principal)
-        ...(estadoGeneralActual && { estadoGeneral: estadoGeneralActual }),
+        // Reescribir estadoGeneral si se conoce (mantener sincronía con sistema principal)
+        ...(estadoGeneral && { estadoGeneral }),
     };
 
+    console.log(`[assignOperator] Guardando operador '${operator}' en '${stage}' para doc '${realId}'`);
     securityMonitor.registerOperation(1);
     await updateDoc(orderRef, updateData);
+    console.log(`[assignOperator] ✓ Operador guardado exitosamente`);
 };
 
 export const toggleStockPause = async (orderId, isPaused) => {
