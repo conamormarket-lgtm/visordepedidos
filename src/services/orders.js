@@ -421,7 +421,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
     // Leer el doc ANTES de modificar para conocer el operador y datos actuales
-    let operadorActual = "Visor Pedidos (Sistema)";
+    let operadorActual = "Visor Pedidos";
     try {
         const docSnap = await getDoc(orderRef);
         if (docSnap.exists()) {
@@ -433,30 +433,33 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         console.warn("[updateOrderStage] No se pudo leer doc previo:", e);
     }
 
+    // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
+    // Usar new Date() para los objetos del historial (igual que el sistema principal).
+    const nowDate = new Date();
+
     // Construir entrada de historial compatible con el sistema principal
     const historialEntry = {
-        fecha: serverTimestamp(),
+        timestamp: nowDate,
         usuario: operadorActual,
+        usuarioEmail: operadorActual,
         accion: "Avance de etapa",
-        descripcion: `Etapa '${currentStage}' completada → nuevo estado: '${newEstadoGeneral}'`,
-        etapa: currentStage,
-        nuevoEstado: newEstadoGeneral,
+        detalle: `Etapa '${currentStage}' completada → nuevo estado: '${newEstadoGeneral}'`,
     };
 
     // Al completar una etapa, registramos fecha de fin y entrada de la siguiente.
-    // Usamos serverTimestamp() para consistencia con el sistema principal.
-    const now = serverTimestamp();
+    // serverTimestamp() solo se usa en updatedAt (nivel raíz del documento).
     const updateData = {
         ...(newEstadoGeneral && { estadoGeneral: newEstadoGeneral }),
-        updatedAt: now,
-        [`${currentStage}.estado`]: "Completado",
-        [`${currentStage}.fechaSalida`]: now,
-        [`${currentStage}.fechaFin`]: now,
+        updatedAt: serverTimestamp(),
+        [`${currentStage}.estado`]: "LISTO",
+        [`${currentStage}.fechaSalida`]: nowDate,
+        [`${currentStage}.fechaFin`]: nowDate,
         [`${currentStage}.operador`]: operadorActual,
+        [`${currentStage}.operadorNombre`]: operadorActual,
         // Si hay una siguiente etapa, registramos su entrada
         ...(newStatus !== 'despacho' && {
-            [`${newStatus}.fechaEntrada`]: now,
-            [`${newStatus}.estado`]: "En Progreso",
+            [`${newStatus}.fechaEntrada`]: nowDate,
+            [`${newStatus}.estado`]: "EN PROCESO",
         }),
         historialModificaciones: arrayUnion(historialEntry),
         ...updates
@@ -492,28 +495,29 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
     else if (prevStage === "estampado") prevEstadoGeneral = "En Estampado";
     else if (prevStage === "empaquetado") prevEstadoGeneral = "En Empaquetado";
 
-    const now = serverTimestamp();
+    // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
+    // Usar new Date() para los objetos del historial.
+    const nowDate = new Date();
 
     // Entrada de historial para el deshacer
     const historialEntry = {
-        fecha: now,
-        usuario: "Visor Pedidos (Sistema)",
+        timestamp: nowDate,
+        usuario: "Visor Pedidos",
+        usuarioEmail: "sistema",
         accion: "Reversión de etapa",
-        descripcion: `Revertido: '${completedStage}' → estado restaurado a '${prevEstadoGeneral}'`,
-        etapa: completedStage,
-        nuevoEstado: prevEstadoGeneral,
+        detalle: `Revertido: '${completedStage}' → estado restaurado a '${prevEstadoGeneral}'`,
     };
 
     const restoreData = {
         estadoGeneral: prevEstadoGeneral,
-        updatedAt: now,
+        updatedAt: serverTimestamp(),
         // Revertir el estado de la etapa que se "completó" erróneamente
         [`${completedStage}.estado`]: prevSnapshot[`${completedStage}.estado`] || null,
         [`${completedStage}.fechaEntrada`]: prevSnapshot[`${completedStage}.fechaEntrada`] || null,
         [`${completedStage}.fechaSalida`]: null,
         [`${completedStage}.fechaFin`]: null,
         // Revertir la etapa que antes estaba activa (quitar su fechaFin y fechaSalida)
-        [`${prevStage}.estado`]: prevSnapshot[`${prevStage}.estado`] || "En Progreso",
+        [`${prevStage}.estado`]: prevSnapshot[`${prevStage}.estado`] || "EN PROCESO",
         [`${prevStage}.fechaFin`]: null,
         [`${prevStage}.fechaSalida`]: null,
         historialModificaciones: arrayUnion(historialEntry),
@@ -538,24 +542,25 @@ export const assignOperator = async (orderId, stage, operator) => {
         console.warn("[assignOperator] No se pudo leer estadoGeneral:", e);
     }
 
-    const now = serverTimestamp();
+    // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
+    // Usar new Date() para los objetos del historial (patrón del sistema principal).
+    const nowDate = new Date();
 
     // Entrada de historial compatible con el sistema principal
     const historialEntry = {
-        fecha: now,
+        timestamp: nowDate,
         usuario: operator,
+        usuarioEmail: operator,
         accion: "Asignación de operario",
-        descripcion: `Operario '${operator}' asignado a etapa '${stage}'`,
-        etapa: stage,
-        nuevoEstado: estadoGeneralActual,
+        detalle: `Operario '${operator}' asignado a etapa '${stage}'`,
     };
 
     const updateData = {
         [`${stage}.operador`]: operator,
         [`${stage}.operadorNombre`]: operator,
-        updatedAt: now,
+        updatedAt: serverTimestamp(),
         historialModificaciones: arrayUnion(historialEntry),
-        // Reescribir estadoGeneral si lo conocemos (para mantener sincronía con el sistema principal)
+        // Reescribir estadoGeneral si lo conocemos (mantener sincronía con sistema principal)
         ...(estadoGeneralActual && { estadoGeneral: estadoGeneralActual }),
     };
 
