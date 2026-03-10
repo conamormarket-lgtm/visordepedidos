@@ -18,6 +18,11 @@ const COLLECTION_NAME = "pedidos";
 // Global map to link visual ID with document ID (Smart Mapping)
 const _pedidosIdMap = new Map();
 
+// Mapa de IDs hermanos: cuando el mismo pedido existe como '006436' y '6436' en Firebase,
+// ambos docIds se registran en este mapa para que las escrituras se hagan en los dos.
+const _pedidosSiblingIds = new Map(); // numericKey | docId → string[]
+const _pedidosNumericKey = new Map(); // docId → clave canónica sin ceros ('6436')
+
 /**
  * Suscribe a la lista de operarios configurada en Firebase
  * Documento: configuracion/general
@@ -141,6 +146,17 @@ const normalizeOrder = (doc) => {
 
     // Save mapping for future updates using visual ID if needed
     _pedidosIdMap.set(visualId, doc.id);
+
+    // Registrar IDs hermanos: el mismo pedido puede existir como '006436' y '6436' en Firebase.
+    // La clave canónica es el número sin ceros al inicio.
+    const numericKey = String(parseInt(visualId, 10) || visualId);
+    _pedidosNumericKey.set(doc.id, numericKey);
+    // Acumular todos los docIds con esta clave numérica
+    const siblingGroup = _pedidosSiblingIds.get(numericKey) || [];
+    if (!siblingGroup.includes(doc.id)) siblingGroup.push(doc.id);
+    _pedidosSiblingIds.set(numericKey, siblingGroup);
+    // Mantener referencia desde cada docId al grupo completo
+    siblingGroup.forEach(id => _pedidosSiblingIds.set(id, siblingGroup));
 
     // Destination Logic
     const dept = data.envioDepartamento || "";
@@ -409,9 +425,32 @@ export const subscribeToOrders = (callback, onError) => {
 // Helper to get real ID from visual ID
 export const getRealId = (id) => _pedidosIdMap.get(id) || id;
 
-export const updateOrderStage = async (orderId, newStatus, currentStage, updates) => {
+/**
+ * Devuelve TODOS los docIds de Firebase para el mismo número de pedido.
+ * Ejemplo: pedido 6436 puede retornar ['006436', '6436'] si ambos existen en Firestore.
+ * TODAS las escrituras deben hacerse en todos estos IDs para mantener sincronía.
+ */
+const getAllRealIds = (orderId) => {
     const realId = getRealId(orderId);
-    const orderRef = doc(db, COLLECTION_NAME, realId);
+    // 1. Buscar por docId directo
+    const byDocId = _pedidosSiblingIds.get(realId);
+    if (byDocId && byDocId.length > 0) return [...new Set(byDocId)];
+    // 2. Buscar por clave numérica
+    const numKey = String(parseInt(realId, 10) || realId);
+    const byNumKey = _pedidosSiblingIds.get(numKey);
+    if (byNumKey && byNumKey.length > 0) return [...new Set(byNumKey)];
+    // 3. Fallback: solo el ID original
+    return [realId];
+};
+
+export const updateOrderStage = async (orderId, newStatus, currentStage, updates) => {
+    // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
+    const realIds = getAllRealIds(orderId);
+    const primaryRef = doc(db, COLLECTION_NAME, realIds[0]);
+
+    if (realIds.length > 1) {
+        console.log(`[updateOrderStage] Pedido con IDs duplicados: ${realIds.join(' + ')}. Escribiendo en ambos.`);
+    }
 
     // Map internal status back to estadoGeneral
     let newEstadoGeneral = "";
@@ -420,10 +459,10 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "empaquetado") newEstadoGeneral = "En Empaquetado";
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
-    // Leer el doc ANTES de modificar para conocer el operador y datos actuales
+    // Leer el doc principal para obtener el operador actual
     let operadorActual = "Visor Pedidos";
     try {
-        const docSnap = await getDoc(orderRef);
+        const docSnap = await getDoc(primaryRef);
         if (docSnap.exists()) {
             const d = docSnap.data();
             const op = d[currentStage]?.operador || d[currentStage]?.operadorNombre;
@@ -433,21 +472,15 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         console.warn("[updateOrderStage] No se pudo leer doc previo:", e);
     }
 
-    // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
-    // Usar new Date() para los objetos del historial (igual que el sistema principal).
     const nowDate = new Date();
-
-    // Construir entrada de historial compatible con el sistema principal
     const historialEntry = {
         timestamp: nowDate,
-        usuario: operadorActual,
+        usuarioId: "visor-pedidos",
         usuarioEmail: operadorActual,
         accion: "Avance de etapa",
         detalle: `Etapa '${currentStage}' completada → nuevo estado: '${newEstadoGeneral}'`,
     };
 
-    // Al completar una etapa, registramos fecha de fin y entrada de la siguiente.
-    // serverTimestamp() solo se usa en updatedAt (nivel raíz del documento).
     const updateData = {
         ...(newEstadoGeneral && { estadoGeneral: newEstadoGeneral }),
         updatedAt: serverTimestamp(),
@@ -456,7 +489,6 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         [`${currentStage}.fechaFin`]: nowDate,
         [`${currentStage}.operador`]: operadorActual,
         [`${currentStage}.operadorNombre`]: operadorActual,
-        // Si hay una siguiente etapa, registramos su entrada
         ...(newStatus !== 'despacho' && {
             [`${newStatus}.fechaEntrada`]: nowDate,
             [`${newStatus}.estado`]: "EN PROCESO",
@@ -465,13 +497,14 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         ...updates
     };
 
-    securityMonitor.registerOperation(1);
-    await updateDoc(orderRef, updateData);
+    securityMonitor.registerOperation(realIds.length);
+    // Escribir en TODOS los docIds hermanos simultaneamente
+    await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
 
     // DESCONTAR INVENTARIO al pasar de preparación → estampado
     if (newStatus === "estampado" && currentStage === "preparacion") {
         try {
-            await descontarInventarioPorPedido(realId, operadorActual);
+            await descontarInventarioPorPedido(realIds[0], operadorActual);
         } catch (error) {
             console.error("Error intentando descontar inventario:", error);
         }
@@ -486,23 +519,17 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
  * @param {object} prevSnapshot - Snapshot parcial de los campos a restaurar
  */
 export const undoOrderStage = async (orderId, prevStage, completedStage, prevSnapshot) => {
-    const realId = getRealId(orderId);
-    const orderRef = doc(db, COLLECTION_NAME, realId);
+    const realIds = getAllRealIds(orderId);
 
-    // Map prevStage back to estadoGeneral
     let prevEstadoGeneral = "";
     if (prevStage === "preparacion") prevEstadoGeneral = "Listo para Preparar";
     else if (prevStage === "estampado") prevEstadoGeneral = "En Estampado";
     else if (prevStage === "empaquetado") prevEstadoGeneral = "En Empaquetado";
 
-    // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
-    // Usar new Date() para los objetos del historial.
     const nowDate = new Date();
-
-    // Entrada de historial para el deshacer
     const historialEntry = {
         timestamp: nowDate,
-        usuario: "Visor Pedidos",
+        usuarioId: "visor-pedidos",
         usuarioEmail: "sistema",
         accion: "Reversión de etapa",
         detalle: `Revertido: '${completedStage}' → estado restaurado a '${prevEstadoGeneral}'`,
@@ -511,20 +538,18 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
     const restoreData = {
         estadoGeneral: prevEstadoGeneral,
         updatedAt: serverTimestamp(),
-        // Revertir el estado de la etapa que se "completó" erróneamente
         [`${completedStage}.estado`]: prevSnapshot[`${completedStage}.estado`] || null,
         [`${completedStage}.fechaEntrada`]: prevSnapshot[`${completedStage}.fechaEntrada`] || null,
         [`${completedStage}.fechaSalida`]: null,
         [`${completedStage}.fechaFin`]: null,
-        // Revertir la etapa que antes estaba activa (quitar su fechaFin y fechaSalida)
         [`${prevStage}.estado`]: prevSnapshot[`${prevStage}.estado`] || "EN PROCESO",
         [`${prevStage}.fechaFin`]: null,
         [`${prevStage}.fechaSalida`]: null,
         historialModificaciones: arrayUnion(historialEntry),
     };
 
-    securityMonitor.registerOperation(1);
-    await updateDoc(orderRef, restoreData);
+    securityMonitor.registerOperation(realIds.length);
+    await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), restoreData)));
 };
 
 /**
@@ -535,17 +560,17 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
  * @param {string} [estadoGeneral] - estadoGeneral actual (pasado desde el componente para evitar un getDoc extra)
  */
 export const assignOperator = async (orderId, stage, operator, estadoGeneral) => {
-    const realId = getRealId(orderId);
-    const orderRef = doc(db, COLLECTION_NAME, realId);
+    // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
+    const realIds = getAllRealIds(orderId);
 
-    // IMPORTANTE: serverTimestamp() NO puede usarse dentro de arrayUnion().
-    // Usar new Date() para los objetos del historial (patrón exacto del sistema principal).
+    if (realIds.length > 1) {
+        console.log(`[assignOperator] Pedido duplicado detectado: ${realIds.join(' + ')}. Escribiendo en ambos.`);
+    }
+
     const nowDate = new Date();
-
-    // Entrada de historial compatible con el sistema principal
     const historialEntry = {
         timestamp: nowDate,
-        usuario: operator,
+        usuarioId: "visor-pedidos",
         usuarioEmail: operator,
         accion: "Asignación de operario",
         detalle: `Operario '${operator}' asignado a etapa '${stage}'`,
@@ -556,14 +581,18 @@ export const assignOperator = async (orderId, stage, operator, estadoGeneral) =>
         [`${stage}.operadorNombre`]: operator,
         updatedAt: serverTimestamp(),
         historialModificaciones: arrayUnion(historialEntry),
-        // Reescribir estadoGeneral si se conoce (mantener sincronía con sistema principal)
         ...(estadoGeneral && { estadoGeneral }),
     };
 
-    console.log(`[assignOperator] Guardando operador '${operator}' en '${stage}' para doc '${realId}'`);
-    securityMonitor.registerOperation(1);
-    await updateDoc(orderRef, updateData);
-    console.log(`[assignOperator] ✓ Operador guardado exitosamente`);
+    try {
+        securityMonitor.registerOperation(realIds.length);
+        // Escribir en TODOS los docIds hermanos simultáneamente
+        await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
+        console.log(`[assignOperator] ✓ Operador '${operator}' guardado en: ${realIds.join(', ')}`);
+    } catch (err) {
+        console.error('[assignOperator] Error al escribir en Firebase:', err);
+        throw err;
+    }
 };
 
 export const toggleStockPause = async (orderId, isPaused) => {
