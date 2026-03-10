@@ -6,7 +6,9 @@ import {
     where,
     doc,
     getDoc,
-    updateDoc
+    updateDoc,
+    arrayUnion,
+    serverTimestamp
 } from "firebase/firestore";
 import { securityMonitor } from "../utils/securityMonitor";
 import { descontarInventarioPorPedido } from "./inventory";
@@ -418,32 +420,55 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "empaquetado") newEstadoGeneral = "En Empaquetado";
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
-    // Al completar una etapa, registramos fecha de fin y entrada de la siguiente
+    // Leer el doc ANTES de modificar para conocer el operador y datos actuales
+    let operadorActual = "Visor Pedidos (Sistema)";
+    try {
+        const docSnap = await getDoc(orderRef);
+        if (docSnap.exists()) {
+            const d = docSnap.data();
+            const op = d[currentStage]?.operador || d[currentStage]?.operadorNombre;
+            if (op && op !== "Sin Asignar") operadorActual = op;
+        }
+    } catch (e) {
+        console.warn("[updateOrderStage] No se pudo leer doc previo:", e);
+    }
+
+    // Construir entrada de historial compatible con el sistema principal
+    const historialEntry = {
+        fecha: serverTimestamp(),
+        usuario: operadorActual,
+        accion: "Avance de etapa",
+        descripcion: `Etapa '${currentStage}' completada → nuevo estado: '${newEstadoGeneral}'`,
+        etapa: currentStage,
+        nuevoEstado: newEstadoGeneral,
+    };
+
+    // Al completar una etapa, registramos fecha de fin y entrada de la siguiente.
+    // Usamos serverTimestamp() para consistencia con el sistema principal.
+    const now = serverTimestamp();
     const updateData = {
         ...(newEstadoGeneral && { estadoGeneral: newEstadoGeneral }),
+        updatedAt: now,
         [`${currentStage}.estado`]: "Completado",
-        [`${currentStage}.fechaFin`]: new Date(),
-        // Si hay una siguiente etapa mapeada internamente, registramos su entrada
-        ...(newStatus !== 'despacho' && { [`${newStatus}.fechaEntrada`]: new Date() }),
+        [`${currentStage}.fechaSalida`]: now,
+        [`${currentStage}.fechaFin`]: now,
+        [`${currentStage}.operador`]: operadorActual,
+        // Si hay una siguiente etapa, registramos su entrada
+        ...(newStatus !== 'despacho' && {
+            [`${newStatus}.fechaEntrada`]: now,
+            [`${newStatus}.estado`]: "En Progreso",
+        }),
+        historialModificaciones: arrayUnion(historialEntry),
         ...updates
     };
 
     securityMonitor.registerOperation(1);
     await updateDoc(orderRef, updateData);
 
-    // NUEVO: DESCONTAR INVENTARIO 
+    // DESCONTAR INVENTARIO al pasar de preparación → estampado
     if (newStatus === "estampado" && currentStage === "preparacion") {
         try {
-            const docSnap = await getDoc(orderRef);
-            let userToLog = "Visor Pedidos (Sistema)";
-            if (docSnap.exists()) {
-                const currentData = docSnap.data();
-                const operator = currentData.preparacion?.operador || currentData.preparacion?.operadorNombre;
-                if (operator && operator !== "Sin Asignar") {
-                    userToLog = operator;
-                }
-            }
-            await descontarInventarioPorPedido(realId, userToLog);
+            await descontarInventarioPorPedido(realId, operadorActual);
         } catch (error) {
             console.error("Error intentando descontar inventario:", error);
         }
@@ -467,14 +492,31 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
     else if (prevStage === "estampado") prevEstadoGeneral = "En Estampado";
     else if (prevStage === "empaquetado") prevEstadoGeneral = "En Empaquetado";
 
+    const now = serverTimestamp();
+
+    // Entrada de historial para el deshacer
+    const historialEntry = {
+        fecha: now,
+        usuario: "Visor Pedidos (Sistema)",
+        accion: "Reversión de etapa",
+        descripcion: `Revertido: '${completedStage}' → estado restaurado a '${prevEstadoGeneral}'`,
+        etapa: completedStage,
+        nuevoEstado: prevEstadoGeneral,
+    };
+
     const restoreData = {
         estadoGeneral: prevEstadoGeneral,
+        updatedAt: now,
         // Revertir el estado de la etapa que se "completó" erróneamente
         [`${completedStage}.estado`]: prevSnapshot[`${completedStage}.estado`] || null,
         [`${completedStage}.fechaEntrada`]: prevSnapshot[`${completedStage}.fechaEntrada`] || null,
-        // Revertir la etapa que antes estaba activa (quitar su fechaFin)
+        [`${completedStage}.fechaSalida`]: null,
+        [`${completedStage}.fechaFin`]: null,
+        // Revertir la etapa que antes estaba activa (quitar su fechaFin y fechaSalida)
         [`${prevStage}.estado`]: prevSnapshot[`${prevStage}.estado`] || "En Progreso",
         [`${prevStage}.fechaFin`]: null,
+        [`${prevStage}.fechaSalida`]: null,
+        historialModificaciones: arrayUnion(historialEntry),
     };
 
     securityMonitor.registerOperation(1);
@@ -484,10 +526,41 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
 export const assignOperator = async (orderId, stage, operator) => {
     const realId = getRealId(orderId);
     const orderRef = doc(db, COLLECTION_NAME, realId);
+
+    // Leer estadoGeneral actual para reescribirlo correctamente
+    let estadoGeneralActual = null;
+    try {
+        const docSnap = await getDoc(orderRef);
+        if (docSnap.exists()) {
+            estadoGeneralActual = docSnap.data().estadoGeneral || null;
+        }
+    } catch (e) {
+        console.warn("[assignOperator] No se pudo leer estadoGeneral:", e);
+    }
+
+    const now = serverTimestamp();
+
+    // Entrada de historial compatible con el sistema principal
+    const historialEntry = {
+        fecha: now,
+        usuario: operator,
+        accion: "Asignación de operario",
+        descripcion: `Operario '${operator}' asignado a etapa '${stage}'`,
+        etapa: stage,
+        nuevoEstado: estadoGeneralActual,
+    };
+
+    const updateData = {
+        [`${stage}.operador`]: operator,
+        [`${stage}.operadorNombre`]: operator,
+        updatedAt: now,
+        historialModificaciones: arrayUnion(historialEntry),
+        // Reescribir estadoGeneral si lo conocemos (para mantener sincronía con el sistema principal)
+        ...(estadoGeneralActual && { estadoGeneral: estadoGeneralActual }),
+    };
+
     securityMonitor.registerOperation(1);
-    await updateDoc(orderRef, {
-        [`${stage}.operador`]: operator
-    });
+    await updateDoc(orderRef, updateData);
 };
 
 export const toggleStockPause = async (orderId, isPaused) => {
