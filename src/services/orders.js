@@ -4,10 +4,11 @@ import {
     onSnapshot,
     query,
     where,
-    getDocs,
     doc,
     getDoc,
+    setDoc,
     updateDoc,
+    runTransaction,
     arrayUnion,
     serverTimestamp
 } from "firebase/firestore";
@@ -466,40 +467,62 @@ const getAllRealIds = (orderId) => {
 };
 
 /**
- * Calcula el siguiente número de cola para un pedido que ingresa a una etapa.
+ * Asigna atómicamente el siguiente número de cola a un pedido que entra a una etapa.
  *
- * Consulta Firestore para contar los pedidos que ya están en `newEstadoGeneral`
- * con el mismo valor de `esPrioridad` que el pedido actual.
- * El siguiente número es ese conteo + 1.
+ * Réplica exacta del queue-counter.ts del Sistema Gestión.
+ * Usa el MISMO documento configuracion/contadores_cola y los MISMOS campos
+ * (ej: preparacion_normal, estampado_prioridad) para que ambos sistemas
+ * compartan el mismo contador sin colisiones.
  *
- * Las dos colas (prioridad / normal) son independientes dentro de cada etapa:
- *   - esPrioridad = true  → cola P-1, P-2, P-3 …
- *   - esPrioridad = false → cola 1, 2, 3 …
+ * Usa runTransaction para garantizar atomicidad: dos pedidos que avancen
+ * exactamente al mismo tiempo reciben números diferentes.
  *
- * @param {string}  newEstadoGeneral  – valor de estadoGeneral destino (ej: "En Estampado")
- * @param {boolean} esPrioridad       – si el pedido es prioritario
- * @returns {{ numeroCola: number, numeroColaDisplay: string }}
+ * @param {string}  etapa        - 'preparacion' | 'estampado' | 'empaquetado'
+ * @param {boolean} esPrioridad  - si el pedido es prioritario
+ * @returns {{ numeroCola: number, numeroColaDisplay: string } | null}
  */
-const calcularNumeroCola = async (newEstadoGeneral, esPrioridad) => {
+const QUEUE_COUNTERS_DOC_REF = () => doc(db, "configuracion", "contadores_cola");
+
+const asignarNumeroCola = async (etapa, esPrioridad) => {
+    const ref = QUEUE_COUNTERS_DOC_REF();
+    const counterKey = `${etapa}_${esPrioridad ? "prioridad" : "normal"}`;
+
     try {
-        // Construimos la query con ambos filtros para no sobre-leer documentos
-        const q = query(
-            collection(db, COLLECTION_NAME),
-            where("estadoGeneral", "==", newEstadoGeneral),
-            where("esPrioridad",    "==", !!esPrioridad)
-        );
-        const snap = await getDocs(q);
-        securityMonitor.registerOperation(snap.size || 1); // contabilizar la lectura
-        const siguiente = snap.size + 1;
-        return {
-            numeroCola:        siguiente,
-            numeroColaDisplay: esPrioridad ? `P-${siguiente}` : String(siguiente),
-        };
+        // Garantizar que el documento de contadores existe
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+            const initialData = { updatedAt: serverTimestamp() };
+            ["preparacion", "estampado", "empaquetado"].forEach(e => {
+                initialData[`${e}_normal`]    = 0;
+                initialData[`${e}_prioridad`] = 0;
+            });
+            await setDoc(ref, initialData);
+            console.log("[QueueCounter] Documento contadores_cola inicializado.");
+        }
+
+        // Transacción atómica: leer contador actual → incrementar → devolver nuevo valor
+        const result = await runTransaction(db, async (tx) => {
+            const txSnap = await tx.get(ref);
+            const current = (txSnap.data()?.[counterKey]) ?? 0;
+            const next = current + 1;
+            tx.update(ref, {
+                [counterKey]: next,
+                updatedAt: serverTimestamp(),
+            });
+            return next;
+        });
+
+        securityMonitor.registerOperation(1);
+        const numeroColaDisplay = esPrioridad ? `P-${result}` : String(result);
+        console.log(`[QueueCounter] Asignado #${numeroColaDisplay} para etapa "${etapa}" (${esPrioridad ? "Prioridad" : "Normal"})`);
+        return { numeroCola: result, numeroColaDisplay };
+
     } catch (err) {
-        console.warn("[calcularNumeroCola] No se pudo calcular el número de cola:", err);
-        return { numeroCola: null, numeroColaDisplay: null };
+        console.error("[QueueCounter] Error al asignar número de cola:", err);
+        return null;
     }
 };
+
 
 export const updateOrderStage = async (orderId, newStatus, currentStage, updates) => {
     // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
@@ -559,13 +582,13 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     };
 
     // ── Asignar número de cola en la etapa destino ────────────────────────────
+    // Réplica exacta de buildQueueUpdate() del Sistema Gestión.
     // Solo aplica cuando el destino es una etapa productiva (no despacho).
-    if (newStatus !== 'despacho' && newEstadoGeneral) {
-        const { numeroCola, numeroColaDisplay } = await calcularNumeroCola(newEstadoGeneral, esPrioridadDelPedido);
-        if (numeroCola !== null) {
-            updateData[`${newStatus}.numeroCola`]        = numeroCola;
-            updateData[`${newStatus}.numeroColaDisplay`] = numeroColaDisplay;
-            console.log(`[Cola] Pedido ${orderId} → ${newStatus}: posición ${numeroColaDisplay}`);
+    if (newStatus !== 'despacho') {
+        const colaAsignada = await asignarNumeroCola(newStatus, esPrioridadDelPedido);
+        if (colaAsignada !== null) {
+            updateData[`${newStatus}.numeroCola`]        = colaAsignada.numeroCola;
+            updateData[`${newStatus}.numeroColaDisplay`] = colaAsignada.numeroColaDisplay;
         }
     }
 
