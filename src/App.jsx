@@ -65,25 +65,30 @@ function App() {
     useEffect(() => {
         let stageOrders = allOrders.filter(o => o.status === currentStage);
 
-        // Orden especial para preparación: primero 'Listo para Preparar', luego el resto
-        if (currentStage === STAGES.PREPARACION) {
-            stageOrders = [...stageOrders].sort((a, b) => {
-                // 1º criterio: esPrioridad (true primero)
-                const aPriority = a.esPrioridad ? 0 : 1;
-                const bPriority = b.esPrioridad ? 0 : 1;
-                if (aPriority !== bPriority) return aPriority - bPriority;
-                // 2º criterio: estadoGeneral dentro de cada grupo
-                const subPriority = { "Listo para Preparar": 1, "En Pausa por Stock": 2 };
-                return (subPriority[a.estadoGeneral] || 3) - (subPriority[b.estadoGeneral] || 3);
-            });
-        } else {
-            // Para el resto de etapas: esPrioridad === true primero
-            stageOrders = [...stageOrders].sort((a, b) => {
-                const aPriority = a.esPrioridad ? 0 : 1;
-                const bPriority = b.esPrioridad ? 0 : 1;
-                return aPriority - bPriority;
-            });
-        }
+        // ── Orden de cola unificado para todas las etapas ───────────────────────────────
+        // Grupo 1: pedidos prioritarios (esPrioridad=true y no en pausa por stock)
+        //          ordenados ascendentemente por numeroCola.
+        // Grupo 2: pedidos normales (no prioritarios, no en pausa por stock)
+        //          ordenados ascendentemente por numeroCola.
+        // Grupo 3: pedidos en pausa por stock (siempre al final).
+        stageOrders = [...stageOrders].sort((a, b) => {
+            const aStock = a.isStockPaused ? 1 : 0;
+            const bStock = b.isStockPaused ? 1 : 0;
+
+            // Pausa por stock siempre al final
+            if (aStock !== bStock) return aStock - bStock;
+
+            // Dentro de los activos: prioridad primero
+            const aPriority = a.esPrioridad ? 0 : 1;
+            const bPriority = b.esPrioridad ? 0 : 1;
+            if (aPriority !== bPriority) return aPriority - bPriority;
+
+            // Dentro del mismo grupo: ordenar por numeroCola ascendente.
+            // Si un pedido no tiene numeroCola va al final de su grupo.
+            const aCol = a.numeroCola ?? Infinity;
+            const bCol = b.numeroCola ?? Infinity;
+            return aCol - bCol;
+        });
 
         if (searchTerm) {
             const term = searchTerm.trim();

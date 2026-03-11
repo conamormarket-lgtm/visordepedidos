@@ -214,13 +214,31 @@ const normalizeOrder = (doc) => {
         commentText = data.comentarios;
     }
 
+    // ── Número de cola ────────────────────────────────────────────────────
+    // Los campos numeroCola / numeroColaDisplay viven dentro del sub-mapa de
+    // la etapa activa (ej: data.preparacion.numeroCola).
+    // Mapa de estadoGeneral → campo de etapa donde buscar
+    const stageKeyForCola = {
+        "Listo para Preparar": "preparacion",
+        "En Pausa por Stock":  "preparacion",
+        "En Estampado":        "estampado",
+        "En Empaquetado":      "empaquetado",
+    };
+    const stageKeyNow = stageKeyForCola[estGen];
+    const stageMapNow = stageKeyNow ? data[stageKeyNow] : null;
+    const numeroCola        = stageMapNow?.numeroCola        ?? null;
+    const numeroColaDisplay = stageMapNow?.numeroColaDisplay ?? null;
+
+    const esPrioridad = data.esPrioridad === true || data.EsPrioridad === true;
+
     const orderData = {
         id: doc.id,
         orderId: visualId,
         date: normalizeDate(data.fechaEnvio),
         destination: fullDestination,
         deliveryType,
-        isPriority: data.esPrioridad === true || data.EsPrioridad === true,
+        isPriority: esPrioridad,
+        esPrioridad,
         phone: data.clienteContacto,
         products: productList,
         itemsAgregados,
@@ -234,7 +252,10 @@ const normalizeOrder = (doc) => {
         empaquetado: normalizeStage(data.empaquetado),
         isStockPaused: estGen === "En Pausa por Stock" || data.preparacion?.enPausa || false,
         images: images,
-        // ── Campos de envío / impresión de etiqueta ──────────────────────────
+        // ── Número de cola ────────────────────────────────────────────────
+        numeroCola,
+        numeroColaDisplay,
+        // ── Campos de envío / impresión de etiqueta ──────────────────────
         envioNombres: data.envioNombres || '',
         envioApellidos: data.envioApellidos || '',
         envioNumeroDocumento: data.envioNumeroDocumento || '',
