@@ -240,6 +240,22 @@ function App() {
         }
     };
 
+    // Enviar pedido POR MAYOR directamente a Reparto (sin pasar por estampado/empaquetado)
+    const handleWholesale = async () => {
+        const currentOrder = filteredOrders[currentIndex];
+        if (!currentOrder) return;
+        if (currentStage !== STAGES.PREPARACION) return;
+        // Solo disponible para pedidos sin imágenes
+        if (currentOrder.images && currentOrder.images.length > 0) return;
+
+        // Bloqueo: requiere operador asignado
+        const assignedOperator = currentOrder?.[currentStage]?.operador;
+        if (!assignedOperator || assignedOperator === 'Sin Asignar') return;
+
+        // Saltar directamente a despacho (En Reparto)
+        await updateOrderStage(currentOrder.id, 'despacho', currentStage);
+    };
+
     const handleUndo = async () => {
         if (!lastAction) return;
         const { orderId, prevStage, completedStage, prevSnapshot } = lastAction;
@@ -279,10 +295,12 @@ function App() {
                     onAssign={handleAssign}
                     onComplete={handleComplete}
                     onUndo={handleUndo}
+                    onWholesale={handleWholesale}
                     lastAction={lastAction}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                     currentOrderId={currentOrder?.id}
                     currentOrder={currentOrder}
+                    sinImagen={sinImagen}
                 />
             }
         >

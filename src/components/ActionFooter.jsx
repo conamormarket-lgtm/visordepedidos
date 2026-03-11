@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Printer, Loader2 } from 'lucide-react';
+import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Printer, Loader2, Truck } from 'lucide-react';
 import { printTicket } from '../services/printService';
 
 const ActionFooter = ({
@@ -9,11 +9,13 @@ const ActionFooter = ({
     onAssign,
     onComplete,
     onUndo,
+    onWholesale,
     lastAction,
     assignedTo,
     operators = [],
     currentOrderId,
     currentOrder,
+    sinImagen,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [undoCountdown, setUndoCountdown] = useState(null);
@@ -220,6 +222,27 @@ const ActionFooter = ({
                             Asigna un operador antes de pasar el pedido a la siguiente etapa
                         </span>
                     </div>
+                )}
+
+                {/* Botón POR MAYOR: solo en preparacion + sin imágenes */}
+                {currentStage === 'preparacion' && sinImagen && (
+                    <button
+                        onClick={onWholesale}
+                        disabled={!isOperatorAssigned}
+                        className={`w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border transition-all duration-300 transform
+                            ${isOperatorAssigned
+                                ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white shadow-lg shadow-orange-500/30 active:scale-[0.99] border-white/10 cursor-pointer'
+                                : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'
+                            }`}
+                    >
+                        {isOperatorAssigned && (
+                            <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
+                        )}
+                        <Truck size={20} className="shrink-0" />
+                        <span className="text-lg font-black tracking-wider uppercase drop-shadow-sm">
+                            POR MAYOR → Reparto
+                        </span>
+                    </button>
                 )}
 
                 {/* Complete Button */}
