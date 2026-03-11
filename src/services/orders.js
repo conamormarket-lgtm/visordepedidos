@@ -4,6 +4,7 @@ import {
     onSnapshot,
     query,
     where,
+    getDocs,
     doc,
     getDoc,
     updateDoc,
@@ -464,6 +465,42 @@ const getAllRealIds = (orderId) => {
     return [realId];
 };
 
+/**
+ * Calcula el siguiente número de cola para un pedido que ingresa a una etapa.
+ *
+ * Consulta Firestore para contar los pedidos que ya están en `newEstadoGeneral`
+ * con el mismo valor de `esPrioridad` que el pedido actual.
+ * El siguiente número es ese conteo + 1.
+ *
+ * Las dos colas (prioridad / normal) son independientes dentro de cada etapa:
+ *   - esPrioridad = true  → cola P-1, P-2, P-3 …
+ *   - esPrioridad = false → cola 1, 2, 3 …
+ *
+ * @param {string}  newEstadoGeneral  – valor de estadoGeneral destino (ej: "En Estampado")
+ * @param {boolean} esPrioridad       – si el pedido es prioritario
+ * @returns {{ numeroCola: number, numeroColaDisplay: string }}
+ */
+const calcularNumeroCola = async (newEstadoGeneral, esPrioridad) => {
+    try {
+        // Construimos la query con ambos filtros para no sobre-leer documentos
+        const q = query(
+            collection(db, COLLECTION_NAME),
+            where("estadoGeneral", "==", newEstadoGeneral),
+            where("esPrioridad",    "==", !!esPrioridad)
+        );
+        const snap = await getDocs(q);
+        securityMonitor.registerOperation(snap.size || 1); // contabilizar la lectura
+        const siguiente = snap.size + 1;
+        return {
+            numeroCola:        siguiente,
+            numeroColaDisplay: esPrioridad ? `P-${siguiente}` : String(siguiente),
+        };
+    } catch (err) {
+        console.warn("[calcularNumeroCola] No se pudo calcular el número de cola:", err);
+        return { numeroCola: null, numeroColaDisplay: null };
+    }
+};
+
 export const updateOrderStage = async (orderId, newStatus, currentStage, updates) => {
     // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
     const realIds = getAllRealIds(orderId);
@@ -480,14 +517,17 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "empaquetado") newEstadoGeneral = "En Empaquetado";
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
-    // Leer el doc principal para obtener el operador actual
+    // Leer el doc principal para obtener el operador actual Y esPrioridad
+    // (una sola lectura de Firestore para ambos datos)
     let operadorActual = "Visor Pedidos";
+    let esPrioridadDelPedido = false;
     try {
         const docSnap = await getDoc(primaryRef);
         if (docSnap.exists()) {
             const d = docSnap.data();
             const op = d[currentStage]?.operador || d[currentStage]?.operadorNombre;
             if (op && op !== "Sin Asignar") operadorActual = op;
+            esPrioridadDelPedido = d.esPrioridad === true || d.EsPrioridad === true;
         }
     } catch (e) {
         console.warn("[updateOrderStage] No se pudo leer doc previo:", e);
@@ -517,6 +557,17 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         historialModificaciones: arrayUnion(historialEntry),
         ...updates
     };
+
+    // ── Asignar número de cola en la etapa destino ────────────────────────────
+    // Solo aplica cuando el destino es una etapa productiva (no despacho).
+    if (newStatus !== 'despacho' && newEstadoGeneral) {
+        const { numeroCola, numeroColaDisplay } = await calcularNumeroCola(newEstadoGeneral, esPrioridadDelPedido);
+        if (numeroCola !== null) {
+            updateData[`${newStatus}.numeroCola`]        = numeroCola;
+            updateData[`${newStatus}.numeroColaDisplay`] = numeroColaDisplay;
+            console.log(`[Cola] Pedido ${orderId} → ${newStatus}: posición ${numeroColaDisplay}`);
+        }
+    }
 
     securityMonitor.registerOperation(realIds.length);
     // Escribir en TODOS los docIds hermanos simultaneamente
