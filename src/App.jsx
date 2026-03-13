@@ -272,15 +272,11 @@ function App() {
         }
     };
 
-    // Enviar pedido BOX/CUADRO: desde Estampado directamente a Empaquetado
+    // Enviar pedido BOX/CUADRO: desde Estampado directamente a Empaquetado (sin requerir operador)
     const handleBox = async () => {
         const currentOrder = filteredOrders[currentIndex];
         if (!currentOrder) return;
         if (currentStage !== STAGES.ESTAMPADO) return;
-
-        // Bloqueo: requiere operador asignado
-        const assignedOperator = currentOrder?.[currentStage]?.operador;
-        if (!assignedOperator || assignedOperator === 'Sin Asignar') return;
 
         const nextStage = STAGES.EMPAQUETADO;
         const prevSnapshot = {
