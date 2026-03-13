@@ -10,6 +10,7 @@ const ActionFooter = ({
     onComplete,
     onUndo,
     onWholesale,
+    onBox,
     lastAction,
     assignedTo,
     operators = [],
@@ -222,6 +223,27 @@ const ActionFooter = ({
                             Asigna un operador antes de pasar el pedido a la siguiente etapa
                         </span>
                     </div>
+                )}
+
+                {/* Botón BOX/CUADRO: solo en estampado → pasa a empaquetado */}
+                {currentStage === 'estampado' && (
+                    <button
+                        onClick={onBox}
+                        disabled={!isOperatorAssigned}
+                        className={`w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border transition-all duration-300 transform
+                            ${isOperatorAssigned
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] border-white/10 cursor-pointer'
+                                : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'
+                            }`}
+                    >
+                        {isOperatorAssigned && (
+                            <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
+                        )}
+                        <span className="text-2xl">📦</span>
+                        <span className="text-lg font-black tracking-wider uppercase drop-shadow-sm">
+                            BOX / CUADRO → Empaquetado
+                        </span>
+                    </button>
                 )}
 
                 {/* Botón POR MAYOR: solo en preparacion + sin imágenes */}

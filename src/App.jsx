@@ -90,6 +90,38 @@ function App() {
             return aCol - bCol;
         });
 
+        // ── Renumeración en tiempo real de las posiciones de cola ──────────────────
+        // El numeroCola guardado en Firebase es el ticket de entrada (nunca baja),
+        // pero lo que el usuario necesita ver es su POSICIÓN ACTUAL en la cola.
+        // La calculamos aquí, en el cliente, a partir del orden ya sorted, sin
+        // costo de red ni escrituras a Firebase.
+        //
+        //  Grupo prioridad activos → P-1, P-2, P-3 ...
+        //  Grupo normal activos    → 1, 2, 3 ...
+        //  Pausa por stock         → sin número de cola
+        let posPrioridad = 0;
+        let posNormal    = 0;
+        stageOrders = stageOrders.map(order => {
+            if (order.isStockPaused) {
+                // En pausa por stock: sin número de cola asignado
+                return { ...order, numeroColaDisplay: null, numeroCola: null };
+            }
+            if (order.esPrioridad) {
+                posPrioridad++;
+                return {
+                    ...order,
+                    numeroCola:        posPrioridad,
+                    numeroColaDisplay: `P-${posPrioridad}`,
+                };
+            }
+            posNormal++;
+            return {
+                ...order,
+                numeroCola:        posNormal,
+                numeroColaDisplay: String(posNormal),
+            };
+        });
+
         if (searchTerm) {
             const term = searchTerm.trim();
             const isNumeric = /^\d+$/.test(term);
@@ -240,6 +272,35 @@ function App() {
         }
     };
 
+    // Enviar pedido BOX/CUADRO: desde Estampado directamente a Empaquetado
+    const handleBox = async () => {
+        const currentOrder = filteredOrders[currentIndex];
+        if (!currentOrder) return;
+        if (currentStage !== STAGES.ESTAMPADO) return;
+
+        // Bloqueo: requiere operador asignado
+        const assignedOperator = currentOrder?.[currentStage]?.operador;
+        if (!assignedOperator || assignedOperator === 'Sin Asignar') return;
+
+        const nextStage = STAGES.EMPAQUETADO;
+        const prevSnapshot = {
+            [`${currentStage}.estado`]: currentOrder[currentStage]?.estado || null,
+            [`${currentStage}.fechaFin`]: currentOrder[currentStage]?.fechaFin || null,
+            [`${nextStage}.estado`]: currentOrder[nextStage]?.estado || null,
+            [`${nextStage}.fechaEntrada`]: currentOrder[nextStage]?.fechaEntrada || null,
+        };
+
+        setLastAction({
+            orderId: currentOrder.id,
+            orderVisualId: currentOrder.orderId,
+            prevStage: currentStage,
+            completedStage: nextStage,
+            prevSnapshot,
+        });
+
+        await updateOrderStage(currentOrder.id, nextStage, currentStage);
+    };
+
     // Enviar pedido POR MAYOR directamente a Reparto (sin pasar por estampado/empaquetado)
     const handleWholesale = async () => {
         const currentOrder = filteredOrders[currentIndex];
@@ -296,6 +357,7 @@ function App() {
                     onComplete={handleComplete}
                     onUndo={handleUndo}
                     onWholesale={handleWholesale}
+                    onBox={handleBox}
                     lastAction={lastAction}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                     currentOrderId={currentOrder?.id}
