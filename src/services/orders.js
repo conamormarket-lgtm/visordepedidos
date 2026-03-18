@@ -577,6 +577,13 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
             [`${newStatus}.fechaEntrada`]: nowDate,
             [`${newStatus}.estado`]: "EN PROCESO",
         }),
+        // Al pasar a Reparto ("despacho"), registrar fechaEntrada en el sub-objeto reparto.
+        // La condición anterior excluía este campo porque newStatus === 'despacho',
+        // pero el Sistema Gestión sí lo escribe (ver empaquetado-tab.tsx → reparto.fechaEntrada).
+        ...(newStatus === 'despacho' && {
+            "reparto.fechaEntrada": nowDate,
+            "reparto.estado": "EN PROCESO",
+        }),
         historialModificaciones: arrayUnion(historialEntry),
         ...updates
     };

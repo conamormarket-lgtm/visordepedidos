@@ -39,7 +39,7 @@ export const generateZpl = (order) => {
     // Fuente: 50 dots. Última línea en Y=340 → termina en Y=390, margen de 10 dots
     const zpl = [
         '^XA',
-        '^CF0,50,50',
+        '^CF0,50,30',
         `^FO50,30^FDRecibe: ${s(order.envioNombres)}^FS`,
         `^FO50,90^FD${s(order.envioApellidos)}^FS`,
         `^FO50,160^FDDNI: ${s(order.envioNumeroDocumento)}^FS`,
