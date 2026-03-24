@@ -260,15 +260,32 @@ function App() {
                 [`${nextStage}.fechaEntrada`]: currentOrder[nextStage]?.fechaEntrada || null,
             };
 
-            setLastAction({
-                orderId: currentOrder.id,
-                orderVisualId: currentOrder.orderId,
-                prevStage: currentStage,
-                completedStage: nextStage,
-                prevSnapshot,
-            });
+            try {
+                // Guardar snapshot para poder deshacer SOLO si el avance fue exitoso
+                await updateOrderStage(currentOrder.id, nextStage, currentStage);
 
-            await updateOrderStage(currentOrder.id, nextStage, currentStage);
+                setLastAction({
+                    orderId: currentOrder.id,
+                    orderVisualId: currentOrder.orderId,
+                    prevStage: currentStage,
+                    completedStage: nextStage,
+                    prevSnapshot,
+                });
+            } catch (err) {
+                // Error de stock insuficiente: el pedido ya fue revertido en Firestore
+                if (err.message?.startsWith('SIN_STOCK:')) {
+                    const detalle = err.message.replace('SIN_STOCK: ', '');
+                    alert(
+                        `⚠️ SIN STOCK — El pedido #${currentOrder.orderId} no puede avanzar.\n\n` +
+                        `${detalle}\n\n` +
+                        `El pedido ha sido movido automáticamente a "En Pausa por Stock".`
+                    );
+                    setLastAction(null); // No hay nada que deshacer (Firestore ya revirtió)
+                } else {
+                    console.error('[App] Error al completar etapa:', err);
+                    alert(`Error al completar la etapa: ${err.message}`);
+                }
+            }
         }
     };
 

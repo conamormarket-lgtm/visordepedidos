@@ -606,8 +606,36 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     // DESCONTAR INVENTARIO al pasar de preparación → estampado
     if (newStatus === "estampado" && currentStage === "preparacion") {
         try {
-            await descontarInventarioPorPedido(realIds[0], operadorActual);
+            const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual);
+
+            if (!resultadoInventario.exito && resultadoInventario.sinStock) {
+                // ── REVERTIR: el pedido avanzó en Firestore pero no hay stock suficiente ──
+                // Volver a "En Pausa por Stock" para que el equipo de producción sepa que falta stock.
+                const revertData = {
+                    estadoGeneral: "En Pausa por Stock",
+                    "preparacion.estado": "EN PROCESO",
+                    [`${newStatus}.fechaEntrada`]: null,
+                    [`${newStatus}.estado`]: null,
+                    updatedAt: serverTimestamp(),
+                    historialModificaciones: arrayUnion({
+                        timestamp: new Date(),
+                        usuarioId: "visor-pedidos",
+                        usuarioEmail: operadorActual,
+                        accion: "Revertido a Pausa por Stock",
+                        detalle: `Sin stock al avanzar a Estampado: ${resultadoInventario.mensaje}`,
+                    }),
+                };
+                await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), revertData)));
+
+                // Lanzar error para que el componente UI muestre el alert al usuario
+                throw new Error(
+                    `SIN_STOCK: ${resultadoInventario.mensaje}`
+                );
+            }
         } catch (error) {
+            // Re-lanzar errores de stock para que el componente los maneje con alert
+            if (error.message?.startsWith("SIN_STOCK:")) throw error;
+            // Otros errores de inventario: solo loguear, no bloquear el flujo
             console.error("Error intentando descontar inventario:", error);
         }
     }

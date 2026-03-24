@@ -130,37 +130,49 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
 
                 if (index !== -1) {
                     const available = items[index].quantity;
-                    const canTake = Math.min(cantidadReq, available);
+                    const cantidadFaltante = cantidadReq - available;
 
-                    if (canTake > 0) {
-                        items[index].quantity -= canTake;
-                        descontadas++;
-
+                    // Si no hay stock suficiente, abortar la transacción completa
+                    if (available < cantidadReq) {
                         const itemType = items[index].type || items[index].tipoPrenda || prendaReq.tipoPrenda;
                         const itemColor = items[index].color || prendaReq.color;
                         const itemSize = items[index].size || items[index].talla || prendaReq.talla;
-
-                        const logDocRef = doc(historyRef);
-                        // Store the writes to be executed below
-                        updatesLog.push({
-                            ref: logDocRef,
-                            data: {
-                                timestamp: serverTimestamp(),
-                                user: userLog || "Visor Pedidos (Sistema)",
-                                action: "Salida",
-                                details: `Descuento automático por pedido #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${canTake})`,
-                                quantity: canTake,
-                                metadata: {
-                                    type: itemType,
-                                    color: itemColor,
-                                    size: itemSize,
-                                    quantity: canTake,
-                                    originalActionType: "exit",
-                                    pedidoOrigenId: pedidoId
-                                }
-                            }
-                        });
+                        throw new Error(
+                            `STOCK_INSUFICIENTE: ${itemType} ${itemColor} ${itemSize} — disponible: ${available}, requerido: ${cantidadReq} (faltan ${cantidadFaltante})`
+                        );
                     }
+
+                    items[index].quantity -= cantidadReq;
+                    descontadas++;
+
+                    const itemType = items[index].type || items[index].tipoPrenda || prendaReq.tipoPrenda;
+                    const itemColor = items[index].color || prendaReq.color;
+                    const itemSize = items[index].size || items[index].talla || prendaReq.talla;
+
+                    const logDocRef = doc(historyRef);
+                    updatesLog.push({
+                        ref: logDocRef,
+                        data: {
+                            timestamp: serverTimestamp(),
+                            user: userLog || "Visor Pedidos (Sistema)",
+                            action: "Salida",
+                            details: `Descuento automático por pedido #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${cantidadReq})`,
+                            quantity: cantidadReq,
+                            metadata: {
+                                type: itemType,
+                                color: itemColor,
+                                size: itemSize,
+                                quantity: cantidadReq,
+                                originalActionType: "exit",
+                                pedidoOrigenId: pedidoId
+                            }
+                        }
+                    });
+                } else {
+                    // La prenda no está en el inventario — no se puede descontar
+                    throw new Error(
+                        `STOCK_INSUFICIENTE: ${prendaReq.tipoPrenda} ${prendaReq.color} ${prendaReq.talla} — no encontrado en inventario`
+                    );
                 }
             }
 
@@ -184,6 +196,11 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
         }
         if (error.message === "NO_PRENDAS") {
             return { exito: true, mensaje: "No hay prendas para descontar" };
+        }
+        if (error.message?.startsWith("STOCK_INSUFICIENTE:")) {
+            const detalle = error.message.replace("STOCK_INSUFICIENTE: ", "");
+            console.warn("[Inventario] Stock insuficiente al descontar:", detalle);
+            return { exito: false, sinStock: true, mensaje: detalle };
         }
         console.error("Error al descontar inventario:", error);
         return { exito: false, mensaje: "Error del servidor: " + error.message };
