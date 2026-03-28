@@ -1,0 +1,44 @@
+# visordepedidos — Project Memory
+# Auto-synced | 80 observations
+
+**Stack:** JavaScript · React + Tailwind · DB: Firebase
+
+# 🛡️ GLOBAL SAFETY RULES
+
+- **NEVER** run `git clean -fd` or `git reset --hard` without checking `git log` and verifying commits exist.
+- **NEVER** delete untracked files or folders blindly. Always backup or stash before bulk edits.
+
+# 🧭 ACTIVE CONTEXT
+
+> Always read `.cursor/active-context.md` for exact instructions on the specific file you are currently editing. It updates dynamically.
+
+# 🔴 CRITICAL — DO NOT IGNORE
+
+- **Don't mix Tailwind with inline styles** — Don't mix Tailwind with inline styles
+- **Don't store sensitive data in client-accessible collections** — Don't store sensitive data in client-accessible collections
+- **Set Firestore security rules — never leave default open rules** — Set Firestore security rules — never leave default open rules
+- **Clean up effects — return cleanup function from useEffect** — Clean up effects — return cleanup function from useEffect
+- **Don't create components inside other components — causes remount on every render** — Don't create components inside other components — causes remount on every render
+
+# 📐 Conventions
+
+- Extract repeated class patterns into components
+- Use responsive prefixes consistently (sm:, md:, lg:, xl:)
+- Don't use arbitrary values when a utility class exists
+- Index Firestore queries for performance
+- Use batch writes for multiple document updates
+- Use Suspense and Error Boundaries for async operations
+- Don't prop-drill more than 2 levels — use Context or state management
+- Use useMemo for expensive computations, useCallback for stable references
+
+# ⚡ Available Tools (ON-DEMAND only)
+- `save(title, content, category)` — Save a note + auto-detect conflicts
+- `batch_save(items[])` — Save multiple notes in 1 call
+- `query(text)` — Search memory for architecture, past fixes, decisions
+- `search(text)` — Full-text search for details
+- `check_errors()` — Check compiler errors after edits
+
+> ℹ️ DO NOT call get_context() or get_gotchas() at startup — context above IS your context.
+
+---
+*Auto-synced | 2026-03-26*

@@ -65,6 +65,12 @@ function App() {
     useEffect(() => {
         let stageOrders = allOrders.filter(o => o.status === currentStage);
 
+        // ── Filtro de cobranza (solo en Preparación) ──────────────────────────
+        // Solo se muestran pedidos cuyo campo cobranza.estado sea "Habilitado".
+        if (currentStage === STAGES.PREPARACION) {
+            stageOrders = stageOrders.filter(o => o.cobranza?.estado === 'Habilitado');
+        }
+
         // ── Orden de cola unificado para todas las etapas ───────────────────────────────
         // Grupo 1: pedidos prioritarios (esPrioridad=true y no en pausa por stock)
         //          ordenados ascendentemente por numeroCola.

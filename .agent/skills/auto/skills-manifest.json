@@ -1,0 +1,36 @@
+{
+  "javascript": {
+    "enabled": true,
+    "lastGenerated": "2026-03-28T00:01:37.446Z",
+    "observationCount": 5,
+    "skillCount": 0,
+    "domain": "javascript",
+    "triggerGlobs": [
+      "**/*.js",
+      "**/*.jsx"
+    ],
+    "description": "Javascript for visordepedidos. ."
+  },
+  "javascript-react": {
+    "enabled": true,
+    "lastGenerated": "2026-03-28T00:01:37.447Z",
+    "observationCount": 3,
+    "skillCount": 0,
+    "domain": "javascript-react",
+    "triggerGlobs": [
+      "**/*.jsx"
+    ],
+    "description": "Javascript React for visordepedidos. 1 fixes."
+  },
+  "project": {
+    "enabled": true,
+    "lastGenerated": "2026-03-28T00:01:37.446Z",
+    "observationCount": 72,
+    "skillCount": 0,
+    "domain": "project",
+    "triggerGlobs": [
+      "**/*"
+    ],
+    "description": "Project for visordepedidos. 30 gotchas, 40 conventions."
+  }
+}

@@ -264,6 +264,8 @@ const normalizeOrder = (doc) => {
         envioContacto: data.envioContacto || '',
         agenciaEnvio: data.agenciaEnvio || '',
         envioDireccionLima: data.envioDireccionLima || '',
+        // ── Cobranza ──────────────────────────────────────────────────
+        cobranza: data.cobranza || null,
     };
 
     // DEVOLVER OBJETO CON LLAVES ORDENADAS (Garantiza comparaciones consistentes)
