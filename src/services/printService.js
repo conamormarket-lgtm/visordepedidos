@@ -19,7 +19,7 @@
 
 // ── IP del servidor de impresión (PC con print-server.cjs corriendo) ────────
 // IP de la PC en la red LAN donde corre print-server.cjs
-const DEFAULT_PRINT_SERVER = 'http://192.168.18.32:3001';
+const DEFAULT_PRINT_SERVER = 'http://192.168.18.82:3001';
 
 const getPrintServerUrl = () =>
     localStorage.getItem('visor_print_server') || DEFAULT_PRINT_SERVER;

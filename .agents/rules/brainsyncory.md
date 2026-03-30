@@ -18,22 +18,7 @@
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
-## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Project Standards
-
-- Extract repeated class patterns into components
-- Use responsive prefixes consistently (sm:, md:, lg:, xl:)
-- Don't use arbitrary values when a utility class exists
-- Index Firestore queries for performance
-- Use batch writes for multiple document updates
-- Use Suspense and Error Boundaries for async operations
-- Don't prop-drill more than 2 levels — use Context or state management
-- Use useMemo for expensive computations, useCallback for stable references
-
-## Recent Decisions
-
-- decision in .gitignore
-
-## Verified Best Practices
+## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Verified Best Practices
 
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
