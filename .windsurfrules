@@ -1,5 +1,5 @@
 # visordepedidos — Project Memory
-# Auto-synced | 86 observations
+# Auto-synced | 87 observations
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
@@ -55,3 +55,6 @@ Example:
 
 ---
 *Auto-synced | 2026-04-01*
+
+# BrainSync Intelligence (Auto-Synced)
+[BrainSync Rules](.brainsync/agent-rules.md)
