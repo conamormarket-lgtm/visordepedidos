@@ -80,7 +80,7 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
-            console.log(`\n[${timestamp()}] Nueva solicitud de impresión`);
+            console.log(`\n[${timestamp()}] Nueva solicitud de impresión de: ${req.socket.remoteAddress}`);
             console.log(`  → Conectando a ${CONFIG.PRINTER_IP}:${CONFIG.PRINTER_PORT}...`);
 
             // Enviar ZPL por TCP al puerto 9100 de la impresora

@@ -1,8 +1,8 @@
 {
   "javascript": {
     "enabled": true,
-    "lastGenerated": "2026-03-30T14:13:42.899Z",
-    "observationCount": 5,
+    "lastGenerated": "2026-04-01T16:43:21.397Z",
+    "observationCount": 8,
     "skillCount": 0,
     "domain": "javascript",
     "triggerGlobs": [
@@ -13,24 +13,35 @@
   },
   "javascript-react": {
     "enabled": true,
-    "lastGenerated": "2026-03-30T14:13:42.899Z",
-    "observationCount": 3,
+    "lastGenerated": "2026-04-01T16:43:21.398Z",
+    "observationCount": 4,
     "skillCount": 0,
     "domain": "javascript-react",
     "triggerGlobs": [
       "**/*.jsx"
     ],
-    "description": "Javascript React for visordepedidos. 1 fixes."
+    "description": "Javascript React for visordepedidos. 2 fixes."
   },
   "project": {
     "enabled": true,
-    "lastGenerated": "2026-03-30T14:13:42.899Z",
-    "observationCount": 72,
+    "lastGenerated": "2026-04-01T16:43:21.397Z",
+    "observationCount": 74,
     "skillCount": 0,
     "domain": "project",
     "triggerGlobs": [
       "**/*"
     ],
     "description": "Project for visordepedidos. 30 gotchas, 40 conventions."
+  },
+  "problem-fix": {
+    "enabled": true,
+    "lastGenerated": "2026-04-01T16:43:21.398Z",
+    "observationCount": 0,
+    "skillCount": 1,
+    "domain": "problem-fix",
+    "triggerGlobs": [
+      "**/*"
+    ],
+    "description": "Problem Fix for visordepedidos. 1 error→fix pairs."
   }
 }

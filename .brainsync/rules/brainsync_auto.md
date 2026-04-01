@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 80 notes | Score threshold: >40
+> 86 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -18,8 +18,13 @@
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
-## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Verified Best Practices
+## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Known Fixes
 
+- ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
+
+## Learned Patterns
+
+- When encountering this, fix by: problem-fix in ImageCarousel.jsx (seen 2x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 

@@ -1,5 +1,5 @@
 # visordepedidos — Project Memory
-# Auto-synced | 81 observations
+# Auto-synced | 86 observations
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
@@ -54,4 +54,4 @@ Example:
 > ℹ️ DO NOT call get_context() or get_gotchas() at startup — context above IS your context.
 
 ---
-*Auto-synced | 2026-03-30*
+*Auto-synced | 2026-04-01*
