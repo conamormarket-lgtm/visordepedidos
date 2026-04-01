@@ -17,12 +17,10 @@
  *     localStorage.setItem('visor_print_server', 'http://192.168.18.XX:3001')
  */
 
-// ── IP del servidor de impresión (PC con print-server.cjs corriendo) ────────
-// IP de la PC en la red LAN donde corre print-server.cjs
-const DEFAULT_PRINT_SERVER = 'http://192.168.18.82:3001';
-
-const getPrintServerUrl = () =>
-    localStorage.getItem('visor_print_server') || DEFAULT_PRINT_SERVER;
+// ── IP del servidor de impresión local (Abolido) ────────
+// Ya no usamos el servidor local por IP. Usaremos Firebase.
+import { db } from '../firebase/config.js';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // ── Generador de ZPL ─────────────────────────────────────────────────────────
 /**
@@ -52,54 +50,36 @@ export const generateZpl = (order) => {
     return zpl;
 };
 
-// ── Envío al servidor de impresión ───────────────────────────────────────────
+// ── Envío a la cola de impresión en la nube ────────────────────────────────
 /**
- * Genera el ZPL del pedido y lo envía al print-server.js local.
+ * Guarda el ZPL en Firebase. La PC local que tiene la Zebra
+ * está escuchando esta base de datos e imprimirá automáticamente.
  *
  * @param {object} order - Objeto normalizado del pedido
  * @returns {Promise<{ok: boolean, message: string}>}
- * @throws {Error} si falla la conexión o la impresora no responde
  */
 export const printTicket = async (order) => {
-    const serverUrl = getPrintServerUrl();
     const zpl = generateZpl(order);
+    console.log('[Print Cloud] Enviando ticket a Firebase...');
 
-    console.log(`[Print] Enviando a ${serverUrl}/imprimir`);
-    console.log('[Print] ZPL generado:\n', zpl);
-
-    let response;
     try {
-        response = await fetch(`${serverUrl}/imprimir`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ zpl }),
+        await addDoc(collection(db, 'print_queue'), {
+            zpl,
+            orderId: order.id || order.Id || 'Desconocido',
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            printedAt: null
         });
-    } catch (networkErr) {
-        throw new Error(
-            `No se pudo conectar al servidor de impresión (${serverUrl}). ` +
-            `¿Está corriendo print-server.js en esa PC?`
-        );
+        return { ok: true, message: 'Ticket en cola en la nube. La PC lo imprimirá enseguida.' };
+    } catch (err) {
+        console.error('Error enviando a la nube:', err);
+        throw new Error('No se pudo enviar el ticket. Verifica tu conexión a internet.');
     }
-
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-        throw new Error(data.error || `Error del servidor: ${response.status}`);
-    }
-
-    return { ok: true, message: data.message || 'Ticket impreso correctamente' };
 };
 
 /**
  * Verifica que el servidor de impresión esté activo.
+ * En el modelo cloud, siempre asumimos true o verificamos la conexión a internet.
  * @returns {Promise<boolean>}
  */
-export const pingPrintServer = async () => {
-    try {
-        const res = await fetch(`${getPrintServerUrl()}/ping`, { signal: AbortSignal.timeout(3000) });
-        const data = await res.json();
-        return data.ok === true;
-    } catch {
-        return false;
-    }
-};
+export const pingPrintServer = async () => true;
