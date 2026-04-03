@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 87 notes | Score threshold: >40
+> 89 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -18,9 +18,18 @@
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
-## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Known Fixes
+## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Active: `.`
+
+- **what-changed in print-server.cjs**
+- **decision in .gitignore**
+
+## Known Fixes
 
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
+
+## Recent Decisions
+
+- decision in .gitignore
 
 ## Learned Patterns
 

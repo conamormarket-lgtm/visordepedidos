@@ -134,12 +134,16 @@ function App() {
 
             let filtered;
             if (isNumeric) {
-                // Búsqueda numérica: orderId, teléfono y DNI simultáneamente
-                filtered = stageOrders.filter(o =>
-                    (o.orderId && o.orderId.toString().includes(term)) ||
-                    (o.phone && o.phone.toString().includes(term)) ||
-                    (o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(term))
-                );
+                const termLength = term.length;
+                filtered = stageOrders.filter(o => {
+                    if (termLength <= 4) {
+                        return o.orderId && o.orderId.toString().includes(term);
+                    } else if (termLength >= 5 && termLength <= 8) {
+                        return o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(term);
+                    } else {
+                        return o.phone && o.phone.toString().includes(term);
+                    }
+                });
             } else {
                 // Búsqueda de texto: por destino u observaciones
                 const termLower = term.toLowerCase();

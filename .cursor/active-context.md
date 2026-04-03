@@ -2,6 +2,10 @@
 > Dynamically loaded for active file: `print-server.cjs` (Domain: **Generic Logic**)
 
 ### 📐 Generic Logic Conventions & Fixes
+- **[what-changed] what-changed in print-server.cjs**: -             console.log(`\n[${timestamp()}] Nueva solicitud de impresión`);
++             console.log(`\n[${timestamp()}] Nueva solicitud de impresión de: ${req.socket.remoteAddress}`);
+
+📌 IDE AST Context: Modified symbols likely include [http, net, CONFIG, timestamp, sendResponse]
 - **[what-changed] what-changed in .gitignore**: + AGENT.md
 + CLAUDE.md
 + .agent-mem/

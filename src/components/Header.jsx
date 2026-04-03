@@ -167,11 +167,14 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
 
                         <div className="flex items-center gap-3">
                             {/* Indicador de modo */}
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap transition-all duration-200 ${searchTerm.length >= 6
-                                ? 'bg-purple-100 text-purple-700'
-                                : 'bg-blue-100 text-blue-700'
-                                }`}>
-                                {searchTerm.length >= 6 ? 'DNI / Teléfono' : 'Nº Pedido'}
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap transition-all duration-200 ${
+                                searchTerm.length >= 9
+                                    ? 'bg-green-100 text-green-700'
+                                    : searchTerm.length >= 5
+                                        ? 'bg-purple-100 text-purple-700'
+                                        : 'bg-blue-100 text-blue-700'
+                            }`}>
+                                {searchTerm.length >= 9 ? 'Teléfono' : searchTerm.length >= 5 ? 'DNI' : 'Nº Pedido'}
                             </span>
 
                             {/* Input */}
@@ -182,9 +185,11 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                                     type="number"
                                     inputMode="numeric"
                                     placeholder={
-                                        searchTerm.length >= 6
-                                            ? "Ingresa DNI o teléfono del cliente..."
-                                            : "Ingresa el número de pedido (máx. 5 dígitos)..."
+                                        searchTerm.length >= 9
+                                            ? "Ingresa teléfono del cliente..."
+                                            : searchTerm.length >= 5
+                                                ? "Ingresa DNI del cliente..."
+                                                : "Ingresa el número de pedido (máx. 4 dígitos)..."
                                     }
                                     className="w-full pl-8 pr-4 py-2 bg-white/70 hover:bg-white/90 border border-white/60 focus:bg-white focus:border-blue-400/60 rounded-xl text-xs font-semibold text-slate-800 outline-none transition-all shadow-sm placeholder:text-slate-400 placeholder:font-normal"
                                     value={searchTerm}
