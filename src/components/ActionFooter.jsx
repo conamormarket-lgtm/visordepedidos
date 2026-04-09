@@ -35,7 +35,11 @@ const ActionFooter = ({
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener("touchstart", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("touchstart", handleClickOutside);
+        };
     }, []);
 
     // Countdown automático de 30 segundos para el botón de deshacer
@@ -156,7 +160,10 @@ const ActionFooter = ({
                         </button>
 
                         {isOpen && (
-                            <div className="absolute bottom-full left-0 w-full mb-3 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-black/5 animate-slide-up-fade overflow-hidden z-30 flex flex-col-reverse">
+                            <div className="absolute bottom-full left-0 w-full mb-3 max-h-[60vh] overflow-y-auto bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-black/5 animate-slide-up-fade z-30 flex flex-col">
+                                <div className="sticky top-0 z-10 px-5 py-2 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                    Seleccionar Operador
+                                </div>
                                 {operators.map((op) => (
                                     <button
                                         key={op}
@@ -168,12 +175,9 @@ const ActionFooter = ({
                                             }`}
                                     >
                                         {op}
-                                        {assignedTo === op && <CheckCircle size={18} className="text-blue-600" />}
+                                        {assignedTo === op && <CheckCircle size={18} className="text-blue-600 shrink-0" />}
                                     </button>
                                 ))}
-                                <div className="px-5 py-2 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                    Seleccionar Operador
-                                </div>
                             </div>
                         )}
                     </div>

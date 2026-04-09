@@ -1,7 +1,7 @@
 {
   "javascript": {
     "enabled": true,
-    "lastGenerated": "2026-04-02T14:59:18.124Z",
+    "lastGenerated": "2026-04-09T13:14:37.272Z",
     "observationCount": 8,
     "skillCount": 0,
     "domain": "javascript",
@@ -13,7 +13,7 @@
   },
   "javascript-react": {
     "enabled": true,
-    "lastGenerated": "2026-04-02T14:59:18.125Z",
+    "lastGenerated": "2026-04-09T13:14:37.272Z",
     "observationCount": 4,
     "skillCount": 0,
     "domain": "javascript-react",
@@ -24,18 +24,18 @@
   },
   "project": {
     "enabled": true,
-    "lastGenerated": "2026-04-02T14:59:18.124Z",
-    "observationCount": 77,
+    "lastGenerated": "2026-04-09T13:14:37.271Z",
+    "observationCount": 164,
     "skillCount": 0,
     "domain": "project",
     "triggerGlobs": [
       "**/*"
     ],
-    "description": "Project for visordepedidos. 30 gotchas, 40 conventions."
+    "description": "Project for visordepedidos. 39 gotchas, 60 conventions, 1 fixes."
   },
   "problem-fix": {
     "enabled": true,
-    "lastGenerated": "2026-04-02T14:59:18.125Z",
+    "lastGenerated": "2026-04-09T13:14:37.273Z",
     "observationCount": 0,
     "skillCount": 1,
     "domain": "problem-fix",
@@ -43,5 +43,52 @@
       "**/*"
     ],
     "description": "Problem Fix for visordepedidos. 1 error→fix pairs."
+  },
+  "config": {
+    "enabled": true,
+    "lastGenerated": "2026-04-09T13:14:37.271Z",
+    "observationCount": 65,
+    "skillCount": 0,
+    "domain": "config",
+    "triggerGlobs": [
+      "**/*.yaml",
+      "**/*.yml",
+      "**/*.json",
+      "**/*.toml"
+    ],
+    "description": "Config for visordepedidos. 1 gotchas, 18 conventions, 4 fixes."
+  },
+  "decision": {
+    "enabled": true,
+    "lastGenerated": "2026-04-09T13:14:37.273Z",
+    "observationCount": 0,
+    "skillCount": 3,
+    "domain": "decision",
+    "triggerGlobs": [
+      "**/*"
+    ],
+    "description": "Decision for visordepedidos. ."
+  },
+  "gotcha": {
+    "enabled": true,
+    "lastGenerated": "2026-04-09T13:14:37.273Z",
+    "observationCount": 0,
+    "skillCount": 5,
+    "domain": "gotcha",
+    "triggerGlobs": [
+      "**/*"
+    ],
+    "description": "Gotcha for visordepedidos. ."
+  },
+  "convention": {
+    "enabled": true,
+    "lastGenerated": "2026-04-09T13:14:37.273Z",
+    "observationCount": 0,
+    "skillCount": 11,
+    "domain": "convention",
+    "triggerGlobs": [
+      "**/*"
+    ],
+    "description": "Convention for visordepedidos. ."
   }
 }

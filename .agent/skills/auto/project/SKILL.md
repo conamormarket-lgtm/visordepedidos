@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 30 gotchas, 40 conventions."
+description: "Project for visordepedidos. 39 gotchas, 60 conventions, 1 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **77 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **164 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,15 @@ Auto-compiled from **77 real patterns** in **visordepedidos**. This skill is aut
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 226 notes - Score threshold: >40 + > 231 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 146 notes - Score threshold: >40 + > 150 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 140 notes - Score threshold: >40 + > 146 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 134 notes - Score threshold: >40 + > 140 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 128 notes - Score threshold: >40 + > 134 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 126 notes - Score threshold: >40 + > 128 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 118 notes - Score threshold: >40 + > 126 notes - Score threshold: >40 - - **gotcha in agent-rule |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 116 notes - Score threshold: >40 + > 118 notes - Score threshold: >40 - - what-changed in shared |
+| gotcha in agent-rules.md | File updated (external): .brainsync/agent-rules.md  Content summary (72 lines): # Project Intelligen |
 | Don't mix Tailwind with inline styles | Don't mix Tailwind with inline styles |
 | Don't store sensitive data in client-accessible co | Don't store sensitive data in client-accessible collections |
 | Set Firestore security rules — never leave default | Set Firestore security rules — never leave default open rules |
@@ -49,9 +58,117 @@ Auto-compiled from **77 real patterns** in **visordepedidos**. This skill is aut
 | Don't commit .env, secrets, API keys, or credentia | Don't commit .env, secrets, API keys, or credentials — add to .gitignore |
 | Never force push to main, master, or production br | Never force push to main, master, or production branches |
 
+## 🔧 Problem Playbooks
+
+### Patched security issue Optimized
+- 
++ - Optimized GOTCHA — prevents XSS injection attacks
+- ## Recent fixes
++ 
+- 
++ ## Recent fixes
+- - Patched security issue Kevin
++ 
+- - problem-fix in ImageCarousel.jsx
++ - Patched security issue Kevin
+- 
++ - problem-fix in ImageCarousel.jsx
+- ## How things work
++ 
+- 
++ ## How things work
+- - how-it-works in StockPauseAlert.jsx
++ 
+- - how-it-works in Layout.jsx
++ - how-it-works in StockPauseAle
+
+**Actionable Steps:**
+1. Modified 1 files
+2. identifier: Optimized
+3. identifier: GOTCHA
+4. identifier: XSS
+5. identifier: Recent
+
 ## 📐 Conventions & Best Practices
 
 ### Project Conventions
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 235 notes | Score threshold: >40
++ > 237 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 231 notes | Score threshold: >40
++ > 235 notes | Score threshold: >40
+- - **gotcha in shared-con
+- 📐 **Optimized Score — confirmed 3x** — - > 218 notes | Score threshold: >40
++ > 220 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 215 notes | Score threshold: >40
++ > 217 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 211 notes | Score threshold: >40
++ > 212 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 208 notes | Score threshold: >40
++ > 210 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 200 notes | Score threshold: >40
++ > 202 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 197 notes | Score threshold: >40
++ > 199 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 193 notes | Score threshold: >40
++ > 194 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 191 notes | Score threshold: >40
++ > 192 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 186 notes | Score threshold: >40
++ > 187 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 179 notes | Score threshold: >40
++ > 180 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 161 notes | Score threshold: >40
++ > 167 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 159 notes | Score threshold: >40
++ > 160 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized GOTCHA — ensures atomic multi-step database operations — confirmed 3x** — - - gotcha in agent-rules.md
++ - ⚠️ GOTCHA: Optimized Score — parallelizes async operations for spee
+- 📐 **Optimized Optimized — confirmed 3x** — - 
++ - Optimized GOTCHA — ensures atomic multi-step database operations
+- ## Recent fixes
++ 
+- 
++ ##
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 114 notes | Score threshold: >40
++ > 116 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 113 notes | Score threshold: >40
++ > 114 notes | Score threshold: >40
+- ## Active: `.`
++ ## Proj
+- 📐 **Optimized Optimized — confirmed 4x** — - 
++ - Optimized Optimized
+- ## Recent fixes
++ 
+- 
++ ## Recent fixes
+- - Patched security issue Kevi
+- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 99 notes | Score threshold: >40
++ > 101 notes | Score threshold: >40
+- ## Known Fixes
++ ## Proje
 - 📐 **Extract repeated class patterns into components** — Extract repeated class patterns into components
 - 📐 **Use responsive prefixes consistently (sm:, md:, lg:, xl:)** — Use responsive prefixes consistently (sm:, md:, lg:, xl:)
 - 📐 **Don't use arbitrary values when a utility class exists** — Don't use arbitrary values when a utility class exists
@@ -71,37 +188,6 @@ Auto-compiled from **77 real patterns** in **visordepedidos**. This skill is aut
 - 📐 **Handle timezone correctly — store UTC, display in user's timezone** — Handle timezone correctly — store UTC, display in user's timezone
 - 📐 **Make layouts responsive from the start — mobile-first approach** — Make layouts responsive from the start — mobile-first approach
 - 📐 **Disable submit button during form submission — prevent double-submit** — Disable submit button during form submission — prevent double-submit
-- 📐 **Always add empty states ("No items yet" with call-to-action)** — Always add empty states ("No items yet" with call-to-action)
-- 📐 **Always add error states with retry button — not just blank screen** — Always add error states with retry button — not just blank screen
-- 📐 **Always add loading states for async operations (skeleton, spinner)** — Always add loading states for async operations (skeleton, spinner)
-- 📐 **Test edge cases: empty input, null, boundary values, error scenarios** — Test edge cases: empty input, null, boundary values, error scenarios
-- 📐 **Each test should be independent — no shared mutable state between tests** — Each test should be independent — no shared mutable state between tests
-- 📐 **Write tests for business logic — test behavior/output, not implementation details** — Write tests for business logic — test behavior/output, not implementation details
-- 📐 **Close resources (streams, connections, handles) when done** — Close resources (streams, connections, handles) when done
-- 📐 **Debounce user input handlers (search, resize, scroll)** — Debounce user input handlers (search, resize, scroll)
-- 📐 **Use pagination for lists over 100 items** — Use pagination for lists over 100 items
-- 📐 **Implement retry logic for transient failures with exponential backoff** — Implement retry logic for transient failures with exponential backoff
-- 📐 **Return proper HTTP status codes — not 500 for everything** — Return proper HTTP status codes — not 500 for everything
-- 📐 **Always wrap async/await in try/catch** — Always wrap async/await in try/catch
-- 📐 **Hash passwords with cost factor ≥12 (bcrypt) or memory ≥64MB (argon2)** — Hash passwords with cost factor ≥12 (bcrypt) or memory ≥64MB (argon2)
-- 📐 **Implement rate limiting on login endpoints to prevent brute force** — Implement rate limiting on login endpoints to prevent brute force
-- 📐 **Use constants for magic numbers and strings** — Use constants for magic numbers and strings
-- 📐 **Handle edge cases: empty arrays, empty strings, null, undefined, 0, NaN** — Handle edge cases: empty arrays, empty strings, null, undefined, 0, NaN
-- 📐 **Keep functions under 50 lines and single-responsibility** — Keep functions under 50 lines and single-responsibility
-- 📐 **Remove unused imports, variables, and dead code** — Remove unused imports, variables, and dead code
-- 📐 **Always pull before push to avoid conflicts** — Always pull before push to avoid conflicts
-- 📐 **Use meaningful commit messages in imperative mood: "Add feature" not "Added feature"** — Use meaningful commit messages in imperative mood: "Add feature" not "Added feature"
-- 📐 **Don't commit node_modules, __pycache__, build/, dist/ — add to .gitignore** — Don't commit node_modules, __pycache__, build/, dist/ — add to .gitignore
+- 📐 **Always add empty states ("No items yet" with call-to-action)** —
 
-## 🤔 Decisions & Trade-offs
-
-- **decision in .gitignore** — File updated (external): .gitignore
-
-Content summary (132 lines):
-# Logs
-logs
-*.log
-npm-debug.log
-
----
-*Auto-generated by BrainSync 🧠 | 77 patterns | 2026-04-02*
+... [Truncated — see individual observations for full content]

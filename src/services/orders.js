@@ -35,13 +35,12 @@ export const subscribeToOperators = (callback) => {
     return onSnapshot(configRef, (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.data();
-            const list = Array.isArray(data.operarios) ? data.operarios : [];
-            // Siempre aseguramos que 'Sin Asignar' esté presente si no viene de la DB
-            if (list.length === 0) {
-                callback(["Sin Asignar"]);
-            } else {
-                callback(list);
+            let list = Array.isArray(data.operarios) ? data.operarios : [];
+            // Siempre aseguramos que 'Sin Asignar' esté presente
+            if (!list.includes("Sin Asignar")) {
+                list = ["Sin Asignar", ...list];
             }
+            callback(list);
         } else {
             callback(["Sin Asignar"]);
         }
@@ -610,11 +609,11 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         try {
             const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual);
 
-            if (!resultadoInventario.exito && resultadoInventario.sinStock) {
-                // ── REVERTIR: el pedido avanzó en Firestore pero no hay stock suficiente ──
-                // Volver a "En Pausa por Stock" para que el equipo de producción sepa que falta stock.
+            if (!resultadoInventario.exito) {
+                // ── REVERTIR: el pedido avanzó en Firestore pero el inventario falló ──
+                let estadoReverso = resultadoInventario.sinStock ? "En Pausa por Stock" : "Listo para Preparar";
                 const revertData = {
-                    estadoGeneral: "En Pausa por Stock",
+                    estadoGeneral: estadoReverso,
                     "preparacion.estado": "EN PROCESO",
                     [`${newStatus}.fechaEntrada`]: null,
                     [`${newStatus}.estado`]: null,
@@ -623,22 +622,25 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
                         timestamp: new Date(),
                         usuarioId: "visor-pedidos",
                         usuarioEmail: operadorActual,
-                        accion: "Revertido a Pausa por Stock",
-                        detalle: `Sin stock al avanzar a Estampado: ${resultadoInventario.mensaje}`,
+                        accion: resultadoInventario.sinStock ? "Revertido a Pausa por Stock" : "Revertido por Error de Servidor",
+                        detalle: `Fallo al descontar inventario: ${resultadoInventario.mensaje}`,
                     }),
                 };
                 await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), revertData)));
 
-                // Lanzar error para que el componente UI muestre el alert al usuario
-                throw new Error(
-                    `SIN_STOCK: ${resultadoInventario.mensaje}`
-                );
+                // Lanzar error para que el componente UI muestre el alert
+                if (resultadoInventario.sinStock) {
+                    throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
+                } else {
+                    throw new Error(`ERROR_INVENTARIO: ${resultadoInventario.mensaje}`);
+                }
             }
         } catch (error) {
-            // Re-lanzar errores de stock para que el componente los maneje con alert
-            if (error.message?.startsWith("SIN_STOCK:")) throw error;
-            // Otros errores de inventario: solo loguear, no bloquear el flujo
+            // Re-lanzar errores para que el componente los maneje con alert
+            if (error.message?.startsWith("SIN_STOCK:") || error.message?.startsWith("ERROR_INVENTARIO:")) throw error;
+            // Otros errores técnicos imprevistos que no fueron capturados como resultadoInventario.exito = false
             console.error("Error intentando descontar inventario:", error);
+            throw error; // Re-throw para que el UI muestre alert genérico y no asuma éxito si colapsa acá
         }
     }
 };
