@@ -244,6 +244,7 @@ const normalizeOrder = (doc) => {
         products: productList,
         itemsAgregados,
         sizes: data.prendas,
+        notasDiseño: data.notasDiseño || data.notasDiseno || data.diseño?.notasDiseño || data.diseno?.notasDiseño || null,
         observations: data.observacion,
         comments: commentText,
         status: internalStatus,

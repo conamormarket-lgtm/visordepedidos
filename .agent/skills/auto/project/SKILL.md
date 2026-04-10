@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 39 gotchas, 60 conventions, 1 fixes."
+description: "Project for visordepedidos. 52 gotchas, 102 conventions, 1 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **164 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **293 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,19 @@ Auto-compiled from **164 real patterns** in **visordepedidos**. This skill is au
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 369 notes - Score threshold: >40 + > 370 notes - Score threshold: >40 - - **gotcha in agent-rule |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 354 notes - Score threshold: >40 + > 357 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 353 notes - Score threshold: >40 + > 354 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 337 notes - Score threshold: >40 + > 338 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 286 notes - Score threshold: >40 + > 289 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
+| gotcha in agent-rules.md | File updated (external): .brainsync/agent-rules.md  Content summary (85 lines): # Project Intelligen |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 270 notes - Score threshold: >40 + > 274 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 266 notes - Score threshold: >40 + > 268 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 264 notes - Score threshold: >40 + > 266 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 260 notes - Score threshold: >40 + > 264 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 258 notes - Score threshold: >40 + > 260 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 253 notes - Score threshold: >40 + > 254 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 240 notes - Score threshold: >40 + > 241 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 226 notes - Score threshold: >40 + > 231 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 146 notes - Score threshold: >40 + > 150 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 140 notes - Score threshold: >40 + > 146 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
@@ -55,8 +68,6 @@ Auto-compiled from **164 real patterns** in **visordepedidos**. This skill is au
 | Never use eval(), exec(), or Function() with user  | Never use eval(), exec(), or Function() with user input |
 | Don't hardcode API keys, passwords, database URLs, | Don't hardcode API keys, passwords, database URLs, or secrets anywhere |
 | Don't leave console.log, print(), debugger, or TOD | Don't leave console.log, print(), debugger, or TODO in production code |
-| Don't commit .env, secrets, API keys, or credentia | Don't commit .env, secrets, API keys, or credentials — add to .gitignore |
-| Never force push to main, master, or production br | Never force push to main, master, or production branches |
 
 ## 🔧 Problem Playbooks
 
@@ -92,102 +103,99 @@ Auto-compiled from **164 real patterns** in **visordepedidos**. This skill is au
 ## 📐 Conventions & Best Practices
 
 ### Project Conventions
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 235 notes | Score threshold: >40
-+ > 237 notes | Score threshold: >40
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
 
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 231 notes | Score threshold: >40
-+ > 235 notes | Score threshold: >40
-- - **gotcha in shared-con
-- 📐 **Optimized Score — confirmed 3x** — - > 218 notes | Score threshold: >40
-+ > 220 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 215 notes | Score threshold: >40
-+ > 217 notes | Score threshold: >40
+Content summary (314 lines):
 
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 211 notes | Score threshold: >40
-+ > 212 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 208 notes | Score threshold: >40
-+ > 210 notes | Score threshold: >40
 
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 200 notes | Score threshold: >40
-+ > 202 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 197 notes | Score threshold: >40
-+ > 199 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 193 notes | Score threshold: >40
-+ > 194 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 191 notes | Score threshold: >40
-+ > 192 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 186 notes | Score threshold: >40
-+ > 187 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 179 notes | Score threshold: >40
-+ > 180 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 161 notes | Score threshold: >40
-+ > 167 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 159 notes | Score threshold: >40
-+ > 160 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized GOTCHA — ensures atomic multi-step database operations — confirmed 3x** — - - gotcha in agent-rules.md
-+ - ⚠️ GOTCHA: Optimized Score — parallelizes async operations for spee
-- 📐 **Optimized Optimized — confirmed 3x** — - 
-+ - Optimized GOTCHA — ensures atomic multi-step database operations
-- ## Recent fixes
-+ 
+# Projec
+- 📐 **Strengthened types Patched** — - - problem-fix in .gitignore
++ - Patched security issue Kevin
 - 
-+ ##
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 114 notes | Score threshold: >40
-+ > 116 notes | Score threshold: >40
++ - problem-fix in .gitignore
+- ##
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 390 notes | Score threshold: >40
++ > 391 notes | Score threshold: >40
+- - Added JWT tokens authe
+- 📐 **what-changed in brainsync_auto.md** — - > 389 notes | Score threshold: >40
++ > 390 notes | Score threshold: >40
 
 📌 IDE AST Context: Modif
-- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 113 notes | Score threshold: >40
-+ > 114 notes | Score threshold: >40
-- ## Active: `.`
-+ ## Proj
-- 📐 **Optimized Optimized — confirmed 4x** — - 
-+ - Optimized Optimized
-- ## Recent fixes
-+ 
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 388 notes | Score threshold: >40
++ > 389 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 384 notes | Score threshold: >40
++ > 385 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 381 notes | Score threshold: >40
++ > 382 notes | Score threshold: >40
+- - Added JWT tokens authe
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 379 notes | Score threshold: >40
++ > 380 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 375 notes | Score threshold: >40
++ > 376 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 366 notes | Score threshold: >40
++ > 367 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Strengthened types Comprehensive** — - - problem-fix in .gitignore
++ - problem-fix in shared-context.json
 - 
-+ ## Recent fixes
-- - Patched security issue Kevi
-- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 99 notes | Score threshold: >40
-+ > 101 notes | Score threshold: >40
-- ## Known Fixes
-+ ## Proje
-- 📐 **Extract repeated class patterns into components** — Extract repeated class patterns into components
-- 📐 **Use responsive prefixes consistently (sm:, md:, lg:, xl:)** — Use responsive prefixes consistently (sm:, md:, lg:, xl:)
-- 📐 **Don't use arbitrary values when a utility class exists** — Don't use arbitrary values when a utility class exists
-- 📐 **Index Firestore queries for performance** — Index Firestore queries for performance
-- 📐 **Use batch writes for multiple document updates** — Use batch writes for multiple document updates
-- 📐 **Use Suspense and Error Boundaries for async operations** — Use Suspense and Error Boundaries for async operations
-- 📐 **Don't prop-drill more than 2 levels — use Context or state management** — Don't prop-drill more than 2 levels — use Context or state management
-- 📐 **Use useMemo for expensive computations, useCallback for stable references** — Use useMemo for expensive computations, useCallback for stable references
-- 📐 **Enable strict mode in tsconfig.json** — Enable strict mode in tsconfig.json
-- 📐 **Prefer Array methods (map, filter, reduce) over manual loops** — Prefer Array methods (map, filter, reduce) over manual loops
-- 📐 **Use template literals for string interpolation, not concatenation** — Use template literals for string interpolation, not concatenation
-- 📐 **Use optional chaining (?.) and nullish coalescing (??) for safe access** — Use optional chaining (?.) and nullish coalescing (??) for safe access
-- 📐 **Use const by default, let when reassignment needed, never var** — Use const by default, let when reassignment needed, never var
-- 📐 **Version your API from day 1 (/api/v1/)** — Version your API from day 1 (/api/v1/)
-- 📐 **Use consistent response format across all endpoints** — Use consistent response format across all endpoints
-- 📐 **Implement soft delete for important data — don't hard delete without confirmation** — Implement soft delete for important data — don't hard delete without confirmation
-- 📐 **Handle timezone correctly — store UTC, display in user's timezone** — Handle timezone correctly — store UTC, display in user's timezone
-- 📐 **Make layouts responsive from the start — mobile-first approach** — Make layouts responsive from the start — mobile-first approach
-- 📐 **Disable submit button during form submission — prevent double-submit** — Disable submit button during form submission — prevent double-submit
-- 📐 **Always add empty states ("No items yet" with call-to-action)** —
++ - problem-fix in .gitignor
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 362 notes | Score threshold: >40
++ > 363 notes | Score threshold: >40
+- - trade-off in shared-co
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 359 notes | Score threshold: >40
++ > 361 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 350 notes | Score threshold: >40
++ > 351 notes | Score threshold: >40
+- - Added JWT tokens authe
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 348 notes | Score threshold: >40
++ > 349 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Strengthened types Comprehensive** — - - problem-fix in agent-rules.md
++ - problem-fix in shared-context.json
+- - problem-fix in agent-ru
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 342 notes | Score threshold: >40
++ > 344 notes | Score threshold: >40
+- - what-changed in brains
+- 📐 **Optimized Score — confirmed 3x** — - > 338 notes | Score threshold: >40
++ > 340 notes | Score threshold: >40
+- - **⚠️ GOTCHA: Optimized
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
+
+Content summary (324 lines):
+
+
+# Projec
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 332 notes | Score threshold: >40
++ > 333 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 329 notes | Score threshold: >40
++ > 330 notes | Score threshold: >40
+- - Added JWT tokens authe
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 327 notes | Score threshold: >40
++ > 328 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 323 notes | Score threshold: >40
++ > 324 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 320 notes | Score threshold: >40
++ > 321 notes | Score threshold: >40
+- - Added JWT tokens authe
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 318 notes | Score threshold: >40
++ > 319 notes | Score thre
 
 ... [Truncated — see individual observations for full content]

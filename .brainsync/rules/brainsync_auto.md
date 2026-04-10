@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 241 notes | Score threshold: >40
+> 396 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,34 +20,25 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 226 notes | Score threshold: >40
-+ > 231 notes | Score threshold: 
-- **gotcha in shared-context.json** — -     }
-+     },
--   ]
-+     {
-- }
-+       "id": "f10b8ef8d71edf7a",
-+
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 146 notes | Score threshold: >40
-+ > 150 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 140 notes | Score threshold: >40
-+ > 146 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 134 notes | Score threshold: >40
-+ > 140 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 128 notes | Score threshold: >40
-+ > 134 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 369 notes | Score threshold: >40
++ > 370 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 354 notes | Score threshold: >40
++ > 357 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 353 notes | Score threshold: >40
++ > 354 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 337 notes | Score threshold: >40
++ > 338 notes | Score threshold: 
 
 ## Project Standards
 
+- Strengthened types Patched
+- Added JWT tokens authentication — confirmed 3x
+- what-changed in brainsync_auto.md
 - what-changed in brainsync_auto.md — confirmed 3x
-- Optimized Score — confirmed 3x
-- what-changed in shared-context.json
-- what-changed in shared-context.json — confirmed 3x
-- Optimized Score — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
-- Optimized Score — confirmed 3x
+- Added JWT tokens authentication — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
 
 ## Known Fixes
 
@@ -56,15 +47,15 @@
 ## Recent Decisions
 
 - Optimized Score — formalizes the data contract with explicit types
-- Optimized GOTCHA — ensures atomic multi-step database operations
+- Optimized Score — formalizes the data contract with explicit types
 - Optimized GOTCHA — ensures atomic multi-step database operations
 - Optimized GOTCHA — ensures atomic multi-step database operations
 
 ## Learned Patterns
 
 - Decision: Optimized Optimized (seen 2x)
-- Avoid: ⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed (seen 2x)
-- Avoid: ⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed (seen 3x)
+- Avoid: ⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed (seen 4x)
+- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 2x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 
@@ -343,3 +334,7 @@ You are a frontend engineer focused on transforming designs into clean React cod
 (truncated)
 
 
+## Available Tools (ON-DEMAND only)
+- `sys_core_01(q)` — Deep search when stuck
+- `sys_core_05(query)` — Full-text lookup
+> Context above IS your context. Do NOT call sys_core_14() at startup.

@@ -190,11 +190,17 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                     })()}
                 </div>
 
-                {/* Observations */}
-                {(order.observations || order.comments) && (
+                {/* Observations & Design Notes */}
+                {(order.notasDiseño || order.observations || order.comments) && (
                     <div className="bg-white/90 border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                        {order.notasDiseño && (
+                            <div className="bg-indigo-50/70 p-2.5 rounded-lg border border-indigo-100">
+                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-wider mb-1 block">Notas de Diseño</span>
+                                <p className="text-sm font-semibold text-indigo-900 leading-tight">{order.notasDiseño}</p>
+                            </div>
+                        )}
                         {order.observations && (
-                            <div>
+                            <div className={order.notasDiseño ? "pt-2 border-t border-slate-100" : ""}>
                                 <div className="flex items-center gap-1.5 mb-1 text-rose-500">
                                     <AlertTriangle size={14} />
                                     <span className="text-[10px] font-bold uppercase tracking-wider">Observaciones</span>
@@ -203,7 +209,7 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                             </div>
                         )}
                         {order.comments && (
-                            <div className="pt-2 border-t border-slate-100">
+                            <div className={(order.notasDiseño || order.observations) ? "pt-2 border-t border-slate-100" : ""}>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Comentarios</span>
                                 <p className="text-xs text-slate-600 italic">"{order.comments}"</p>
                             </div>
