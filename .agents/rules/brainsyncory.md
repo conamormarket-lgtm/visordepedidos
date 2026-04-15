@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 556 notes | Score threshold: >40
+> 562 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,11 +20,21 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
+- **gotcha in shared-context.json** — -     }
++     },
+-   ]
++     {
+- }
++       "id": "6feaae317a8d7dc2",
++
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 554 notes | Score threshold: >40
++ > 556 notes | Score threshold: 
 - **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 553 notes | Score threshold: >40
 + > 554 notes | Score threshold: 
 
 ## Project Standards
 
+- what-changed in shared-context.json — confirmed 3x
 - convention in shared-context.json
 - what-changed in shared-context.json — confirmed 3x
 - Patched security issue Kevin — confirmed 3x
@@ -32,7 +42,6 @@
 - what-changed in shared-context.json — confirmed 3x
 - Optimized Score — parallelizes async operations for speed — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
-- Patched security issue Kevin — confirmed 4x
 
 ## Known Fixes
 

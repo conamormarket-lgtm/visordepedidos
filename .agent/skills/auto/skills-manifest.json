@@ -1,7 +1,7 @@
 {
   "javascript": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.783Z",
+    "lastGenerated": "2026-04-15T13:31:04.790Z",
     "observationCount": 9,
     "skillCount": 0,
     "domain": "javascript",
@@ -13,7 +13,7 @@
   },
   "javascript-react": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.783Z",
+    "lastGenerated": "2026-04-15T13:31:04.790Z",
     "observationCount": 4,
     "skillCount": 0,
     "domain": "javascript-react",
@@ -24,18 +24,18 @@
   },
   "project": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.782Z",
-    "observationCount": 372,
+    "lastGenerated": "2026-04-15T13:31:04.789Z",
+    "observationCount": 375,
     "skillCount": 0,
     "domain": "project",
     "triggerGlobs": [
       "**/*"
     ],
-    "description": "Project for visordepedidos. 71 gotchas, 120 conventions, 2 fixes."
+    "description": "Project for visordepedidos. 72 gotchas, 120 conventions, 2 fixes."
   },
   "problem-fix": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.784Z",
+    "lastGenerated": "2026-04-15T13:31:04.791Z",
     "observationCount": 0,
     "skillCount": 1,
     "domain": "problem-fix",
@@ -46,8 +46,8 @@
   },
   "config": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.782Z",
-    "observationCount": 177,
+    "lastGenerated": "2026-04-15T13:31:04.789Z",
+    "observationCount": 180,
     "skillCount": 0,
     "domain": "config",
     "triggerGlobs": [
@@ -56,11 +56,11 @@
       "**/*.json",
       "**/*.toml"
     ],
-    "description": "Config for visordepedidos. 6 gotchas, 53 conventions, 20 fixes."
+    "description": "Config for visordepedidos. 7 gotchas, 53 conventions, 20 fixes."
   },
   "decision": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.783Z",
+    "lastGenerated": "2026-04-15T13:31:04.790Z",
     "observationCount": 0,
     "skillCount": 4,
     "domain": "decision",
@@ -71,7 +71,7 @@
   },
   "gotcha": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.784Z",
+    "lastGenerated": "2026-04-15T13:31:04.791Z",
     "observationCount": 0,
     "skillCount": 22,
     "domain": "gotcha",
@@ -82,7 +82,7 @@
   },
   "convention": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:21:04.783Z",
+    "lastGenerated": "2026-04-15T13:31:04.791Z",
     "observationCount": 0,
     "skillCount": 48,
     "domain": "convention",

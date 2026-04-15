@@ -38,8 +38,8 @@ export const generateZpl = (order) => {
     const zpl = [
         '^XA',
         '^CF0,30,30',
-        `^FO50,30^FDRecibe: ${s(order.envioNombres)}^FS`,
-        `^FO50,70^FD${s(order.envioApellidos)}^FS`,
+        `^FO50,30^FDRecibe: ^FS`,
+        `^FO50,70^FD${s(order.envioNombres)} ${s(order.envioApellidos)}^FS`,
         `^FO50,110^FDDNI: ${s(order.envioNumeroDocumento)}^FS`,
         `^FO50,150^FDTelefono: ${s(order.envioContacto)}^FS`,
         `^FO50,190^FDAgencia: ${s(order.agenciaEnvio)}^FS`,

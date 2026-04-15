@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 71 gotchas, 120 conventions, 2 fixes."
+description: "Project for visordepedidos. 72 gotchas, 120 conventions, 2 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **372 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **375 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,7 @@ Auto-compiled from **372 real patterns** in **visordepedidos**. This skill is au
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 554 notes - Score threshold: >40 + > 556 notes - Score threshold: >40 - ## 📝 NOTE: 1 uncommitte |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 553 notes - Score threshold: >40 + > 554 notes - Score threshold: >40 - ## 📝 NOTE: 1 uncommitte |
 | ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Patched security issue Kevin + - problem-fix in agent-rules.md - - Patched security issue Kevin  |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 539 notes - Score threshold: >40 + > 543 notes - Score threshold: >40 - - **⚠️ GOTCHA: Strengthe |
@@ -67,7 +68,6 @@ Auto-compiled from **372 real patterns** in **visordepedidos**. This skill is au
 | Always use key prop when rendering lists — use uni | Always use key prop when rendering lists — use unique ID, not array index |
 | Don't call setState directly inside render or useE | Don't call setState directly inside render or useEffect without deps array |
 | Don't mix CommonJS (require) and ESM (import) in s | Don't mix CommonJS (require) and ESM (import) in same project |
-| Don't use "any" type in TypeScript — define proper | Don't use "any" type in TypeScript — define proper types/interfaces |
 
 ## 🔧 Problem Playbooks
 
@@ -179,8 +179,6 @@ Content summary (318 lines):
 - 📐 **Optimized Score — confirmed 3x** — - > 405 notes | Score threshold: >40
 + > 407 notes | Score threshold: >40
 - - **⚠️ GOTCHA: Optimized
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
-
-Content summary (314 lines)
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_aut
 
 ... [Truncated — see individual observations for full content]
