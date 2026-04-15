@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 632 notes | Score threshold: >40
+> 644 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,6 +20,7 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
+- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - Fixed null crash in Falta — prevents null/undefined runtime crashe
 - **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 612 notes | Score threshold: >40
 + > 613 notes | Score threshold: 
 - **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 603 notes | Score threshold: >40
@@ -35,12 +36,10 @@
 - }
 +       "id": "179d89da7cf2dccf",
 +
-- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - problem-fix in agent-rules.md
-+ - Patched security issue Kevin
-- -
 
 ## Project Standards
 
+- Optimized Score — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
@@ -48,12 +47,12 @@
 - trade-off in shared-context.json — confirmed 3x
 - what-changed in shared-context.json — confirmed 4x
 - Patched security issue Kevin — confirmed 4x
-- what-changed in shared-context.json — confirmed 4x
 
 ## Known Fixes
 
 - ❌ - - Fixed null crash in orders — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
+- ❌ - - Fixed null crash in Falta — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
 - ❌ + - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 

@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 82 gotchas, 129 conventions, 5 fixes."
+description: "Project for visordepedidos. 83 gotchas, 130 conventions, 7 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **412 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **418 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,7 @@ Auto-compiled from **412 real patterns** in **visordepedidos**. This skill is au
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Fixed null crash in Falta — prevents null/undefined runtime crashes + - problem-fix in agent-rul |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 612 notes - Score threshold: >40 + > 613 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 603 notes - Score threshold: >40 + > 610 notes - Score threshold: >40 - - **gotcha in shared-con |
 | ⚠️ GOTCHA: Optimized GOTCHA | - - gotcha in shared-context.json + - ⚠️ GOTCHA: Optimized Score — parallelizes async operations for |
@@ -67,9 +68,37 @@ Auto-compiled from **412 real patterns** in **visordepedidos**. This skill is au
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 134 notes - Score threshold: >40 + > 140 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 128 notes - Score threshold: >40 + > 134 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 126 notes - Score threshold: >40 + > 128 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
-| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 118 notes - Score threshold: >40 + > 126 notes - Score threshold: >40 - - **gotcha in agent-rule |
 
 ## 🔧 Problem Playbooks
+
+### problem-fix in agent-rules.md
+- - Fixed null crash in Falta — prevents null/undefined runtime crashes
++ - problem-fix in agent-rules.md
+- - problem-fix in agent-rules.md
++ - Fixed null crash in Falta — prevents null/undefined runtime crashes
+- - Fixed null crash in FDDNI
++ - problem-fix in agent-rules.md
+- - problem-fix in shared-context.json
++ - Fixed null crash in FDDNI
+- - Fixed null crash in orders — prevents null/undefine
+
+**Actionable Steps:**
+1. Modified 1 files
+
+### problem-fix in agent-rules.md
+- - problem-fix in agent-rules.md
++ - Fixed null crash in Falta — prevents null/undefined runtime crashes
+- - Fixed null crash in FDDNI
++ - problem-fix in agent-rules.md
+- - problem-fix in shared-context.json
++ - Fixed null crash in FDDNI
+- - Fixed null crash in orders — prevents null/undefined runtime crashes
++ - problem-fix in shared-context.json
+- - problem-fix in ImageCarousel.jsx
++ - Fixed nu
+
+**Actionable Steps:**
+1. Modified 1 files
 
 ### problem-fix in agent-rules.md
 - - problem-fix in agent-rules.md
@@ -163,35 +192,10 @@ Auto-compiled from **412 real patterns** in **visordepedidos**. This skill is au
 ## 📐 Conventions & Best Practices
 
 ### Project Conventions
+- 📐 **problem-fix in agent-rules.md — confirmed 4x** — - - Fixed null crash in Falta — prevents null/undefined runtime crashes
++ - problem-fix in agent-rul
 - 📐 **Optimized Score — confirmed 3x** — - > 629 notes | Score threshold: >40
 + > 630 notes | Score threshold: >40
 - - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 627 notes | Score threshold: >40
-+ > 628 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 619 notes | Score threshold: >40
-+ > 621 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 618 notes | Score threshold: >40
-+ > 619 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **Optimized Score — confirmed 3x** — - > 589 notes | Score threshold: >40
-+ > 593 notes | Score threshold: >40
-- - **gotcha in agent-rule
-- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: problem-fix in agent-rules.md
-+ - gotcha in agent-rules.md
-- - ⚠️ GOTCHA: Optimized S
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
-
-Content summary (329 lines):
-
-
-# Projec
-- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 581 notes | Score threshold: >40
-+ > 583 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 *
 
 ... [Truncated — see individual observations for full content]

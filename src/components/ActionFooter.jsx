@@ -128,44 +128,44 @@ const ActionFooter = ({
                 : 'bg-slate-800 hover:bg-slate-700 text-white shadow-md active:scale-95';
 
     const printBtnContent = printStatus === 'loading'
-        ? <><Loader2 size={17} className="animate-spin" /><span>Imprimiendo...</span></>
+        ? <><Loader2 size={15} className="animate-spin" /><span>Imprimiendo...</span></>
         : printStatus === 'success'
-            ? <><CheckCircle size={17} /><span>¡Impreso!</span></>
+            ? <><CheckCircle size={15} /><span>¡Impreso!</span></>
             : printStatus === 'error'
-                ? <><AlertTriangle size={17} /><span>Error</span></>
-                : <><Printer size={17} /><span>Imprimir Ticket</span></>;
+                ? <><AlertTriangle size={15} /><span>Error</span></>
+                : <><Printer size={15} /><span>Ticket</span></>;
 
     return (
         <>
             <div className="bg-white/40 backdrop-blur-xl border border-white/40 p-6 flex flex-col gap-4 shadow-2xl z-20 relative rounded-3xl mx-4 mb-4 ring-1 ring-white/40">
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 items-center gap-4 w-full">
+                <div className="flex flex-row items-center justify-between gap-2 w-full">
 
                     {/* Pagination Info - Left */}
-                    <div className="flex items-center gap-4 px-2 justify-self-center xl:justify-self-start w-full xl:w-auto justify-between xl:justify-start">
-                        <div className="flex flex-col min-w-[100px] text-center xl:text-left">
-                            <span className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-0.5 opacity-80">Pedido</span>
-                            <span className="text-3xl font-black text-slate-900">
+                    <div className="flex items-center gap-2 px-1 shrink-0">
+                        <div className="flex flex-col min-w-[100px]">
+                            <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-0.5 opacity-80 whitespace-nowrap">Pedido</span>
+                            <span className="text-2xl font-black text-slate-900 leading-none">
                                 {currentOrderIndex + 1}
-                                <span className="text-slate-900 mx-1">/</span>
+                                <span className="text-slate-900 mx-0.5 font-normal opacity-40">/</span>
                                 {totalOrders}
                             </span>
                         </div>
                     </div>
 
                     {/* Operator Select - Custom Dropdown */}
-                    <div className="justify-self-center w-full max-w-md relative group" ref={dropdownRef}>
+                    <div className="flex-1 max-w-[280px] relative group" ref={dropdownRef}>
                         <div className={`absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl transition-opacity duration-300 ${isOperatorAssigned ? 'opacity-100' : 'opacity-0'}`}></div>
 
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="relative flex items-center w-full bg-white border-2 border-slate-100 hover:border-blue-300 rounded-2xl transition-all duration-300 shadow-sm group-hover:shadow-md overflow-hidden text-left"
                         >
-                            <div className={`flex items-center justify-center w-14 h-14 ${isOperatorAssigned ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'} transition-colors duration-300`}>
-                                {isOperatorAssigned ? <User size={24} strokeWidth={2.5} /> : <UserPlus size={24} strokeWidth={2.5} />}
+                            <div className={`flex items-center justify-center w-12 h-12 shrink-0 ${isOperatorAssigned ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'} transition-colors duration-300`}>
+                                {isOperatorAssigned ? <User size={20} strokeWidth={2.5} /> : <UserPlus size={20} strokeWidth={2.5} />}
                             </div>
-                            <div className="flex-1 px-4 flex flex-col justify-center h-14">
-                                <span className={`font-bold text-lg ${isOperatorAssigned ? 'text-slate-700' : 'text-slate-400'}`}>
+                            <div className="flex-1 px-3 flex flex-col justify-center h-12 overflow-hidden">
+                                <span className={`font-bold text-sm truncate ${isOperatorAssigned ? 'text-slate-700' : 'text-slate-400'}`}>
                                     {isOperatorAssigned ? assignedTo : "Sin Asignar"}
                                 </span>
                             </div>
@@ -198,15 +198,15 @@ const ActionFooter = ({
                     </div>
 
                     {/* Right column: Imprimir Ticket (empaquetado) + Deshacer */}
-                    <div className="justify-self-center xl:justify-self-end flex flex-row flex-wrap justify-center xl:justify-end items-center gap-2 mt-2 xl:mt-0 w-full xl:w-auto">
+                    <div className="flex items-center justify-end gap-1.5 shrink-0">
                         {currentStage === 'empaquetado' && (
                             <div className="relative group" ref={tagDropdownRef}>
                                 <button
                                     onClick={() => setIsTagOpen(!isTagOpen)}
-                                    className="px-4 py-3 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-sm font-bold text-slate-700 shadow-sm transition-all flex items-center gap-2 h-[46px]"
+                                    className="px-3 py-2 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-xs font-bold text-slate-700 shadow-sm transition-all flex items-center gap-1.5 h-[40px] whitespace-nowrap"
                                 >
                                     <span>Etiquetar</span>
-                                    <ChevronDown size={16} className={`transition-transform duration-300 ${isTagOpen ? 'rotate-180 text-blue-500' : 'text-slate-400'}`} />
+                                    <ChevronDown size={14} className={`transition-transform duration-300 ${isTagOpen ? 'rotate-180 text-blue-500' : 'text-slate-400'}`} />
                                 </button>
 
                                 {isTagOpen && (
@@ -252,7 +252,7 @@ const ActionFooter = ({
                                 type="button"
                                 onClick={handlePrint}
                                 disabled={!currentOrder || printStatus === 'loading'}
-                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 h-[46px] ${printBtnStyle}`}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 h-[40px] whitespace-nowrap ${printBtnStyle}`}
                             >
                                 {printBtnContent}
                             </button>
@@ -264,13 +264,13 @@ const ActionFooter = ({
                                 title={`Deshacer: Pedido #${lastAction.orderVisualId} regresa a ${lastAction.prevStage}`}
                                 className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-2xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 active:scale-95 transition-all duration-200 shadow-md group h-[46px]"
                             >
-                                <span className="text-[10px] font-black text-amber-700 tracking-wider uppercase flex items-center gap-1">
-                                    <RotateCcw size={12} className="text-amber-600 group-hover:rotate-[-30deg] transition-transform duration-300" />
-                                    Deshacer {undoCountdown}s
+                                <span className="text-[9px] font-black text-amber-700 tracking-tight uppercase flex flex-col items-center leading-none">
+                                    <RotateCcw size={14} className="text-amber-600 group-hover:rotate-[-30deg] transition-transform duration-300" />
+                                    <span>Deshacer {undoCountdown}s</span>
                                 </span>
                             </button>
                         ) : (
-                            currentStage !== 'empaquetado' && <div className="w-[68px]" />
+                            currentStage !== 'empaquetado' && <div className="w-[50px]" />
                         )}
                     </div>
                 </div>
