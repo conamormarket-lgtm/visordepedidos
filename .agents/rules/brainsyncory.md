@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 615 notes | Score threshold: >40
+> 632 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -41,14 +41,14 @@
 
 ## Project Standards
 
+- what-changed in brainsync_auto.md — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
+- what-changed in shared-context.json — confirmed 3x
+- Optimized Score — confirmed 3x
+- trade-off in shared-context.json — confirmed 3x
 - what-changed in shared-context.json — confirmed 4x
 - Patched security issue Kevin — confirmed 4x
 - what-changed in shared-context.json — confirmed 4x
-- Optimized Score — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
-- Optimized GOTCHA — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
-- Optimized Score — parallelizes async operations for speed — confirmed 3x
 
 ## Known Fixes
 

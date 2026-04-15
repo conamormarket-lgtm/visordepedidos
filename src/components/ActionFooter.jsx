@@ -33,7 +33,8 @@ const ActionFooter = ({
         "Falta polera",
         "Falta jogger",
         "Falta casaca",
-        "Falta polo"
+        "Falta polo",
+        "Falta gorra"
     ];
 
     const isOperatorAssigned = assignedTo && assignedTo !== 'Sin Asignar';
@@ -138,11 +139,11 @@ const ActionFooter = ({
         <>
             <div className="bg-white/40 backdrop-blur-xl border border-white/40 p-6 flex flex-col gap-4 shadow-2xl z-20 relative rounded-3xl mx-4 mb-4 ring-1 ring-white/40">
 
-                <div className="grid grid-cols-3 items-center gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-3 items-center gap-4 w-full">
 
                     {/* Pagination Info - Left */}
-                    <div className="flex items-center gap-4 px-2 justify-self-start">
-                        <div className="flex flex-col min-w-[100px]">
+                    <div className="flex items-center gap-4 px-2 justify-self-center xl:justify-self-start w-full xl:w-auto justify-between xl:justify-start">
+                        <div className="flex flex-col min-w-[100px] text-center xl:text-left">
                             <span className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-0.5 opacity-80">Pedido</span>
                             <span className="text-3xl font-black text-slate-900">
                                 {currentOrderIndex + 1}
@@ -197,7 +198,7 @@ const ActionFooter = ({
                     </div>
 
                     {/* Right column: Imprimir Ticket (empaquetado) + Deshacer */}
-                    <div className="justify-self-end flex flex-row items-center gap-2">
+                    <div className="justify-self-center xl:justify-self-end flex flex-row flex-wrap justify-center xl:justify-end items-center gap-2 mt-2 xl:mt-0 w-full xl:w-auto">
                         {currentStage === 'empaquetado' && (
                             <div className="relative group" ref={tagDropdownRef}>
                                 <button

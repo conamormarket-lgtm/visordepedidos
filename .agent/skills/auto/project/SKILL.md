@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 82 gotchas, 125 conventions, 5 fixes."
+description: "Project for visordepedidos. 82 gotchas, 129 conventions, 5 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **400 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **412 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -163,6 +163,20 @@ Auto-compiled from **400 real patterns** in **visordepedidos**. This skill is au
 ## 📐 Conventions & Best Practices
 
 ### Project Conventions
+- 📐 **Optimized Score — confirmed 3x** — - > 629 notes | Score threshold: >40
++ > 630 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 627 notes | Score threshold: >40
++ > 628 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 619 notes | Score threshold: >40
++ > 621 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 618 notes | Score threshold: >40
++ > 619 notes | Score threshold: >40
+- - what-changed in shared
 - 📐 **Optimized Score — confirmed 3x** — - > 589 notes | Score threshold: >40
 + > 593 notes | Score threshold: >40
 - - **gotcha in agent-rule
@@ -178,17 +192,6 @@ Content summary (329 lines):
 - 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 581 notes | Score threshold: >40
 + > 583 notes | Score threshold: >40
 - - what-changed in shared
-- 📐 **problem-fix in agent-rules.md — confirmed 4x** — - - Fixed null crash in FDDNI
-+ - problem-fix in agent-rules.md
-- - problem-fix in shared-context.js
-- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Strengthened types Fixed
-+ - ⚠️ GOTCHA: Optimized Score — parallelizes async operatio
-- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 530 notes | Score threshold: >40
-+ > 531 notes | Score threshold: >40
-- ## Active: `.`
-+ ## Proj
-- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Strengthened types Fixed
-+ - ⚠️ GOTCHA: Optimized GOTCHA
-- - gotcha in
+- 📐 *
 
 ... [Truncated — see individual observations for full content]
