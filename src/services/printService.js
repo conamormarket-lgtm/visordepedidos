@@ -37,13 +37,14 @@ export const generateZpl = (order) => {
     // Fuente: 50 dots. Última línea en Y=340 → termina en Y=390, margen de 10 dots
     const zpl = [
         '^XA',
-        '^CF0,50,30',
+        '^CF0,30,30',
         `^FO50,30^FDRecibe: ${s(order.envioNombres)}^FS`,
-        `^FO50,90^FD${s(order.envioApellidos)}^FS`,
-        `^FO50,160^FDDNI: ${s(order.envioNumeroDocumento)}^FS`,
-        `^FO50,220^FDTelefono: ${s(order.envioContacto)}^FS`,
-        `^FO50,280^FDAgencia: ${s(order.agenciaEnvio)}^FS`,
-        `^FO50,340^FDSede: ${s(order.envioDireccionLima)}^FS`,
+        `^FO50,70^FD${s(order.envioApellidos)}^FS`,
+        `^FO50,110^FDDNI: ${s(order.envioNumeroDocumento)}^FS`,
+        `^FO50,150^FDTelefono: ${s(order.envioContacto)}^FS`,
+        `^FO50,190^FDAgencia: ${s(order.agenciaEnvio)}^FS`,
+        `^FO50,230^FDSede:^FS`,
+        `^FO50,270^FD${s(order.envioDireccionLima)}^FS`,
         '^XZ',
     ].join('\n');
 

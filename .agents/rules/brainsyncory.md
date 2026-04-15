@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 396 notes | Score threshold: >40
+> 556 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,42 +20,35 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 369 notes | Score threshold: >40
-+ > 370 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 354 notes | Score threshold: >40
-+ > 357 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 353 notes | Score threshold: >40
-+ > 354 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 337 notes | Score threshold: >40
-+ > 338 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 553 notes | Score threshold: >40
++ > 554 notes | Score threshold: 
 
 ## Project Standards
 
-- Strengthened types Patched
-- Added JWT tokens authentication — confirmed 3x
-- what-changed in brainsync_auto.md
-- what-changed in brainsync_auto.md — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
-- Added JWT tokens authentication — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
+- convention in shared-context.json
+- what-changed in shared-context.json — confirmed 3x
+- Patched security issue Kevin — confirmed 3x
+- Optimized GOTCHA — confirmed 3x
+- what-changed in shared-context.json — confirmed 3x
+- Optimized Score — parallelizes async operations for speed — confirmed 3x
+- what-changed in shared-context.json — confirmed 3x
+- Patched security issue Kevin — confirmed 4x
 
 ## Known Fixes
 
+- ❌ - - Fixed null crash in orders — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
 
 ## Recent Decisions
 
-- Optimized Score — formalizes the data contract with explicit types
-- Optimized Score — formalizes the data contract with explicit types
-- Optimized GOTCHA — ensures atomic multi-step database operations
-- Optimized GOTCHA — ensures atomic multi-step database operations
+- Optimized Score — parallelizes async operations for speed
+- Optimized Score — parallelizes async operations for speed
 
 ## Learned Patterns
 
 - Decision: Optimized Optimized (seen 2x)
-- Avoid: ⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed (seen 4x)
-- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 2x)
+- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 4x)
+- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 5x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 

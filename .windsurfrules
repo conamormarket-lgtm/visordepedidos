@@ -1,5 +1,5 @@
 # visordepedidos — Project Memory
-# Auto-synced | 402 observations
+# Auto-synced | 569 observations
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
@@ -54,7 +54,4 @@ Example:
 > ℹ️ DO NOT call sys_core_14() or sys_core_08() at startup — context above IS your context.
 
 ---
-*Auto-synced | 2026-04-10*
-
-# BrainSync Intelligence (Auto-Synced)
-[BrainSync Rules](.brainsync/agent-rules.md)
+*Auto-synced | 2026-04-15*

@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 52 gotchas, 102 conventions, 1 fixes."
+description: "Project for visordepedidos. 71 gotchas, 120 conventions, 2 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **293 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **372 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,25 @@ Auto-compiled from **293 real patterns** in **visordepedidos**. This skill is au
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 553 notes - Score threshold: >40 + > 554 notes - Score threshold: >40 - ## 📝 NOTE: 1 uncommitte |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Patched security issue Kevin + - problem-fix in agent-rules.md - - Patched security issue Kevin  |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 539 notes - Score threshold: >40 + > 543 notes - Score threshold: >40 - - **⚠️ GOTCHA: Strengthe |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 531 notes - Score threshold: >40 + > 539 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Strengthened types Fixed | - - Patched security issue Kevin + - problem-fix in agent-rules.md - - Patched security issue Kevin  |
+| ⚠️ GOTCHA: Optimized GOTCHA | - - ⚠️ GOTCHA: Optimized GOTCHA + - ⚠️ GOTCHA: problem-fix in agent-rules.md - - ⚠️ GOTCHA: Strength |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Patched security issue Kevin + - problem-fix in shared-context.json - - Patched security issue K |
+| ⚠️ GOTCHA: Optimized GOTCHA | - - gotcha in agent-rules.md + - ⚠️ GOTCHA: Strengthened types Fixed - - gotcha in shared-context.js |
+| ⚠️ GOTCHA: Strengthened types Fixed | - - problem-fix in agent-rules.md + - problem-fix in shared-context.json - - Fixed null crash in ord |
+| gotcha in agent-rules.md | File updated (external): .brainsync/agent-rules.md  Content summary (85 lines): # Project Intelligen |
+| ⚠️ GOTCHA: Optimized GOTCHA | - - gotcha in agent-rules.md + - ⚠️ GOTCHA: Optimized Score - - ⚠️ GOTCHA: problem-fix in agent-rule |
+| ⚠️ GOTCHA: Optimized Score | - > 431 notes - Score threshold: >40 + > 440 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| gotcha in agent-rules.md | - - ⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed + - ⚠️ GOTCHA: problem-fix  |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Patched security issue Kevin + - problem-fix in agent-rules.md - - problem-fix in shared-context |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 422 notes - Score threshold: >40 + > 429 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 421 notes - Score threshold: >40 + > 422 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 403 notes - Score threshold: >40 + > 405 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 396 notes - Score threshold: >40 + > 403 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 395 notes - Score threshold: >40 + > 396 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 369 notes - Score threshold: >40 + > 370 notes - Score threshold: >40 - - **gotcha in agent-rule |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 354 notes - Score threshold: >40 + > 357 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 353 notes - Score threshold: >40 + > 354 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
@@ -49,27 +68,21 @@ Auto-compiled from **293 real patterns** in **visordepedidos**. This skill is au
 | Don't call setState directly inside render or useE | Don't call setState directly inside render or useEffect without deps array |
 | Don't mix CommonJS (require) and ESM (import) in s | Don't mix CommonJS (require) and ESM (import) in same project |
 | Don't use "any" type in TypeScript — define proper | Don't use "any" type in TypeScript — define proper types/interfaces |
-| Handle Promise rejections — always .catch() or try | Handle Promise rejections — always .catch() or try/catch with await |
-| Use === not == — strict equality prevents type coe | Use === not == — strict equality prevents type coercion bugs |
-| Agent: follow existing project patterns — don't in | Agent: follow existing project patterns — don't introduce a different style |
-| Agent: don't generate code with "any" type — defin | Agent: don't generate code with "any" type — define proper TypeScript types |
-| Agent: always handle loading/error states — don't  | Agent: always handle loading/error states — don't just render data |
-| Agent: don't use deprecated APIs — check library v | Agent: don't use deprecated APIs — check library version, use current API |
-| Agent: check existing code before creating utility | Agent: check existing code before creating utility functions — avoid duplicates |
-| Don't expose database errors to clients — map to u | Don't expose database errors to clients — map to user-friendly messages |
-| Always validate data on the SERVER — client valida | Always validate data on the SERVER — client validation is for UX only |
-| Don't fetch data inside render loops or hot paths | Don't fetch data inside render loops or hot paths |
-| Don't swallow errors silently — empty catch blocks | Don't swallow errors silently — empty catch blocks hide bugs |
-| Never store session tokens in localStorage — use h | Never store session tokens in localStorage — use httpOnly cookies |
-| Use parameterized queries — never string concatena | Use parameterized queries — never string concatenation for SQL |
-| Don't store passwords in plain text — use bcrypt,  | Don't store passwords in plain text — use bcrypt, argon2, or scrypt |
-| Don't use innerHTML — use textContent or sanitized | Don't use innerHTML — use textContent or sanitized rendering |
-| Sanitize ALL user input before database queries —  | Sanitize ALL user input before database queries — prevent SQL injection |
-| Never use eval(), exec(), or Function() with user  | Never use eval(), exec(), or Function() with user input |
-| Don't hardcode API keys, passwords, database URLs, | Don't hardcode API keys, passwords, database URLs, or secrets anywhere |
-| Don't leave console.log, print(), debugger, or TOD | Don't leave console.log, print(), debugger, or TODO in production code |
 
 ## 🔧 Problem Playbooks
+
+### problem-fix in agent-rules.md
+- - problem-fix in shared-context.json
++ - Patched security issue Kevin
+- - Fixed null crash in orders — prevents null/undefined runtime crashes
++ - problem-fix in shared-context.json
+- - problem-fix in ImageCarousel.jsx
++ - Fixed null crash in orders — prevents null/undefined runtime crashes
+
+📌 IDE AST Context: Modified symbols likely include [# Project Intelligence (auto-generated), # Intellect
+
+**Actionable Steps:**
+1. Modified 1 files
 
 ### Patched security issue Optimized
 - 
@@ -103,99 +116,71 @@ Auto-compiled from **293 real patterns** in **visordepedidos**. This skill is au
 ## 📐 Conventions & Best Practices
 
 ### Project Conventions
+- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Strengthened types Fixed
++ - ⚠️ GOTCHA: Optimized Score — parallelizes async operatio
+- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 530 notes | Score threshold: >40
++ > 531 notes | Score threshold: >40
+- ## Active: `.`
++ ## Proj
+- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Strengthened types Fixed
++ - ⚠️ GOTCHA: Optimized GOTCHA
+- - gotcha in agent-rules.md
+- 📐 **Optimized Score — confirmed 3x** — - > 501 notes | Score threshold: >40
++ > 502 notes | Score threshold: >40
+- - Optimized Score — conf
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 499 notes | Score threshold: >40
++ > 501 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 493 notes | Score threshold: >40
++ > 495 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 484 notes | Score threshold: >40
++ > 487 notes | Score threshold: >40
+- +       "id": "6fca83617
+- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 469 notes | Score threshold: >40
++ > 474 notes | Score threshold: >40
+- - **⚠️ GOTCHA: Optimized
+- 📐 **Optimized Score — confirmed 3x** — - > 468 notes | Score threshold: >40
++ > 469 notes | Score threshold: >40
+- - Optimized Score — conf
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 466 notes | Score threshold: >40
++ > 467 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 460 notes | Score threshold: >40
++ > 462 notes | Score threshold: >40
+
+📌 IDE AST Context: Modif
+- 📐 **Optimized Score — confirmed 3x** — - > 456 notes | Score threshold: >40
++ > 457 notes | Score threshold: >40
+- - Optimized GOTCHA — con
+- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Optimized Score
++ - ⚠️ GOTCHA: Optimized GOTCHA
+- - gotcha in agent-rules.md
++ - ⚠️ G
 - 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
 
-Content summary (314 lines):
+Content summary (318 lines):
 
 
 # Projec
-- 📐 **Strengthened types Patched** — - - problem-fix in .gitignore
-+ - Patched security issue Kevin
-- 
-+ - problem-fix in .gitignore
-- ##
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 390 notes | Score threshold: >40
-+ > 391 notes | Score threshold: >40
-- - Added JWT tokens authe
-- 📐 **what-changed in brainsync_auto.md** — - > 389 notes | Score threshold: >40
-+ > 390 notes | Score threshold: >40
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 416 notes | Score threshold: >40
++ > 417 notes | Score threshold: >40
 
 📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 388 notes | Score threshold: >40
-+ > 389 notes | Score threshold: >40
+- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 413 notes | Score threshold: >40
++ > 414 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 411 notes | Score threshold: >40
++ > 412 notes | Score threshold: >40
 
 📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 384 notes | Score threshold: >40
-+ > 385 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 381 notes | Score threshold: >40
-+ > 382 notes | Score threshold: >40
-- - Added JWT tokens authe
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 379 notes | Score threshold: >40
-+ > 380 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 375 notes | Score threshold: >40
-+ > 376 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 366 notes | Score threshold: >40
-+ > 367 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Strengthened types Comprehensive** — - - problem-fix in .gitignore
-+ - problem-fix in shared-context.json
-- 
-+ - problem-fix in .gitignor
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 362 notes | Score threshold: >40
-+ > 363 notes | Score threshold: >40
-- - trade-off in shared-co
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 359 notes | Score threshold: >40
-+ > 361 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 350 notes | Score threshold: >40
-+ > 351 notes | Score threshold: >40
-- - Added JWT tokens authe
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 348 notes | Score threshold: >40
-+ > 349 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Strengthened types Comprehensive** — - - problem-fix in agent-rules.md
-+ - problem-fix in shared-context.json
-- - problem-fix in agent-ru
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 342 notes | Score threshold: >40
-+ > 344 notes | Score threshold: >40
-- - what-changed in brains
-- 📐 **Optimized Score — confirmed 3x** — - > 338 notes | Score threshold: >40
-+ > 340 notes | Score threshold: >40
+- 📐 **Optimized Score — confirmed 3x** — - > 405 notes | Score threshold: >40
++ > 407 notes | Score threshold: >40
 - - **⚠️ GOTCHA: Optimized
 - 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
 
-Content summary (324 lines):
-
-
-# Projec
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 332 notes | Score threshold: >40
-+ > 333 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 329 notes | Score threshold: >40
-+ > 330 notes | Score threshold: >40
-- - Added JWT tokens authe
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 327 notes | Score threshold: >40
-+ > 328 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 323 notes | Score threshold: >40
-+ > 324 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 320 notes | Score threshold: >40
-+ > 321 notes | Score threshold: >40
-- - Added JWT tokens authe
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 318 notes | Score threshold: >40
-+ > 319 notes | Score thre
+Content summary (314 lines)
 
 ... [Truncated — see individual observations for full content]
