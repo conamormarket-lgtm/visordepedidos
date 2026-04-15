@@ -1,19 +1,19 @@
 {
   "javascript": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.790Z",
-    "observationCount": 9,
+    "lastGenerated": "2026-04-15T15:36:46.751Z",
+    "observationCount": 10,
     "skillCount": 0,
     "domain": "javascript",
     "triggerGlobs": [
       "**/*.js",
       "**/*.jsx"
     ],
-    "description": "Javascript for visordepedidos. 1 fixes."
+    "description": "Javascript for visordepedidos. 2 fixes."
   },
   "javascript-react": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.790Z",
+    "lastGenerated": "2026-04-15T15:36:46.751Z",
     "observationCount": 4,
     "skillCount": 0,
     "domain": "javascript-react",
@@ -24,30 +24,30 @@
   },
   "project": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.789Z",
-    "observationCount": 375,
+    "lastGenerated": "2026-04-15T15:36:46.751Z",
+    "observationCount": 400,
     "skillCount": 0,
     "domain": "project",
     "triggerGlobs": [
       "**/*"
     ],
-    "description": "Project for visordepedidos. 72 gotchas, 120 conventions, 2 fixes."
+    "description": "Project for visordepedidos. 82 gotchas, 125 conventions, 5 fixes."
   },
   "problem-fix": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.791Z",
+    "lastGenerated": "2026-04-15T15:36:46.753Z",
     "observationCount": 0,
     "skillCount": 1,
     "domain": "problem-fix",
     "triggerGlobs": [
       "**/*"
     ],
-    "description": "Problem Fix for visordepedidos. 2 error→fix pairs."
+    "description": "Problem Fix for visordepedidos. 4 error→fix pairs."
   },
   "config": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.789Z",
-    "observationCount": 180,
+    "lastGenerated": "2026-04-15T15:36:46.750Z",
+    "observationCount": 207,
     "skillCount": 0,
     "domain": "config",
     "triggerGlobs": [
@@ -56,13 +56,13 @@
       "**/*.json",
       "**/*.toml"
     ],
-    "description": "Config for visordepedidos. 7 gotchas, 53 conventions, 20 fixes."
+    "description": "Config for visordepedidos. 8 gotchas, 60 conventions, 23 fixes."
   },
   "decision": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.790Z",
+    "lastGenerated": "2026-04-15T15:36:46.752Z",
     "observationCount": 0,
-    "skillCount": 4,
+    "skillCount": 5,
     "domain": "decision",
     "triggerGlobs": [
       "**/*"
@@ -71,9 +71,9 @@
   },
   "gotcha": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.791Z",
+    "lastGenerated": "2026-04-15T15:36:46.753Z",
     "observationCount": 0,
-    "skillCount": 22,
+    "skillCount": 27,
     "domain": "gotcha",
     "triggerGlobs": [
       "**/*"
@@ -82,9 +82,9 @@
   },
   "convention": {
     "enabled": true,
-    "lastGenerated": "2026-04-15T13:31:04.791Z",
+    "lastGenerated": "2026-04-15T15:36:46.752Z",
     "observationCount": 0,
-    "skillCount": 48,
+    "skillCount": 49,
     "domain": "convention",
     "triggerGlobs": [
       "**/*"

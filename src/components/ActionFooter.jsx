@@ -17,13 +17,24 @@ const ActionFooter = ({
     currentOrderId,
     currentOrder,
     sinImagen,
+    onTagSelect,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isTagOpen, setIsTagOpen] = useState(false);
     const [undoCountdown, setUndoCountdown] = useState(null);
     const [printStatus, setPrintStatus] = useState(null); // null | 'loading' | 'success' | 'error'
     const [printError, setPrintError] = useState('');
     const countdownRef = useRef(null);
     const dropdownRef = useRef(null);
+    const tagDropdownRef = useRef(null);
+
+    const TAG_OPTIONS = [
+        "Falta regalo",
+        "Falta polera",
+        "Falta jogger",
+        "Falta casaca",
+        "Falta polo"
+    ];
 
     const isOperatorAssigned = assignedTo && assignedTo !== 'Sin Asignar';
 
@@ -32,6 +43,9 @@ const ActionFooter = ({
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsOpen(false);
+            }
+            if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target)) {
+                setIsTagOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -183,13 +197,61 @@ const ActionFooter = ({
                     </div>
 
                     {/* Right column: Imprimir Ticket (empaquetado) + Deshacer */}
-                    <div className="justify-self-end flex flex-col items-end gap-2">
+                    <div className="justify-self-end flex flex-row items-center gap-2">
+                        {currentStage === 'empaquetado' && (
+                            <div className="relative group" ref={tagDropdownRef}>
+                                <button
+                                    onClick={() => setIsTagOpen(!isTagOpen)}
+                                    className="px-4 py-3 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-sm font-bold text-slate-700 shadow-sm transition-all flex items-center gap-2 h-[46px]"
+                                >
+                                    <span>Etiquetar</span>
+                                    <ChevronDown size={16} className={`transition-transform duration-300 ${isTagOpen ? 'rotate-180 text-blue-500' : 'text-slate-400'}`} />
+                                </button>
+
+                                {isTagOpen && (
+                                    <div className="absolute bottom-full right-0 mb-3 w-48 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-black/5 animate-slide-up-fade z-30 flex flex-col overflow-hidden">
+                                        <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">
+                                            Etiquetas
+                                        </div>
+                                        {TAG_OPTIONS.map((tag) => (
+                                            <button
+                                                key={tag}
+                                                onClick={() => {
+                                                    onTagSelect?.(tag);
+                                                    setIsTagOpen(false);
+                                                }}
+                                                className={`w-full px-4 py-3 text-left font-bold transition-colors flex items-center justify-between text-sm
+                                                    ${currentOrder?.etiquetaEmpaquetado === tag
+                                                        ? 'bg-rose-50 text-rose-700'
+                                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                                    }`}
+                                            >
+                                                {tag}
+                                                {currentOrder?.etiquetaEmpaquetado === tag && <CheckCircle size={16} className="text-rose-600 shrink-0" />}
+                                            </button>
+                                        ))}
+                                        {currentOrder?.etiquetaEmpaquetado && (
+                                            <button
+                                                onClick={() => {
+                                                    onTagSelect?.(null);
+                                                    setIsTagOpen(false);
+                                                }}
+                                                className="w-full px-4 py-2 border-t border-slate-100 text-xs font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 text-center uppercase tracking-wider"
+                                            >
+                                                Quitar etiqueta
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {currentStage === 'empaquetado' && (
                             <button
                                 type="button"
                                 onClick={handlePrint}
                                 disabled={!currentOrder || printStatus === 'loading'}
-                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${printBtnStyle}`}
+                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-200 h-[46px] ${printBtnStyle}`}
                             >
                                 {printBtnContent}
                             </button>
@@ -199,11 +261,12 @@ const ActionFooter = ({
                             <button
                                 onClick={handleUndo}
                                 title={`Deshacer: Pedido #${lastAction.orderVisualId} regresa a ${lastAction.prevStage}`}
-                                className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-2xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 active:scale-95 transition-all duration-200 shadow-md group"
+                                className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-2xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 active:scale-95 transition-all duration-200 shadow-md group h-[46px]"
                             >
-                                <RotateCcw size={22} className="text-amber-600 group-hover:rotate-[-30deg] transition-transform duration-300" />
-                                <span className="text-[10px] font-black text-amber-700 tracking-wider uppercase">Deshacer</span>
-                                <span className="text-[10px] font-bold text-amber-500">{undoCountdown}s</span>
+                                <span className="text-[10px] font-black text-amber-700 tracking-wider uppercase flex items-center gap-1">
+                                    <RotateCcw size={12} className="text-amber-600 group-hover:rotate-[-30deg] transition-transform duration-300" />
+                                    Deshacer {undoCountdown}s
+                                </span>
                             </button>
                         ) : (
                             currentStage !== 'empaquetado' && <div className="w-[68px]" />

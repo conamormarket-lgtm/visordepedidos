@@ -1,6 +1,6 @@
 ---
 name: problem-fix
-description: "Problem Fix for visordepedidos. 2 error→fix pairs."
+description: "Problem Fix for visordepedidos. 4 error→fix pairs."
 domain: problem-fix
 composesFrom:
   - fix
@@ -21,7 +21,9 @@ Auto-compiled from **1 real patterns** in **visordepedidos**. This skill is auto
 | Error Pattern | Fix | Seen |
 |-------|-----|------|
 | `- - Fixed null crash in orders — prevents null/und` | problem-fix in agent-rules.md | 9x |
+| `- - Fixed null crash in FDDNI` | problem-fix in agent-rules.md | 6x |
 | `const [failed, setFailed] = useState(false);` | problem-fix in ImageCarousel.jsx | 2x |
+| `+ - Fixed null crash in FDDNI` | problem-fix in agent-rules.md | 2x |
 
 ## 📐 Conventions & Best Practices
 

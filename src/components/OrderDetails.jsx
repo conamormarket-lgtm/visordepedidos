@@ -15,6 +15,14 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Orden de Producción</span>
                         <h2 className="text-3xl font-bold text-slate-800 tracking-tight">#{order.orderId}</h2>
                     </div>
+
+                    {order.etiquetaEmpaquetado && (
+                        <div className="flex-1 flex justify-center mt-2 mx-4">
+                            <span className="px-4 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-black ring-2 ring-rose-500 shadow-sm uppercase tracking-wider text-center">
+                                {order.etiquetaEmpaquetado}
+                            </span>
+                        </div>
+                    )}
                     <div className="flex flex-col items-end gap-1">
                         {/* Número de Cola */}
                         {order.numeroColaDisplay != null && (

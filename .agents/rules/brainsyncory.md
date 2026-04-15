@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 562 notes | Score threshold: >40
+> 615 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,44 +20,55 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 612 notes | Score threshold: >40
++ > 613 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 603 notes | Score threshold: >40
++ > 610 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized GOTCHA** — - - gotcha in shared-context.json
++ - ⚠️ GOTCHA: Optimized Score — par
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 600 notes | Score threshold: >40
++ > 603 notes | Score threshold: 
 - **gotcha in shared-context.json** — -     }
 +     },
 -   ]
 +     {
 - }
-+       "id": "6feaae317a8d7dc2",
++       "id": "179d89da7cf2dccf",
 +
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 554 notes | Score threshold: >40
-+ > 556 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 553 notes | Score threshold: >40
-+ > 554 notes | Score threshold: 
+- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - problem-fix in agent-rules.md
++ - Patched security issue Kevin
+- -
 
 ## Project Standards
 
+- what-changed in shared-context.json — confirmed 4x
+- Patched security issue Kevin — confirmed 4x
+- what-changed in shared-context.json — confirmed 4x
+- Optimized Score — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
-- convention in shared-context.json
-- what-changed in shared-context.json — confirmed 3x
-- Patched security issue Kevin — confirmed 3x
 - Optimized GOTCHA — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
 - Optimized Score — parallelizes async operations for speed — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
 
 ## Known Fixes
 
 - ❌ - - Fixed null crash in orders — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
+- ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
+- ❌ + - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 
 ## Recent Decisions
 
+- Optimized Score — parallelizes async operations for speed
+- Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 
 ## Learned Patterns
 
 - Decision: Optimized Optimized (seen 2x)
-- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 4x)
 - Always: what-changed in brainsync_auto.md — confirmed 3x (seen 5x)
+- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 6x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 

@@ -264,6 +264,7 @@ const normalizeOrder = (doc) => {
         envioContacto: data.envioContacto || '',
         agenciaEnvio: data.agenciaEnvio || '',
         envioDireccionLima: data.envioDireccionLima || '',
+        etiquetaEmpaquetado: data.etiquetaEmpaquetado || null,
         // ── Cobranza ──────────────────────────────────────────────────
         cobranza: data.cobranza || null,
     };
@@ -766,5 +767,15 @@ export const saveAgenciaData = async (orderId, { agencia, origen, destino, merca
     securityMonitor.registerOperation(1);
     await updateDoc(orderRef, updateData);
     console.log(`[Agencia] Pedido ${orderId} → agencia guardada:`, updateData);
+};
+
+export const updateOrderTag = async (orderId, tagValue) => {
+    const realIds = getAllRealIds(orderId);
+    const updateData = {
+        etiquetaEmpaquetado: tagValue || null
+    };
+
+    securityMonitor.registerOperation(realIds.length);
+    await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
 };
 

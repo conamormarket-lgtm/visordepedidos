@@ -6,7 +6,7 @@ import ImageCarousel from './components/ImageCarousel';
 import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
-import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage } from './services/orders';
+import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { STAGES } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 // Assuming Search is imported from a library like lucide-react or similar
@@ -244,6 +244,16 @@ function App() {
         }
     };
 
+    const handleTagSelect = async (tagValue) => {
+        const currentOrder = filteredOrders[currentIndex];
+        if (!currentOrder) return;
+        try {
+            await updateOrderTag(currentOrder.id, tagValue);
+        } catch (err) {
+            console.error('[App] Error al actualizar etiqueta:', err);
+        }
+    };
+
     const handleComplete = async () => {
         const currentOrder = filteredOrders[currentIndex];
         if (!currentOrder) return;
@@ -381,6 +391,7 @@ function App() {
                     onUndo={handleUndo}
                     onWholesale={handleWholesale}
                     onBox={handleBox}
+                    onTagSelect={handleTagSelect}
                     lastAction={lastAction}
                     assignedTo={currentOrder?.[currentStage]?.operador}
                     currentOrderId={currentOrder?.id}

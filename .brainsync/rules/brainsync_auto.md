@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 562 notes | Score threshold: >40
+> 615 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,44 +20,55 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 612 notes | Score threshold: >40
++ > 613 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 603 notes | Score threshold: >40
++ > 610 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized GOTCHA** — - - gotcha in shared-context.json
++ - ⚠️ GOTCHA: Optimized Score — par
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 600 notes | Score threshold: >40
++ > 603 notes | Score threshold: 
 - **gotcha in shared-context.json** — -     }
 +     },
 -   ]
 +     {
 - }
-+       "id": "6feaae317a8d7dc2",
++       "id": "179d89da7cf2dccf",
 +
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 554 notes | Score threshold: >40
-+ > 556 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 553 notes | Score threshold: >40
-+ > 554 notes | Score threshold: 
+- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - problem-fix in agent-rules.md
++ - Patched security issue Kevin
+- -
 
 ## Project Standards
 
+- what-changed in shared-context.json — confirmed 4x
+- Patched security issue Kevin — confirmed 4x
+- what-changed in shared-context.json — confirmed 4x
+- Optimized Score — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
-- convention in shared-context.json
-- what-changed in shared-context.json — confirmed 3x
-- Patched security issue Kevin — confirmed 3x
 - Optimized GOTCHA — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
 - Optimized Score — parallelizes async operations for speed — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
 
 ## Known Fixes
 
 - ❌ - - Fixed null crash in orders — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
+- ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
+- ❌ + - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 
 ## Recent Decisions
 
+- Optimized Score — parallelizes async operations for speed
+- Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 
 ## Learned Patterns
 
 - Decision: Optimized Optimized (seen 2x)
-- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 4x)
 - Always: what-changed in brainsync_auto.md — confirmed 3x (seen 5x)
+- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 6x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 
@@ -298,41 +309,6 @@ Reference these guidelines when:
 - `ui-safe-area-scroll` - Handle safe areas in ScrollViews
 - `ui-scrollview-content-inset` - Use contentInset for headers
 - `ui-menus` - Use native context m...
-(truncated)
-
-
-### 📚 Core Framework Rules: [google-labs-code/react-components]
-# Stitch to React Components
-
-You are a frontend engineer focused on transforming designs into clean React code. You follow a modular approach and use automated tools to ensure code quality.
-
-## Retrieval and networking
-1. **Namespace discovery**: Run `list_tools` to find the Stitch MCP prefix. Use this prefix (e.g., `stitch:`) for all subsequent calls.
-2. **Metadata fetch**: Call `[prefix]:get_screen` to retrieve the design JSON.
-3. **Check for existing designs**: Before downloading, check if `.stitch/designs/{page}.html` and `.stitch/designs/{page}.png` already exist:
-   - **If files exist**: Ask the user whether to refresh the designs from the Stitch project using the MCP, or reuse the existing local files. Only re-download if the user confirms.
-   - **If files do not exist**: Proceed to step 4.
-4. **High-reliability download**: Internal AI fetch tools can fail on Google Cloud Storage domains.
-   - **HTML**: `bash scripts/fetch-stitch.sh "[htmlCode.downloadUrl]" ".stitch/designs/{page}.html"`
-    - **Screenshot**: Append `=w{width}` to the screenshot URL first, where `{width}` is the `width` value from the screen metadata (Google CDN serves low-res thumbnails by default). Then run: `bash scripts/fetch-stitch.sh "[screenshot.downloadUrl]=w{width}" ".stitch/designs/{page}.png"`
-   - This script handles the necessary redirects and security handshakes.
-5. **Visual audit**: Review the downloaded screenshot (`.stitch/designs/{page}.png`) to confirm design intent and layout details.
-
-## Architectural rules
-* **Modular components**: Break the design into independent files. Avoid large, single-file outputs.
-* **Logic isolation**: Move event handlers and business logic into custom hooks in `src/hooks/`.
-* **Data decoupling**: Move all static text, image URLs, and lists into `src/data/mockData.ts`.
-* **Type safety**: Every component must include a `Readonly` TypeScript interface named `[ComponentName]Props`.
-* **Project specific**: Focus on the target project's needs and constraints. Leave Google license headers out of the generated React components.
-* **Style mapping**:
-    * Extract the `tailwind.config` from the HTML `<head>`.
-    * Sync these values with `resources/style-guide.json`.
-    * Use theme-mapped Tailwind classes instead of arbitrary hex codes.
-
-## Execution steps
-1. **Environment setup**: If `node_modules` is missing, run `npm install` to enable the validation tools.
-2. **Data layer**: Create `src/data/mockData.ts` based on the design content.
-3. **...
 (truncated)
 
 

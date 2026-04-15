@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 72 gotchas, 120 conventions, 2 fixes."
+description: "Project for visordepedidos. 82 gotchas, 125 conventions, 5 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **375 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **400 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,16 @@ Auto-compiled from **375 real patterns** in **visordepedidos**. This skill is au
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 612 notes - Score threshold: >40 + > 613 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 603 notes - Score threshold: >40 + > 610 notes - Score threshold: >40 - - **gotcha in shared-con |
+| ⚠️ GOTCHA: Optimized GOTCHA | - - gotcha in shared-context.json + - ⚠️ GOTCHA: Optimized Score — parallelizes async operations for |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 600 notes - Score threshold: >40 + > 603 notes - Score threshold: >40 - - **⚠️ GOTCHA: problem-f |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - problem-fix in agent-rules.md + - Patched security issue Kevin - - Fixed null crash in FDDNI + - |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 586 notes - Score threshold: >40 + > 589 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
+| gotcha in agent-rules.md | File updated (external): .brainsync/agent-rules.md  Content summary (86 lines): # Project Intelligen |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Fixed null crash in FDDNI + - problem-fix in agent-rules.md - - problem-fix in shared-context.js |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Fixed null crash in FDDNI + - problem-fix in agent-rules.md - - problem-fix in shared-context.js |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 556 notes - Score threshold: >40 + > 562 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 554 notes - Score threshold: >40 + > 556 notes - Score threshold: >40 - ## 📝 NOTE: 1 uncommitte |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 553 notes - Score threshold: >40 + > 554 notes - Score threshold: >40 - ## 📝 NOTE: 1 uncommitte |
 | ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Patched security issue Kevin + - problem-fix in agent-rules.md - - Patched security issue Kevin  |
@@ -58,18 +68,55 @@ Auto-compiled from **375 real patterns** in **visordepedidos**. This skill is au
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 128 notes - Score threshold: >40 + > 134 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 126 notes - Score threshold: >40 + > 128 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 118 notes - Score threshold: >40 + > 126 notes - Score threshold: >40 - - **gotcha in agent-rule |
-| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 116 notes - Score threshold: >40 + > 118 notes - Score threshold: >40 - - what-changed in shared |
-| gotcha in agent-rules.md | File updated (external): .brainsync/agent-rules.md  Content summary (72 lines): # Project Intelligen |
-| Don't mix Tailwind with inline styles | Don't mix Tailwind with inline styles |
-| Don't store sensitive data in client-accessible co | Don't store sensitive data in client-accessible collections |
-| Set Firestore security rules — never leave default | Set Firestore security rules — never leave default open rules |
-| Clean up effects — return cleanup function from us | Clean up effects — return cleanup function from useEffect |
-| Don't create components inside other components —  | Don't create components inside other components — causes remount on every render |
-| Always use key prop when rendering lists — use uni | Always use key prop when rendering lists — use unique ID, not array index |
-| Don't call setState directly inside render or useE | Don't call setState directly inside render or useEffect without deps array |
-| Don't mix CommonJS (require) and ESM (import) in s | Don't mix CommonJS (require) and ESM (import) in same project |
 
 ## 🔧 Problem Playbooks
+
+### problem-fix in agent-rules.md
+- - problem-fix in agent-rules.md
++ - Fixed null crash in FDDNI
+- - problem-fix in agent-rules.md
++ - problem-fix in shared-context.json
+- - problem-fix in agent-rules.md
++ - Fixed null crash in orders — prevents null/undefined runtime crashes
+- - Fixed null crash in FDDNI
++ - problem-fix in ImageCarousel.jsx
+- - problem-fix in shared-context.json
++ - problem-fix in ImageCarousel.jsx
+
+📌 IDE AST C
+
+**Actionable Steps:**
+1. Modified 1 files
+
+### problem-fix in agent-rules.md
+- - Fixed null crash in FDDNI
++ - problem-fix in agent-rules.md
+- - problem-fix in shared-context.json
++ - Fixed null crash in FDDNI
+- - problem-fix in agent-rules.md
++ - problem-fix in shared-context.json
+- - Fixed null crash in orders — prevents null/undefined runtime crashes
++ - problem-fix in agent-rules.md
+- - problem-fix in ImageCarousel.jsx
++ - Fixed null crash in orders — prevents null/und
+
+**Actionable Steps:**
+1. Modified 1 files
+
+### problem-fix in agent-rules.md
+- - problem-fix in shared-context.json
++ - Fixed null crash in FDDNI
+- - problem-fix in agent-rules.md
++ - problem-fix in shared-context.json
+- - Fixed null crash in orders — prevents null/undefined runtime crashes
++ - problem-fix in agent-rules.md
+- - problem-fix in ImageCarousel.jsx
++ - Fixed null crash in orders — prevents null/undefined runtime crashes
+
+📌 IDE AST Context: Modified symbols lik
+
+**Actionable Steps:**
+1. Modified 1 files
 
 ### problem-fix in agent-rules.md
 - - problem-fix in shared-context.json
@@ -116,6 +163,24 @@ Auto-compiled from **375 real patterns** in **visordepedidos**. This skill is au
 ## 📐 Conventions & Best Practices
 
 ### Project Conventions
+- 📐 **Optimized Score — confirmed 3x** — - > 589 notes | Score threshold: >40
++ > 593 notes | Score threshold: >40
+- - **gotcha in agent-rule
+- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: problem-fix in agent-rules.md
++ - gotcha in agent-rules.md
+- - ⚠️ GOTCHA: Optimized S
+- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
+
+Content summary (329 lines):
+
+
+# Projec
+- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 581 notes | Score threshold: >40
++ > 583 notes | Score threshold: >40
+- - what-changed in shared
+- 📐 **problem-fix in agent-rules.md — confirmed 4x** — - - Fixed null crash in FDDNI
++ - problem-fix in agent-rules.md
+- - problem-fix in shared-context.js
 - 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Strengthened types Fixed
 + - ⚠️ GOTCHA: Optimized Score — parallelizes async operatio
 - 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 530 notes | Score threshold: >40
@@ -124,61 +189,6 @@ Auto-compiled from **375 real patterns** in **visordepedidos**. This skill is au
 + ## Proj
 - 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Strengthened types Fixed
 + - ⚠️ GOTCHA: Optimized GOTCHA
-- - gotcha in agent-rules.md
-- 📐 **Optimized Score — confirmed 3x** — - > 501 notes | Score threshold: >40
-+ > 502 notes | Score threshold: >40
-- - Optimized Score — conf
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 499 notes | Score threshold: >40
-+ > 501 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 493 notes | Score threshold: >40
-+ > 495 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 484 notes | Score threshold: >40
-+ > 487 notes | Score threshold: >40
-- +       "id": "6fca83617
-- 📐 **Optimized Score — parallelizes async operations for speed — confirmed 3x** — - > 469 notes | Score threshold: >40
-+ > 474 notes | Score threshold: >40
-- - **⚠️ GOTCHA: Optimized
-- 📐 **Optimized Score — confirmed 3x** — - > 468 notes | Score threshold: >40
-+ > 469 notes | Score threshold: >40
-- - Optimized Score — conf
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 466 notes | Score threshold: >40
-+ > 467 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 460 notes | Score threshold: >40
-+ > 462 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 456 notes | Score threshold: >40
-+ > 457 notes | Score threshold: >40
-- - Optimized GOTCHA — con
-- 📐 **Optimized GOTCHA — confirmed 3x** — - - ⚠️ GOTCHA: Optimized Score
-+ - ⚠️ GOTCHA: Optimized GOTCHA
-- - gotcha in agent-rules.md
-+ - ⚠️ G
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_auto.md
-
-Content summary (318 lines):
-
-
-# Projec
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 416 notes | Score threshold: >40
-+ > 417 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Added JWT tokens authentication — confirmed 3x** — - > 413 notes | Score threshold: >40
-+ > 414 notes | Score threshold: >40
-- - what-changed in shared
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — - > 411 notes | Score threshold: >40
-+ > 412 notes | Score threshold: >40
-
-📌 IDE AST Context: Modif
-- 📐 **Optimized Score — confirmed 3x** — - > 405 notes | Score threshold: >40
-+ > 407 notes | Score threshold: >40
-- - **⚠️ GOTCHA: Optimized
-- 📐 **what-changed in brainsync_auto.md — confirmed 3x** — File updated (external): .brainsync/rules/brainsync_aut
+- - gotcha in
 
 ... [Truncated — see individual observations for full content]
