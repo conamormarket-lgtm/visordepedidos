@@ -265,6 +265,7 @@ const normalizeOrder = (doc) => {
         agenciaEnvio: data.agenciaEnvio || '',
         envioDireccionLima: data.envioDireccionLima || '',
         etiquetaEmpaquetado: data.etiquetaEmpaquetado || null,
+        clienteNumeroDocumento: data.clienteNumeroDocumento || data.envioNumeroDocumento || '',
         // ── Cobranza ──────────────────────────────────────────────────
         cobranza: data.cobranza || null,
     };

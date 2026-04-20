@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 644 notes | Score threshold: >40
+> 1135 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,39 +20,50 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
-- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - Fixed null crash in Falta — prevents null/undefined runtime crashe
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 612 notes | Score threshold: >40
-+ > 613 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 603 notes | Score threshold: >40
-+ > 610 notes | Score threshold: 
-- **⚠️ GOTCHA: Optimized GOTCHA** — - - gotcha in shared-context.json
-+ - ⚠️ GOTCHA: Optimized Score — par
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 600 notes | Score threshold: >40
-+ > 603 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1098 notes | Score threshold: >40
++ > 1101 notes | Score threshold
 - **gotcha in shared-context.json** — -     }
 +     },
 -   ]
 +     {
 - }
-+       "id": "179d89da7cf2dccf",
++       "id": "15e92bcba955fa93",
++
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1059 notes | Score threshold: >40
++ > 1062 notes | Score threshold
+- **gotcha in shared-context.json** — -     }
++     },
+-   ]
++     {
+- }
++       "id": "c2b64522eed6f0fb",
++
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1056 notes | Score threshold: >40
++ > 1059 notes | Score threshold
+- **gotcha in shared-context.json** — -     }
++     },
+-   ]
++     {
+- }
++       "id": "d15818803321c7ce",
 +
 
 ## Project Standards
 
-- Optimized Score — confirmed 3x
+- what-changed in shared-context.json — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
+- Optimized Score — confirmed 3x
+- what-changed in shared-context.json — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
+- Optimized Score — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
-- Optimized Score — confirmed 3x
-- trade-off in shared-context.json — confirmed 3x
-- what-changed in shared-context.json — confirmed 4x
-- Patched security issue Kevin — confirmed 4x
 
 ## Known Fixes
 
 - ❌ - - Fixed null crash in orders — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
-- ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 - ❌ - - Fixed null crash in Falta — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
+- ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
 - ❌ + - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 
@@ -66,8 +77,8 @@
 ## Learned Patterns
 
 - Decision: Optimized Optimized (seen 2x)
-- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 5x)
 - Always: what-changed in brainsync_auto.md — confirmed 3x (seen 6x)
+- Always: what-changed in brainsync_auto.md — confirmed 3x (seen 7x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 

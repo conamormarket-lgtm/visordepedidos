@@ -130,23 +130,24 @@ function App() {
 
         if (searchTerm) {
             const term = searchTerm.trim();
-            const isNumeric = /^\d+$/.test(term);
+            const termLower = term.toLowerCase();
+            const termClean = term.replace(/\s+/g, '');
+            const isNumeric = /^\d+$/.test(termClean);
 
             let filtered;
             if (isNumeric) {
-                const termLength = term.length;
+                const termLength = termClean.length;
                 filtered = stageOrders.filter(o => {
                     if (termLength <= 4) {
-                        return o.orderId && o.orderId.toString().includes(term);
+                        return o.orderId && o.orderId.toString().includes(termClean);
                     } else if (termLength >= 5 && termLength <= 8) {
-                        return o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(term);
+                        return o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(termClean);
                     } else {
-                        return o.phone && o.phone.toString().includes(term);
+                        return o.phone && o.phone.toString().replace(/\s+/g, '').includes(termClean);
                     }
                 });
             } else {
                 // Búsqueda de texto: por destino u observaciones
-                const termLower = term.toLowerCase();
                 filtered = stageOrders.filter(o =>
                     (o.destination && o.destination.toLowerCase().includes(termLower)) ||
                     (o.observations && o.observations.toLowerCase().includes(termLower)) ||
