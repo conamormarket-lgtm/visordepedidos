@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 1135 notes | Score threshold: >40
+> 1268 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,42 +20,27 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1098 notes | Score threshold: >40
-+ > 1101 notes | Score threshold
-- **gotcha in shared-context.json** — -     }
-+     },
--   ]
-+     {
-- }
-+       "id": "15e92bcba955fa93",
-+
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1059 notes | Score threshold: >40
-+ > 1062 notes | Score threshold
-- **gotcha in shared-context.json** — -     }
-+     },
--   ]
-+     {
-- }
-+       "id": "c2b64522eed6f0fb",
-+
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1056 notes | Score threshold: >40
-+ > 1059 notes | Score threshold
-- **gotcha in shared-context.json** — -     }
-+     },
--   ]
-+     {
-- }
-+       "id": "d15818803321c7ce",
-+
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1235 notes | Score threshold: >40
++ > 1239 notes | Score threshold
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1228 notes | Score threshold: >40
++ > 1235 notes | Score threshold
+- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - problem-fix in shared-context.json
++ - Patched security issue Kevi
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1203 notes | Score threshold: >40
++ > 1204 notes | Score threshold
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1179 notes | Score threshold: >40
++ > 1183 notes | Score threshold
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1178 notes | Score threshold: >40
++ > 1179 notes | Score threshold
 
 ## Project Standards
 
-- what-changed in shared-context.json — confirmed 3x
+- Strengthened types Fixed
 - what-changed in brainsync_auto.md — confirmed 3x
-- Optimized Score — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
+- Added JWT tokens authentication — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
-- Optimized Score — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
+- Added JWT tokens authentication — confirmed 3x
 - what-changed in brainsync_auto.md — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
 

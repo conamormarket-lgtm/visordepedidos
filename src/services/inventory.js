@@ -195,7 +195,8 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
             return { exito: true, mensaje: "Ya descontado previamente" };
         }
         if (error.message === "NO_PRENDAS") {
-            return { exito: true, mensaje: "No hay prendas para descontar" };
+            console.warn("[Inventario] El pedido no tiene prendas parseables — se bloquea el avance para evitar omitir descuento.");
+            return { exito: false, sinPrendas: true, mensaje: "No se encontraron prendas en el pedido para descontar del inventario" };
         }
         if (error.message?.startsWith("STOCK_INSUFICIENTE:")) {
             const detalle = error.message.replace("STOCK_INSUFICIENTE: ", "");

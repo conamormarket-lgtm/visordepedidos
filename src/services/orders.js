@@ -603,49 +603,47 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         }
     }
 
-    securityMonitor.registerOperation(realIds.length);
-    // Escribir en TODOS los docIds hermanos simultaneamente
-    await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
-
-    // DESCONTAR INVENTARIO al pasar de preparación → estampado
+    // ── DESCONTAR INVENTARIO antes de escribir en Firestore ────────────────────
+    // ORDEN CRÍTICO: validar y descontar el inventario PRIMERO.
+    // Si esto se hiciera después del updateDoc (como antes), una caída de
+    // red o cierre de la app entre los dos awaits dejaba el pedido en
+    // "En Estampado" sin stock descontado y sin forma de detectarlo.
+    // Al hacerlo primero: si falla, Firestore nunca recibe el avance y el
+    // pedido permanece en Preparación sin necesidad de revertir nada.
     if (newStatus === "estampado" && currentStage === "preparacion") {
-        try {
-            const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual);
+        const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual);
 
-            if (!resultadoInventario.exito) {
-                // ── REVERTIR: el pedido avanzó en Firestore pero el inventario falló ──
-                let estadoReverso = resultadoInventario.sinStock ? "En Pausa por Stock" : "Listo para Preparar";
-                const revertData = {
-                    estadoGeneral: estadoReverso,
-                    "preparacion.estado": "EN PROCESO",
-                    [`${newStatus}.fechaEntrada`]: null,
-                    [`${newStatus}.estado`]: null,
+        if (!resultadoInventario.exito) {
+            // El pedido AÚN ESTÁ en Preparación en Firestore (no escribimos nada todavía).
+            // Solo hay que marcar la pausa si corresponde.
+            if (resultadoInventario.sinStock) {
+                // Marcar como "En Pausa por Stock" para que sea visible en el Visor
+                await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), {
+                    estadoGeneral: "En Pausa por Stock",
+                    "preparacion.enPausa": true,
                     updatedAt: serverTimestamp(),
                     historialModificaciones: arrayUnion({
                         timestamp: new Date(),
                         usuarioId: "visor-pedidos",
                         usuarioEmail: operadorActual,
-                        accion: resultadoInventario.sinStock ? "Revertido a Pausa por Stock" : "Revertido por Error de Servidor",
-                        detalle: `Fallo al descontar inventario: ${resultadoInventario.mensaje}`,
+                        accion: "Bloqueado: Sin Stock",
+                        detalle: `No se pudo avanzar a Estampado — stock insuficiente: ${resultadoInventario.mensaje}`,
                     }),
-                };
-                await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), revertData)));
-
-                // Lanzar error para que el componente UI muestre el alert
-                if (resultadoInventario.sinStock) {
-                    throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
-                } else {
-                    throw new Error(`ERROR_INVENTARIO: ${resultadoInventario.mensaje}`);
-                }
+                })));
+                throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
+            } else if (resultadoInventario.sinPrendas) {
+                throw new Error(`SIN_PRENDAS: ${resultadoInventario.mensaje}`);
+            } else {
+                throw new Error(`ERROR_INVENTARIO: ${resultadoInventario.mensaje}`);
             }
-        } catch (error) {
-            // Re-lanzar errores para que el componente los maneje con alert
-            if (error.message?.startsWith("SIN_STOCK:") || error.message?.startsWith("ERROR_INVENTARIO:")) throw error;
-            // Otros errores técnicos imprevistos que no fueron capturados como resultadoInventario.exito = false
-            console.error("Error intentando descontar inventario:", error);
-            throw error; // Re-throw para que el UI muestre alert genérico y no asuma éxito si colapsa acá
         }
+        // Inventario descontado exitosamente → continuar con el avance de Firestore
     }
+
+    securityMonitor.registerOperation(realIds.length);
+    // Escribir en TODOS los docIds hermanos simultaneamente
+    // (esto solo llega si el inventario ya fue descontado correctamente)
+    await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
 };
 
 /**

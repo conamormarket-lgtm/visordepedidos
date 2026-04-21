@@ -301,7 +301,16 @@ function App() {
                         `${detalle}\n\n` +
                         `El pedido ha sido movido automáticamente a "En Pausa por Stock".`
                     );
-                    setLastAction(null); // No hay nada que deshacer (Firestore ya revirtió)
+                    setLastAction(null);
+                } else if (err.message?.startsWith('SIN_PRENDAS:')) {
+                    // El pedido volvió a Preparación automáticamente
+                    alert(
+                        `⚠️ PRENDAS NO DETECTADAS — Pedido #${currentOrder.orderId}\n\n` +
+                        `No se encontraron prendas en este pedido para descontar del inventario.\n\n` +
+                        `Por favor verifica que el campo de prendas/tallas esté correctamente rellenado en el ERP antes de volver a avanzarlo.\n\n` +
+                        `El pedido ha sido devuelto a "Listo para Preparar".`
+                    );
+                    setLastAction(null);
                 } else {
                     console.error('[App] Error al completar etapa:', err);
                     alert(`Error al completar la etapa: ${err.message}`);
