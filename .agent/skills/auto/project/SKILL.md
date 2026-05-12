@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 129 gotchas, 243 conventions, 45 fixes."
+description: "Project for visordepedidos. 141 gotchas, 272 conventions, 46 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **825 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **931 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -18,6 +18,18 @@ Auto-compiled from **825 real patterns** in **visordepedidos**. This skill is au
 
 | ❌ Don't | Details |
 |----------|----------|
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1400 notes - Score threshold: >40 + > 1402 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimiz |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1396 notes - Score threshold: >40 + > 1398 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimiz |
+| ⚠️ GOTCHA: Optimized Project — parallelizes async  | - - **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1324 notes - Scor |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1374 notes - Score threshold: >40 + > 1377 notes - Score threshold: >40 - ## Active: `src/servic |
+| gotcha in agent-rules.md | File updated (external): .brainsync/agent-rules.md  Content summary (87 lines): # Project Intelligen |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1334 notes - Score threshold: >40 + > 1336 notes - Score threshold: >40 - - **⚠️ GOTCHA: problem |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1327 notes - Score threshold: >40 + > 1334 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimiz |
+| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Patched security issue Kevin + - problem-fix in agent-rules.md - - Fixed null crash in Conectand |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1324 notes - Score threshold: >40 + > 1325 notes - Score threshold: >40 - - **⚠️ GOTCHA: problem |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1282 notes - Score threshold: >40 + > 1286 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimiz |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1281 notes - Score threshold: >40 + > 1282 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimiz |
+| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1275 notes - Score threshold: >40 + > 1277 notes - Score threshold: >40 - ## Active: `src/servic |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1235 notes - Score threshold: >40 + > 1239 notes - Score threshold: >40 - - **⚠️ GOTCHA: problem |
 | ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 1228 notes - Score threshold: >40 + > 1235 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimiz |
 | ⚠️ GOTCHA: problem-fix in agent-rules.md | - - problem-fix in shared-context.json + - Patched security issue Kevin - - Fixed null crash in Rese |
@@ -56,20 +68,21 @@ Auto-compiled from **825 real patterns** in **visordepedidos**. This skill is au
 | ⚠️ GOTCHA: problem-fix in brainsync_auto.md | - > 681 notes - Score threshold: >40 + > 683 notes - Score threshold: >40 - - what-changed in brains |
 | ⚠️ GOTCHA: problem-fix in brainsync_auto.md | - > 678 notes - Score threshold: >40 + > 679 notes - Score threshold: >40 - - what-changed in shared |
 | ⚠️ GOTCHA: Optimized Score | - > 670 notes - Score threshold: >40 + > 672 notes - Score threshold: >40 - - what-changed in brains |
-| ⚠️ GOTCHA: Optimized Score | - > 667 notes - Score threshold: >40 + > 668 notes - Score threshold: >40 - - what-changed in shared |
-| ⚠️ GOTCHA: Optimized Score | - > 659 notes - Score threshold: >40 + > 661 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
-| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 657 notes - Score threshold: >40 + > 659 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
-| ⚠️ GOTCHA: Optimized Score | - > 655 notes - Score threshold: >40 + > 657 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
-| ⚠️ GOTCHA: Optimized Score | - > 653 notes - Score threshold: >40 + > 655 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
-| ⚠️ GOTCHA: Optimized Score | - > 644 notes - Score threshold: >40 + > 653 notes - Score threshold: >40 - - **⚠️ GOTCHA: problem-f |
-| ⚠️ GOTCHA: Optimized GOTCHA | - - ⚠️ GOTCHA: problem-fix in agent-rules.md + - gotcha in shared-context.json - - ⚠️ GOTCHA: Optimi |
-| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 632 notes - Score threshold: >40 + > 644 notes - Score threshold: >40 - - **⚠️ GOTCHA: Optimized |
-| ⚠️ GOTCHA: problem-fix in agent-rules.md | - - Fixed null crash in Falta — prevents null/undefined runtime crashes + - problem-fix in agent-rul |
-| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 612 notes - Score threshold: >40 + > 613 notes - Score threshold: >40 - ## Active: `.` + ## Proj |
-| ⚠️ GOTCHA: Optimized Score — parallelizes async op | - > 603 notes - Score threshold: >40 + > 610 notes - Score threshold: >40 - - **gotcha in shared-con |
-| ⚠️ GOTCHA: Optimized GOTCHA | - - gotcha in shared-context.json + - ⚠️ GOTCHA: Optimized Score — parallelizes async operations for |
 
 ## 🔧 Problem Playbooks
+
+### problem-fix in agent-rules.md
+- - Fixed null crash in Conectando — prevents null/undefined runtime crashes
++ - Patched security issue Kevin
+- - problem-fix in shared-context.json
++ - Fixed null crash in Conectando — prevents null/undefined runtime crashes
+- - Fixed null crash in Reset — avoids unnecessary re-renders in React
++ - problem-fix in shared-context.json
+- - problem-fix in ImageCarousel.jsx
++ - Fixed null crash in Res
+
+**Actionable Steps:**
+1. Modified 1 files
 
 ### Fixed null crash in Conectando — prevents null/undefined runtime crashes
 - import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
@@ -159,26 +172,6 @@ Auto-compiled from **825 real patterns** in **visordepedidos**. This skill is au
 - - problem-fix in shared-context.json
 + - Patched security issue Kevin
 
-📌 IDE AST Context: Modified symbols likely include [# Project Intelligence (auto-generated), # Intellectual Property & Architecture Rules, # 🧠 Agent Lessons]
-
-**Actionable Steps:**
-1. Modified 1 files
-
-### problem-fix in agent-rules.md
-- - Patched security issue Kevin
-+ - problem-fix in agent-rules.md
-- - problem-fix in shared-context.json
-+ - Patched security issue Kevin
-- - problem-fix in ImageCarousel.jsx
-+ - problem-fix in shared-context.json
-
-📌 IDE AST Context: Modified symbols likely include [# Project Intelligence (auto-generated), # Intellectual Property & Architecture Rules, # 🧠 Agent Lessons]
-
-**Actionable Steps:**
-1. Modified 1 files
-
-### problem-fix in agent-rules.md
-- - problem-fix in agent-rules.md
-+ - Patched secur
+📌 IDE AST Context: Modified symbols likely include [# Project Intelligence (auto-generated), # Intellectual Property & Arch
 
 ... [Truncated — see individual observations for full content]

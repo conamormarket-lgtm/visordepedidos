@@ -1,5 +1,27 @@
 import React, { useState } from 'react';
+import { Video } from 'lucide-react';
 import { convertDriveLink } from '../utils/drive';
+
+const formatFechaVideo = (fechaVideo) => {
+    if (!fechaVideo) return null;
+    if (typeof fechaVideo === 'object' && fechaVideo.seconds) {
+        return new Date(fechaVideo.seconds * 1000).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    if (typeof fechaVideo === 'string' && fechaVideo.trim()) {
+        // Formato "yyyy-mm-dd" — parsear como fecha local para evitar desfase de zona horaria
+        const parts = fechaVideo.trim().split('-');
+        if (parts.length === 3) {
+            const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        const d = new Date(fechaVideo);
+        if (!isNaN(d.getTime())) {
+            return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        return fechaVideo.trim();
+    }
+    return null;
+};
 
 const ImageItem = ({ img, idx }) => {
     const [failed, setFailed] = useState(false);
@@ -39,7 +61,9 @@ const ImageItem = ({ img, idx }) => {
     );
 };
 
-const ImageCarousel = ({ images }) => {
+const ImageCarousel = ({ images, fechaVideo }) => {
+    const fechaVideoLabel = formatFechaVideo(fechaVideo);
+
     if (!images || images.length === 0) {
         return (
             <div className="w-full xl:w-[70%] bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold h-[51vh] xl:h-full border-b xl:border-b-0 xl:border-r border-white/40 flex-shrink-0">
@@ -55,6 +79,13 @@ const ImageCarousel = ({ images }) => {
 
     return (
         <div className="w-full xl:w-[70%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[51vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
+            {/* Badge Fecha Video — esquina superior derecha del carrusel */}
+            {fechaVideoLabel && (
+                <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-600/90 backdrop-blur-sm shadow-lg shadow-violet-500/30 border border-violet-400/40">
+                    <Video size={11} className="text-violet-100 shrink-0" />
+                    <span className="text-[10px] font-black text-white uppercase tracking-wider leading-none">{fechaVideoLabel}</span>
+                </div>
+            )}
             {images.map((img, idx) => (
                 <ImageItem key={idx} img={img} idx={idx} />
             ))}

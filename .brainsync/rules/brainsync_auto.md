@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 1268 notes | Score threshold: >40
+> 1404 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,37 +20,40 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1235 notes | Score threshold: >40
-+ > 1239 notes | Score threshold
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1228 notes | Score threshold: >40
-+ > 1235 notes | Score threshold
-- **⚠️ GOTCHA: problem-fix in agent-rules.md** — - - problem-fix in shared-context.json
-+ - Patched security issue Kevi
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1203 notes | Score threshold: >40
-+ > 1204 notes | Score threshold
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1179 notes | Score threshold: >40
-+ > 1183 notes | Score threshold
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1178 notes | Score threshold: >40
-+ > 1179 notes | Score threshold
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1400 notes | Score threshold: >40
++ > 1402 notes | Score threshold
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1396 notes | Score threshold: >40
++ > 1398 notes | Score threshold
+- **⚠️ GOTCHA: Optimized Project — parallelizes async operations for speed** — - - **⚠️ GOTCHA: Optimized Score — parallelizes async operations for s
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1374 notes | Score threshold: >40
++ > 1377 notes | Score threshold
+- **gotcha in agent-rules.md** — File updated (external): .brainsync/agent-rules.md
+
+Content summary (8
+
+## Active: `src/services`
+
+- **Fixed null crash in FDDNI**
+- **what-changed in printService.js**
 
 ## Project Standards
 
-- Strengthened types Fixed
-- what-changed in brainsync_auto.md — confirmed 3x
+- what-changed in config.js — confirmed 3x
 - Added JWT tokens authentication — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
-- Added JWT tokens authentication — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
+- Optimized Score — confirmed 3x
 - what-changed in shared-context.json — confirmed 3x
+- what-changed in shared-context.json — confirmed 3x
+- Optimized Score — parallelizes async operations for speed — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
+- what-changed in brainsync_auto.md — confirmed 3x
 
 ## Known Fixes
 
 - ❌ - - Fixed null crash in orders — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ - - Fixed null crash in Falta — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
+- ❌ - - Fixed null crash in Conectando — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
-- ❌ + - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 
 ## Recent Decisions
 
@@ -99,31 +102,7 @@ Reference these guidelines when:
 
 ## Security Notes
 
-- Treat shell commands in these references as local developer operations. Review them before running, prefer version-pinned tooling, and avoid piping remote scripts directly to a shell.
-- Treat third-party libraries and plugins as dependencies that still require normal supply-chain controls: pin versions, verify provenance, and update through your standard review process.
-- Treat Re.Pack code splitting as first-party artifact delivery only. Remote chunks must come from trusted HTTPS origins you control and be pinned to the current app release.
-
-## Priority-Ordered Guidelines
-
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | FPS & Re-renders | CRITICAL | `js-*` |
-| 2 | Bundle Size | CRITICAL | `bundle-*` |
-| 3 | TTI Optimization | HIGH | `native-*`, `bundle-*` |
-| 4 | Native Performance | HIGH | `native-*` |
-| 5 | Memory Management | MEDIUM-HIGH | `js-*`, `native-*` |
-| 6 | Animations | MEDIUM | `js-*` |
-
-## Quick Reference
-
-### Optimization Workflow
-
-Follow this cycle for any performance issue: **Measure → Optimize → Re-measure → Validate**
-
-1. **Measure**: Capture baseline metrics (FPS, TTI, bundle size) before changes
-2. **Optimize**: Apply the targeted fix from the relevant reference
-3. **Re-measure**: Run the same measurement to get updated metrics
-...
+- Treat shell ...
 (truncated)
 
 
@@ -157,26 +136,7 @@ Reference these guidelines when:
 | File | Description |
 |------|-------------|
 | [upgrading-react-native.md][upgrading-react-native] | Router: choose the right upgrade path |
-| [upgrade-helper-core.md][upgrade-helper-core] | Core Upgrade Helper workflow and reliability gates |
-| [upgrading-dependencies.md][upgrading-dependencies] | Dependency compatibility checks and migration planning |
-| [react.md][react] | React and React 19 upgrade alignment rules |
-| [expo-sdk-upgrade.md][expo-sdk-upgrade] | Expo SDK-specific upgrade layer (conditional) |
-| [upgrade-verification.md][upgrade-verification] | Manual post-upgrade verification checklist |
-| [monorepo-singlerepo-targeting.md][monorepo-singlerepo-targeting] | Monorepo and single-repo app targeting and command scoping |
-
-## Problem → Skill Mapping
-
-| Problem | Start With |
-|---------|------------|
-| Need to upgrade React Native | [upgrade-helper-core.md][upgrade-helper-core] |
-| Need dependency risk triage and migration options | [upgrading-dependencies.md][upgrading-dependencies] |
-| Need React/React 19 package alignment | [react.md][react] |
-| Need workflow routing first | [upgrading-react-native.md][upgrading-react-native] |
-| Need Expo SDK-specific steps | [expo-sdk-upgrade.md][expo-sdk-upgrade] |
-| Need manual regression validation | [upgrade-verification.md][upgrade-verification] |
-| Need repo/app command scoping | [monorepo-singlerepo-targeting.md][monorepo-singlerepo-targeting] |
-
-[upgrading-react-native]: references/upgrading-react...
+| [upgrade-helper-core.md][upgrade-he...
 (truncated)
 
 
@@ -212,98 +172,7 @@ Reference these guidelines when:
 ### 1. Eliminating Waterfalls (CRITICAL)
 
 - `async-defer-await` - Move await into branches where actually used
-- `async-parallel` - Use Promise.all() for independent operations
-- `async-dependencies` - Use better-all for partial dependencies
-- `async-api-routes` - Start promises early, await late in API routes
-- `async-suspense-boundaries` - Use Suspense to stream content
-
-### 2. Bundle Size Optimization (CRITICAL)
-
-- `bundle-barrel-imports` - Import directly, avoid barrel files
-- `bundle-dynamic-imports` - Use next/dynamic for heavy components
-- `bundle-defer-third-party` - Load analytics/logging after hydration
-- `bundle-conditional` - Load modules only when feature is activated
-- `bundle-preload` - Preload on hover/focus for perceived speed
-
-### 3. Server-Side Performance (HIGH)
-
-- `server-auth-actions` - Authenticate server actions like API routes
-- `server-cache-react` - Use React.cache() for per-request deduplication
-- `server-cache-lru` - Use LRU cache for cross-request caching
-- `server-dedup-props` - Avoid duplicate serialization in RSC props
-- `server-hoist-static-io` - Hoist static I/O (fonts, logos) to module level
-- `server-serialization` - Minimize data passed to client components
-- `server-parallel-fetching` - Restructure components to parallelize fetches
-- `server-after-nonblocking` - Use after() for non-blocking operations
-
-### 4. Client-Side Data Fetching (MEDIUM-HIGH)
-
-- `c...
-(truncated)
-
-
-### 📚 Core Framework Rules: [vercel-labs/react-native-skills]
-# React Native Skills
-
-Comprehensive best practices for React Native and Expo applications. Contains
-rules across multiple categories covering performance, animations, UI patterns,
-and platform-specific optimizations.
-
-## When to Apply
-
-Reference these guidelines when:
-
-- Building React Native or Expo apps
-- Optimizing list and scroll performance
-- Implementing animations with Reanimated
-- Working with images and media
-- Configuring native modules or fonts
-- Structuring monorepo projects with native dependencies
-
-## Rule Categories by Priority
-
-| Priority | Category         | Impact   | Prefix               |
-| -------- | ---------------- | -------- | -------------------- |
-| 1        | List Performance | CRITICAL | `list-performance-`  |
-| 2        | Animation        | HIGH     | `animation-`         |
-| 3        | Navigation       | HIGH     | `navigation-`        |
-| 4        | UI Patterns      | HIGH     | `ui-`                |
-| 5        | State Management | MEDIUM   | `react-state-`       |
-| 6        | Rendering        | MEDIUM   | `rendering-`         |
-| 7        | Monorepo         | MEDIUM   | `monorepo-`          |
-| 8        | Configuration    | LOW      | `fonts-`, `imports-` |
-
-## Quick Reference
-
-### 1. List Performance (CRITICAL)
-
-- `list-performance-virtualize` - Use FlashList for large lists
-- `list-performance-item-memo` - Memoize list item components
-- `list-performance-callbacks` - Stabilize callback references
-- `list-performance-inline-objects` - Avoid inline style objects
-- `list-performance-function-references` - Extract functions outside render
-- `list-performance-images` - Optimize images in lists
-- `list-performance-item-expensive` - Move expensive work outside items
-- `list-performance-item-types` - Use item types for heterogeneous lists
-
-### 2. Animation (HIGH)
-
-- `animation-gpu-properties` - Animate only transform and opacity
-- `animation-derived-value` - Use useDerivedValue for computed animations
-- `animation-gesture-detector-press` - Use Gesture.Tap instead of Pressable
-
-### 3. Navigation (HIGH)
-
-- `navigation-native-navigators` - Use native stack and native tabs over JS navigators
-
-### 4. UI Patterns (HIGH)
-
-- `ui-expo-image` - Use expo-image for all images
-- `ui-image-gallery` - Use Galeria for image lightboxes
-- `ui-pressable` - Use Pressable over TouchableOpacity
-- `ui-safe-area-scroll` - Handle safe areas in ScrollViews
-- `ui-scrollview-content-inset` - Use contentInset for headers
-- `ui-menus` - Use native context m...
+- `a...
 (truncated)
 
 

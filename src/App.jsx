@@ -438,7 +438,7 @@ function App() {
                     {filteredOrders.length > 0 ? (
                         <>
                             {!sinImagen && (
-                                <ImageCarousel images={currentOrder?.images || []} />
+                                <ImageCarousel images={currentOrder?.images || []} fechaVideo={currentOrder?.fechaVideo} />
                             )}
                             <OrderDetails order={currentOrder} fullWidth={sinImagen} />
                         </>

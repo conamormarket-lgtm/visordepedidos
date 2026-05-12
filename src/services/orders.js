@@ -268,6 +268,8 @@ const normalizeOrder = (doc) => {
         clienteNumeroDocumento: data.clienteNumeroDocumento || data.envioNumeroDocumento || '',
         // ── Cobranza ──────────────────────────────────────────────────
         cobranza: data.cobranza || null,
+        // ── Fecha Video ───────────────────────────────────────────────
+        fechaVideo: data.fechaVideo || null,
     };
 
     // DEVOLVER OBJETO CON LLAVES ORDENADAS (Garantiza comparaciones consistentes)
