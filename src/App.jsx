@@ -248,8 +248,12 @@ function App() {
     const handleTagSelect = async (tagValue) => {
         const currentOrder = filteredOrders[currentIndex];
         if (!currentOrder) return;
+        const fieldName =
+            currentStage === STAGES.PREPARACION ? 'etiquetaPreparacion' :
+            currentStage === STAGES.ESTAMPADO    ? 'etiquetaEstampado'   :
+                                                   'etiquetaEmpaquetado';
         try {
-            await updateOrderTag(currentOrder.id, tagValue);
+            await updateOrderTag(currentOrder.id, fieldName, tagValue);
         } catch (err) {
             console.error('[App] Error al actualizar etiqueta:', err);
         }

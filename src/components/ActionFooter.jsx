@@ -28,14 +28,19 @@ const ActionFooter = ({
     const dropdownRef = useRef(null);
     const tagDropdownRef = useRef(null);
 
-    const TAG_OPTIONS = [
-        "Falta regalo",
-        "Falta polera",
-        "Falta jogger",
-        "Falta casaca",
-        "Falta polo",
-        "Falta gorra"
-    ];
+    const TAG_OPTIONS_BY_STAGE = {
+        preparacion: ["Falta de prenda", "Fallo en plantilla"],
+        estampado:   ["Fallo en estampado", "Falta de prenda"],
+        empaquetado: ["Falta regalo", "Falta polera", "Falta jogger", "Falta casaca", "Falta polo", "Falta gorra"],
+    };
+    const TAG_OPTIONS = TAG_OPTIONS_BY_STAGE[currentStage] || [];
+
+    const TAG_FIELD_BY_STAGE = {
+        preparacion: 'etiquetaPreparacion',
+        estampado:   'etiquetaEstampado',
+        empaquetado: 'etiquetaEmpaquetado',
+    };
+    const currentTagValue = currentOrder?.[TAG_FIELD_BY_STAGE[currentStage]] || null;
 
     const isOperatorAssigned = assignedTo && assignedTo !== 'Sin Asignar';
 
@@ -197,17 +202,23 @@ const ActionFooter = ({
                         )}
                     </div>
 
-                    {/* Right column: Imprimir Ticket (empaquetado) + Deshacer */}
+                    {/* Right column: botones de acción */}
                     <div className="flex items-center justify-end gap-1.5 shrink-0">
-                        {currentStage === 'empaquetado' && (
-                            <div className="relative group" ref={tagDropdownRef}>
-                                <button
-                                    onClick={() => setIsTagOpen(!isTagOpen)}
-                                    className="px-3 py-2 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-xs font-bold text-slate-700 shadow-sm transition-all flex items-center gap-1.5 h-[40px] whitespace-nowrap"
-                                >
-                                    <span>Etiquetar</span>
-                                    <ChevronDown size={14} className={`transition-transform duration-300 ${isTagOpen ? 'rotate-180 text-blue-500' : 'text-slate-400'}`} />
-                                </button>
+                        {/* Botón Etiquetar: visible en todas las etapas */}
+                        <div className="relative group" ref={tagDropdownRef}>
+                                {TAG_OPTIONS.length > 0 && (
+                                    <button
+                                        onClick={() => setIsTagOpen(!isTagOpen)}
+                                        className={`px-3 py-2 rounded-xl border-2 bg-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 h-[40px] whitespace-nowrap ${
+                                            currentTagValue
+                                                ? 'border-rose-400 text-rose-600 hover:border-rose-500'
+                                                : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                                        }`}
+                                    >
+                                        <span>Etiquetar</span>
+                                        <ChevronDown size={14} className={`transition-transform duration-300 ${isTagOpen ? 'rotate-180 text-blue-500' : 'text-slate-400'}`} />
+                                    </button>
+                                )}
 
                                 {isTagOpen && (
                                     <div className="absolute bottom-full right-0 mb-3 w-48 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-black/5 animate-slide-up-fade z-30 flex flex-col overflow-hidden">
@@ -222,16 +233,16 @@ const ActionFooter = ({
                                                     setIsTagOpen(false);
                                                 }}
                                                 className={`w-full px-4 py-3 text-left font-bold transition-colors flex items-center justify-between text-sm
-                                                    ${currentOrder?.etiquetaEmpaquetado === tag
+                                                    ${currentTagValue === tag
                                                         ? 'bg-rose-50 text-rose-700'
                                                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                                     }`}
                                             >
                                                 {tag}
-                                                {currentOrder?.etiquetaEmpaquetado === tag && <CheckCircle size={16} className="text-rose-600 shrink-0" />}
+                                                {currentTagValue === tag && <CheckCircle size={16} className="text-rose-600 shrink-0" />}
                                             </button>
                                         ))}
-                                        {currentOrder?.etiquetaEmpaquetado && (
+                                        {currentTagValue && (
                                             <button
                                                 onClick={() => {
                                                     onTagSelect?.(null);
@@ -245,8 +256,8 @@ const ActionFooter = ({
                                     </div>
                                 )}
                             </div>
-                        )}
 
+                        {/* Botón Imprimir: solo en empaquetado */}
                         {currentStage === 'empaquetado' && (
                             <button
                                 type="button"

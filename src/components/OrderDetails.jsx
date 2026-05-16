@@ -23,6 +23,20 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                             </span>
                         </div>
                     )}
+                    {order.etiquetaEstampado && (
+                        <div className="flex-1 flex justify-center mt-2 mx-4">
+                            <span className="px-4 py-1.5 bg-orange-50 text-orange-600 rounded-xl text-xs font-black ring-2 ring-orange-400 shadow-sm uppercase tracking-wider text-center">
+                                {order.etiquetaEstampado}
+                            </span>
+                        </div>
+                    )}
+                    {order.etiquetaPreparacion && (
+                        <div className="flex-1 flex justify-center mt-2 mx-4">
+                            <span className="px-4 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-black ring-2 ring-amber-400 shadow-sm uppercase tracking-wider text-center">
+                                {order.etiquetaPreparacion}
+                            </span>
+                        </div>
+                    )}
                     <div className="flex flex-col items-end gap-1">
                         {/* Número de Cola */}
                         {order.numeroColaDisplay != null && (

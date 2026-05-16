@@ -264,6 +264,8 @@ const normalizeOrder = (doc) => {
         envioContacto: data.envioContacto || '',
         agenciaEnvio: data.agenciaEnvio || '',
         envioDireccionLima: data.envioDireccionLima || '',
+        etiquetaPreparacion: data.etiquetaPreparacion || null,
+        etiquetaEstampado: data.etiquetaEstampado || null,
         etiquetaEmpaquetado: data.etiquetaEmpaquetado || null,
         clienteNumeroDocumento: data.clienteNumeroDocumento || data.envioNumeroDocumento || '',
         // ── Cobranza ──────────────────────────────────────────────────
@@ -770,10 +772,10 @@ export const saveAgenciaData = async (orderId, { agencia, origen, destino, merca
     console.log(`[Agencia] Pedido ${orderId} → agencia guardada:`, updateData);
 };
 
-export const updateOrderTag = async (orderId, tagValue) => {
+export const updateOrderTag = async (orderId, fieldName, tagValue) => {
     const realIds = getAllRealIds(orderId);
     const updateData = {
-        etiquetaEmpaquetado: tagValue || null
+        [fieldName]: tagValue || null
     };
 
     securityMonitor.registerOperation(realIds.length);
