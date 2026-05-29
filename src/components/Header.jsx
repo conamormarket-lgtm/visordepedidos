@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, Monitor, Maximize, Minimize } from 'lucide-react';
 import { STAGES, STAGE_LABELS } from '../constants';
 
-const Header = ({ currentStage, onTabChange, onSearch }) => {
+const Header = ({ currentStage, onTabChange, onSearch, stats }) => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -82,6 +82,32 @@ const Header = ({ currentStage, onTabChange, onSearch }) => {
                             <h1 className="text-[11px] font-bold text-slate-800 leading-tight">Visor de Pedidos</h1>
                             <p className="text-[9px] font-medium text-slate-800/60 leading-none">Producción v1.0</p>
                         </div>
+                        {stats && (
+                            <div className="relative group ml-1">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-700 hover:bg-emerald-500/15 cursor-pointer transition-all duration-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-[10px] font-extrabold tracking-wide uppercase">Hoy: {stats.counts.preparacion + stats.counts.estampado + stats.counts.empaquetado}</span>
+                                </div>
+                                {/* Desglose en hover */}
+                                <div className="absolute top-full left-0 mt-1.5 w-40 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-100 p-3 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50 text-[10px] font-bold text-slate-600 flex flex-col gap-2 shadow-black/5 ring-1 ring-black/5">
+                                    <div className="border-b border-slate-100 pb-1.5 text-[9px] text-slate-400 uppercase tracking-wider">
+                                        Procesados hoy
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-semibold">Preparación:</span>
+                                        <span className="text-slate-800 font-extrabold">{stats.counts.preparacion}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-semibold">Estampado:</span>
+                                        <span className="text-slate-800 font-extrabold">{stats.counts.estampado}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-semibold">Empaquetado:</span>
+                                        <span className="text-slate-800 font-extrabold">{stats.counts.empaquetado}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Center: Navigation Tabs */}

@@ -18,34 +18,19 @@
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
-## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
+## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Active: `.`
 
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1400 notes | Score threshold: >40
-+ > 1402 notes | Score threshold
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1396 notes | Score threshold: >40
-+ > 1398 notes | Score threshold
-- **⚠️ GOTCHA: Optimized Project — parallelizes async operations for speed** — - - **⚠️ GOTCHA: Optimized Score — parallelizes async operations for s
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 1374 notes | Score threshold: >40
-+ > 1377 notes | Score threshold
-- **gotcha in agent-rules.md** — File updated (external): .brainsync/agent-rules.md
-
-Content summary (8
-
-## Active: `src/services`
-
-- **Fixed null crash in FDDNI**
-- **what-changed in printService.js**
+- **Strengthened types Fallo**
+- **convention in requirements.txt**
+- **Strengthened types Respuestas**
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed**
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed**
 
 ## Project Standards
 
-- what-changed in config.js — confirmed 3x
-- Added JWT tokens authentication — confirmed 3x
-- Optimized Score — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
-- what-changed in shared-context.json — confirmed 3x
-- Optimized Score — parallelizes async operations for speed — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
-- what-changed in brainsync_auto.md — confirmed 3x
+- Strengthened types Fallo
+- convention in requirements.txt
+- Strengthened types Respuestas
 
 ## Known Fixes
 
@@ -54,13 +39,6 @@ Content summary (8
 - ❌ - - Fixed null crash in FDDNI → ✅ problem-fix in agent-rules.md
 - ❌ - - Fixed null crash in Conectando — prevents null/undefined runtime crashes → ✅ problem-fix in agent-rules.md
 - ❌ const [failed, setFailed] = useState(false); → ✅ problem-fix in ImageCarousel.jsx
-
-## Recent Decisions
-
-- Optimized Score — parallelizes async operations for speed
-- Optimized Score — parallelizes async operations for speed
-- Optimized Score — parallelizes async operations for speed
-- Optimized Score — parallelizes async operations for speed
 
 ## Learned Patterns
 

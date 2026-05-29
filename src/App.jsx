@@ -9,6 +9,8 @@ import StockPauseAlert from './components/StockPauseAlert';
 import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { STAGES } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
+import * as deviceStats from './utils/deviceStats';
+import { triggerConfetti } from './utils/confetti';
 // Assuming Search is imported from a library like lucide-react or similar
 // import { Search } from 'lucide-react'; // Add this if Search is a component
 
@@ -22,6 +24,16 @@ function App() {
     const [lockReason, setLockReason] = useState("");
     const [operators, setOperators] = useState(["Sin Asignar"]);
     const [lastAction, setLastAction] = useState(null); // { orderId, prevStage, completedStage, prevSnapshot }
+    const [stats, setStats] = useState(deviceStats.getStats());
+
+    const incrementStats = (stage) => {
+        const updated = deviceStats.incrementCount(stage);
+        setStats(updated);
+        const total = updated.counts.preparacion + updated.counts.estampado + updated.counts.empaquetado;
+        if (total === 15) {
+            triggerConfetti();
+        }
+    };
 
     // Swipe Logic
     const [touchStartX, setTouchStartX] = useState(null);
@@ -296,6 +308,7 @@ function App() {
                     completedStage: nextStage,
                     prevSnapshot,
                 });
+                incrementStats(currentStage);
             } catch (err) {
                 // Error de stock insuficiente: el pedido ya fue revertido en Firestore
                 if (err.message?.startsWith('SIN_STOCK:')) {
@@ -346,6 +359,7 @@ function App() {
         });
 
         await updateOrderStage(currentOrder.id, nextStage, currentStage);
+        incrementStats(currentStage);
     };
 
     // Enviar pedido POR MAYOR directamente a Reparto (sin pasar por estampado/empaquetado)
@@ -362,6 +376,7 @@ function App() {
 
         // Saltar directamente a despacho (En Reparto)
         await updateOrderStage(currentOrder.id, 'despacho', currentStage);
+        incrementStats(currentStage);
     };
 
     const handleUndo = async () => {
@@ -369,6 +384,7 @@ function App() {
         const { orderId, prevStage, completedStage, prevSnapshot } = lastAction;
         await undoOrderStage(orderId, prevStage, completedStage, prevSnapshot);
         setLastAction(null);
+        setStats(deviceStats.decrementCount(prevStage));
     };
 
     const currentOrder = filteredOrders[currentIndex];
@@ -390,6 +406,7 @@ function App() {
                         currentStage={currentStage}
                         onTabChange={handleTabChange}
                         onSearch={handleSearch}
+                        stats={stats}
                     />
                     <StockPauseAlert isPaused={currentOrder?.isStockPaused} />
                 </>
