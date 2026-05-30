@@ -1,10 +1,14 @@
 import { db } from "../firebase/config";
 import { doc, collection, runTransaction, serverTimestamp } from "firebase/firestore";
 
-const COLLECTION_METADATA = "metadata";
-const COLLECTION_HISTORY = "history";
+const COLLECTION_INVENTARIO = "inventarioPrendas";
+const COLLECTION_HISTORIAL = "historialInventarioPrendas";
 
-const normalizeStr = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+// Genera un ID compatible con la nueva arquitectura (ej: "polo-cuello-v_negro_m")
+function generateItemId(tipo, color, talla) {
+    const clean = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    return `${clean(tipo)}_${clean(color)}_${clean(talla)}`;
+}
 
 function parsearTallaPrendaColorTalla(texto) {
     if (!texto || typeof texto !== "string" || texto.trim() === "") return [];
@@ -56,13 +60,12 @@ function agruparPrendas(prendas) {
 export async function descontarInventarioPorPedido(pedidoId, userLog) {
     try {
         const pedidoRef = doc(db, "pedidos", pedidoId);
-        const statsRef = doc(db, COLLECTION_METADATA, "inventory_stats");
-        const historyRef = collection(db, COLLECTION_HISTORY);
+        const historialRef = collection(db, COLLECTION_HISTORIAL);
 
         let descontadasResult = 0;
 
         await runTransaction(db, async (transaction) => {
-            // READS FIRST
+            // 1. LECTURAS (Deben realizarse todas antes de escribir)
             const pedidoSnap = await transaction.get(pedidoRef);
             if (!pedidoSnap.exists()) {
                 throw new Error("Pedido no encontrado");
@@ -73,13 +76,6 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                 throw new Error("ALREADY_DISCOUNTED");
             }
 
-            const statsDoc = await transaction.get(statsRef);
-            let items = [];
-            if (statsDoc.exists() && statsDoc.data().items) {
-                items = statsDoc.data().items;
-            }
-
-            // PROCESSING
             const prendasDetalladas = [];
             let prendasFuente = data.prendas || data.talla;
 
@@ -114,75 +110,93 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                 throw new Error("NO_PRENDAS");
             }
 
+            // Preparar referencias a los documentos de inventario
+            const inventoryRefs = prendasUnicas.map(prendaReq => {
+                const id = generateItemId(prendaReq.tipoPrenda, prendaReq.color, prendaReq.talla);
+                return {
+                    id,
+                    ref: doc(db, COLLECTION_INVENTARIO, id),
+                    req: prendaReq
+                };
+            });
+
+            // Leer todos los documentos de inventario en masa
+            const inventorySnaps = {};
+            for (const item of inventoryRefs) {
+                inventorySnaps[item.id] = await transaction.get(item.ref);
+            }
+
+            // 2. VALIDACIÓN (Chequear existencias antes de mutar datos)
             let descontadas = 0;
             const updatesLog = [];
 
-            for (const prendaReq of prendasUnicas) {
-                const targetCombined = normalizeStr((prendaReq.tipoPrenda || "") + (prendaReq.color || ""));
-                const targetTalla = normalizeStr(prendaReq.talla || "");
-                const cantidadReq = prendaReq.cantidad || 1;
+            for (const item of inventoryRefs) {
+                const snap = inventorySnaps[item.id];
+                const cantidadReq = item.req.cantidad || 1;
 
-                const index = items.findIndex(i => {
-                    const combined = normalizeStr((i.type || i.tipoPrenda || "") + (i.color || ""));
-                    const talla = normalizeStr(i.size || i.talla || "");
-                    return combined === targetCombined && talla === targetTalla;
-                });
+                if (!snap.exists()) {
+                    throw new Error(`STOCK_INSUFICIENTE: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla} — no encontrado en inventario`);
+                }
 
-                if (index !== -1) {
-                    const available = items[index].quantity;
+                const invData = snap.data();
+                const available = invData.quantity || 0;
+
+                if (available < cantidadReq) {
                     const cantidadFaltante = cantidadReq - available;
-
-                    // Si no hay stock suficiente, abortar la transacción completa
-                    if (available < cantidadReq) {
-                        const itemType = items[index].type || items[index].tipoPrenda || prendaReq.tipoPrenda;
-                        const itemColor = items[index].color || prendaReq.color;
-                        const itemSize = items[index].size || items[index].talla || prendaReq.talla;
-                        throw new Error(
-                            `STOCK_INSUFICIENTE: ${itemType} ${itemColor} ${itemSize} — disponible: ${available}, requerido: ${cantidadReq} (faltan ${cantidadFaltante})`
-                        );
-                    }
-
-                    items[index].quantity -= cantidadReq;
-                    descontadas++;
-
-                    const itemType = items[index].type || items[index].tipoPrenda || prendaReq.tipoPrenda;
-                    const itemColor = items[index].color || prendaReq.color;
-                    const itemSize = items[index].size || items[index].talla || prendaReq.talla;
-
-                    const logDocRef = doc(historyRef);
-                    updatesLog.push({
-                        ref: logDocRef,
-                        data: {
-                            timestamp: serverTimestamp(),
-                            user: userLog || "Visor Pedidos (Sistema)",
-                            action: "Salida",
-                            details: `Descuento automático por pedido #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${cantidadReq})`,
-                            quantity: cantidadReq,
-                            metadata: {
-                                type: itemType,
-                                color: itemColor,
-                                size: itemSize,
-                                quantity: cantidadReq,
-                                originalActionType: "exit",
-                                pedidoOrigenId: pedidoId
-                            }
-                        }
-                    });
-                } else {
-                    // La prenda no está en el inventario — no se puede descontar
+                    const itemType = invData.type || invData.tipoPrenda || item.req.tipoPrenda;
+                    const itemColor = invData.color || item.req.color;
+                    const itemSize = invData.size || invData.talla || item.req.talla;
+                    
                     throw new Error(
-                        `STOCK_INSUFICIENTE: ${prendaReq.tipoPrenda} ${prendaReq.color} ${prendaReq.talla} — no encontrado en inventario`
+                        `STOCK_INSUFICIENTE: ${itemType} ${itemColor} ${itemSize} — disponible: ${available}, requerido: ${cantidadReq} (faltan ${cantidadFaltante})`
                     );
                 }
+
+                // 3. PREPARAR ESCRITURAS
+                descontadas++;
+                const itemType = invData.type || invData.tipoPrenda || item.req.tipoPrenda;
+                const itemColor = invData.color || item.req.color;
+                const itemSize = invData.size || invData.talla || item.req.talla;
+                
+                const newQuantity = available - cantidadReq;
+                const newSalidas = (invData.salidas || 0) + cantidadReq;
+
+                updatesLog.push({
+                    invRef: item.ref,
+                    invData: {
+                        quantity: newQuantity,
+                        salidas: newSalidas,
+                        updatedAt: serverTimestamp()
+                    },
+                    historyRef: doc(historialRef),
+                    historyData: {
+                        itemId: item.id,
+                        type: "exit",
+                        categoryMovement: "preparación_estampado",
+                        details: {
+                            type: itemType,
+                            color: itemColor,
+                            size: itemSize
+                        },
+                        quantity: cantidadReq,
+                        prevStock: available,
+                        newStock: newQuantity,
+                        date: serverTimestamp(),
+                        user: {
+                            name: typeof userLog === 'string' ? userLog : "Sistema",
+                            username: typeof userLog === 'string' ? userLog : "admin"
+                        }
+                    }
+                });
             }
 
-            // WRITES (MUST ONLY BE DONE AFTER ALL READS)
-            updatesLog.forEach(log => {
-                transaction.set(log.ref, log.data);
-            });
+            // 4. EJECUTAR ESCRITURAS (No más lecturas a partir de aquí)
+            for (const log of updatesLog) {
+                transaction.update(log.invRef, log.invData);
+                transaction.set(log.historyRef, log.historyData);
+            }
 
-            transaction.set(statsRef, { items: items, lastUpdated: serverTimestamp() }, { merge: true });
-            transaction.set(pedidoRef, { inventarioDescontado: true }, { merge: true });
+            transaction.update(pedidoRef, { inventarioDescontado: true });
 
             descontadasResult = descontadas;
         });
