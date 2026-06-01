@@ -170,22 +170,22 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                     },
                     historyRef: doc(historialRef),
                     historyData: {
-                        itemId: item.id,
-                        type: "exit",
+                        action: "Salida",
                         categoryMovement: "preparación_estampado",
-                        details: {
-                            type: itemType,
+                        details: `Descuento automático por pedido #${data.numeroPedido || pedidoId} - ${itemType} - ${itemColor} - Talla ${itemSize} (Cant: ${cantidadReq})`,
+                        metadata: {
+                            categoryMovement: "preparación_estampado",
                             color: itemColor,
-                            size: itemSize
+                            originalActionType: "exit",
+                            quantity: cantidadReq,
+                            size: itemSize,
+                            type: itemType,
+                            pedidoOrigenId: pedidoId
                         },
                         quantity: cantidadReq,
-                        prevStock: available,
-                        newStock: newQuantity,
-                        date: serverTimestamp(),
-                        user: {
-                            name: typeof userLog === 'string' ? userLog : "Sistema",
-                            username: typeof userLog === 'string' ? userLog : "admin"
-                        }
+                        source: "visor_pedidos",
+                        timestamp: serverTimestamp(),
+                        user: typeof userLog === 'string' ? userLog : "Sistema"
                     }
                 });
             }
