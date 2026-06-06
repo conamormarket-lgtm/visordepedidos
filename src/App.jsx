@@ -319,6 +319,16 @@ function App() {
                         `El pedido ha sido movido automáticamente a "En Pausa por Stock".`
                     );
                     setLastAction(null);
+                } else if (err.message?.startsWith('NO_EN_INVENTARIO:')) {
+                    const detalle = err.message.replace('NO_EN_INVENTARIO: ', '');
+                    alert(
+                        `⚠️ PRENDA NO REGISTRADA EN INVENTARIO — Pedido #${currentOrder.orderId}\n\n` +
+                        `${detalle}\n\n` +
+                        `La prenda existe en el pedido pero no se encontró su ficha en el inventario.\n` +
+                        `El pedido NO fue pausado — podés volver a intentarlo.\n\n` +
+                        `Revisá en el sistema de inventario que el producto esté dado de alta con el ID correcto (visible en consola del navegador).`
+                    );
+                    setLastAction(null);
                 } else if (err.message?.startsWith('SIN_PRENDAS:')) {
                     // El pedido volvió a Preparación automáticamente
                     alert(

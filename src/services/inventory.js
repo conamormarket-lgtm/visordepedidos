@@ -135,7 +135,8 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                 const cantidadReq = item.req.cantidad || 1;
 
                 if (!snap.exists()) {
-                    throw new Error(`STOCK_INSUFICIENTE: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla} — no encontrado en inventario`);
+                    console.warn(`[Inventario] Documento no encontrado — ID buscado: "${item.id}" | Prenda: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla}`);
+                    throw new Error(`NO_EN_INVENTARIO: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla} (ID buscado: ${item.id})`);
                 }
 
                 const invData = snap.data();
@@ -211,6 +212,11 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
         if (error.message === "NO_PRENDAS") {
             console.warn("[Inventario] El pedido no tiene prendas parseables — se bloquea el avance para evitar omitir descuento.");
             return { exito: false, sinPrendas: true, mensaje: "No se encontraron prendas en el pedido para descontar del inventario" };
+        }
+        if (error.message?.startsWith("NO_EN_INVENTARIO:")) {
+            const detalle = error.message.replace("NO_EN_INVENTARIO: ", "");
+            console.warn("[Inventario] Prenda no encontrada en inventario:", detalle);
+            return { exito: false, noEncontrado: true, mensaje: detalle };
         }
         if (error.message?.startsWith("STOCK_INSUFICIENTE:")) {
             const detalle = error.message.replace("STOCK_INSUFICIENTE: ", "");

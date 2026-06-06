@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 141 gotchas, 316 conventions, 46 fixes."
+description: "Project for visordepedidos. 141 gotchas, 376 conventions, 46 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **975 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **1037 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 
@@ -172,6 +172,6 @@ Auto-compiled from **975 real patterns** in **visordepedidos**. This skill is au
 - - problem-fix in shared-context.json
 + - Patched security issue Kevin
 
-📌 IDE AST Context: Modified symbols likely include [# Project Intelligence (auto-generated), # Intellectual Property & Arch
+📌 IDE AST Context: Modified symbols likely include [# Project Intelligence (auto-generated), # Intellectual Property & Arc
 
 ... [Truncated — see individual observations for full content]

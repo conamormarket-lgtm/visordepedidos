@@ -635,6 +635,8 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
                     }),
                 })));
                 throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
+            } else if (resultadoInventario.noEncontrado) {
+                throw new Error(`NO_EN_INVENTARIO: ${resultadoInventario.mensaje}`);
             } else if (resultadoInventario.sinPrendas) {
                 throw new Error(`SIN_PRENDAS: ${resultadoInventario.mensaje}`);
             } else {
