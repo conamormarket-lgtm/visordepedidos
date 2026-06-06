@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 1404 notes | Score threshold: >40
+> 1405 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -18,19 +18,10 @@
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
-## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Active: `.`
+## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Active: `src/services`
 
-- **Strengthened types Fallo**
-- **convention in requirements.txt**
-- **Strengthened types Respuestas**
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed**
-- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed**
-
-## Project Standards
-
-- Strengthened types Fallo
-- convention in requirements.txt
-- Strengthened types Respuestas
+- **what-changed in orders.js**
+- **Fixed null crash in orders — prevents null/undefined runtime crashes**
 
 ## Known Fixes
 

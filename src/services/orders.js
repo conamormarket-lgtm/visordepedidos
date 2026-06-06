@@ -252,7 +252,7 @@ const normalizeOrder = (doc) => {
         preparacion: normalizeStage(data.preparacion),
         estampado: normalizeStage(data.estampado),
         empaquetado: normalizeStage(data.empaquetado),
-        isStockPaused: estGen === "En Pausa por Stock" || data.preparacion?.enPausa || false,
+        isStockPaused: estGen === "En Pausa por Stock",
         images: images,
         // ── Número de cola ────────────────────────────────────────────────
         numeroCola,
