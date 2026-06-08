@@ -4,9 +4,19 @@ import { doc, collection, runTransaction, serverTimestamp } from "firebase/fires
 const COLLECTION_INVENTARIO = "inventarioPrendas";
 const COLLECTION_HISTORIAL = "historialInventarioPrendas";
 
-// Genera un ID compatible con la nueva arquitectura (ej: "polo-cuello-v_negro_m")
+// Genera un ID compatible con el inventario en Firestore.
+// Reglas observadas en los documentos reales:
+//   - espacios y "/" \u2192 gui\u00f3n  (ej: "Azul Marino" \u2192 "azul-marino", "Negro/Blanco" \u2192 "negro-blanco")
+//   - "%" se conserva          (ej: "Melange 3%" \u2192 "melange-3%")
+//   - acentos eliminados, todo min\u00fascula
 function generateItemId(tipo, color, talla) {
-    const clean = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const clean = (s) => String(s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .replace(/[\s/]+/g, "-")
+        .replace(/[^a-z0-9-%]/g, "");
     return `${clean(tipo)}_${clean(color)}_${clean(talla)}`;
 }
 
@@ -110,30 +120,20 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                 throw new Error("NO_PRENDAS");
             }
 
-            // Preparar referencias: ID primario + fallback sin porcentajes en el color
-            // Ej: "Melange 3%" → primaryId: "polera_melange-3_s", fallbackId: "polera_melange_s"
+            // Preparar referencias a los documentos de inventario
             const inventoryRefs = prendasUnicas.map(prendaReq => {
-                const primaryId = generateItemId(prendaReq.tipoPrenda, prendaReq.color, prendaReq.talla);
-                const colorSinPct = String(prendaReq.color || "").replace(/\s*\d+(?:\.\d+)?%/g, "").trim();
-                const fallbackId = colorSinPct !== prendaReq.color
-                    ? generateItemId(prendaReq.tipoPrenda, colorSinPct, prendaReq.talla)
-                    : null;
+                const id = generateItemId(prendaReq.tipoPrenda, prendaReq.color, prendaReq.talla);
                 return {
-                    primaryId,
-                    fallbackId,
-                    ref: doc(db, COLLECTION_INVENTARIO, primaryId),
-                    fallbackRef: fallbackId ? doc(db, COLLECTION_INVENTARIO, fallbackId) : null,
+                    id,
+                    ref: doc(db, COLLECTION_INVENTARIO, id),
                     req: prendaReq
                 };
             });
 
-            // Leer todos los documentos (primario + fallback si corresponde)
+            // Leer todos los documentos de inventario en masa
             const inventorySnaps = {};
             for (const item of inventoryRefs) {
-                inventorySnaps[item.primaryId] = await transaction.get(item.ref);
-                if (item.fallbackId && item.fallbackRef) {
-                    inventorySnaps[item.fallbackId] = await transaction.get(item.fallbackRef);
-                }
+                inventorySnaps[item.id] = await transaction.get(item.ref);
             }
 
             // 2. VALIDACIÓN (Chequear existencias antes de mutar datos)
@@ -141,24 +141,12 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
             const updatesLog = [];
 
             for (const item of inventoryRefs) {
+                const snap = inventorySnaps[item.id];
                 const cantidadReq = item.req.cantidad || 1;
 
-                // Usar el ID primario; si no existe, intentar el fallback
-                let snap = inventorySnaps[item.primaryId];
-                let usedRef = item.ref;
-                if (!snap.exists() && item.fallbackId) {
-                    const fallbackSnap = inventorySnaps[item.fallbackId];
-                    if (fallbackSnap.exists()) {
-                        console.warn(`[Inventario] ID primario "${item.primaryId}" no encontrado. Usando fallback "${item.fallbackId}" (color sin porcentaje).`);
-                        snap = fallbackSnap;
-                        usedRef = item.fallbackRef;
-                    }
-                }
-
                 if (!snap.exists()) {
-                    const tambiénProbado = item.fallbackId ? ` (también se probó: "${item.fallbackId}")` : "";
-                    console.warn(`[Inventario] Documento no encontrado — ID buscado: "${item.primaryId}"${tambiénProbado} | Prenda: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla}`);
-                    throw new Error(`NO_EN_INVENTARIO: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla} (ID buscado: ${item.primaryId})`);
+                    console.warn(`[Inventario] Documento no encontrado — ID buscado: "${item.id}" | Prenda: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla}`);
+                    throw new Error(`NO_EN_INVENTARIO: ${item.req.tipoPrenda} ${item.req.color} ${item.req.talla} (ID buscado: ${item.id})`);
                 }
 
                 const invData = snap.data();
@@ -185,7 +173,7 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                 const newSalidas = (invData.salidas || 0) + cantidadReq;
 
                 updatesLog.push({
-                    invRef: usedRef,
+                    invRef: item.ref,
                     invData: {
                         quantity: newQuantity,
                         salidas: newSalidas,
