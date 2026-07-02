@@ -45,6 +45,7 @@ export const generateZpl = (order) => {
         `^FO50,190^FDAgencia: ${s(order.agenciaEnvio)}^FS`,
         `^FO50,230^FDSede:^FS`,
         `^FO50,270^FD${s(order.envioDireccionLima)}^FS`,
+        `^FO50,310^FDNro de Pedido: ${s(order.orderId)}^FS`,
         '^XZ',
     ].join('\n');
 
