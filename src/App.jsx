@@ -150,9 +150,9 @@ function App() {
             if (isNumeric) {
                 const termLength = termClean.length;
                 filtered = stageOrders.filter(o => {
-                    if (termLength <= 4) {
+                    if (termLength <= 5) {
                         return o.orderId && o.orderId.toString().includes(termClean);
-                    } else if (termLength >= 5 && termLength <= 8) {
+                    } else if (termLength >= 6 && termLength <= 8) {
                         return o.clienteNumeroDocumento && o.clienteNumeroDocumento.toString().includes(termClean);
                     } else {
                         return o.phone && o.phone.toString().replace(/\s+/g, '').includes(termClean);
