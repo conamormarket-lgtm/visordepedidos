@@ -4,6 +4,10 @@ import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building
 const OrderDetails = ({ order, fullWidth = false }) => {
     if (!order) return null;
 
+    // Prioridad del ERP (casilla al registrar) o marcada desde el CRM: para el
+    // operario es lo mismo, se pintan igual.
+    const esPrioritario = order.esPrioridad || order.prioridadCRM;
+
     return (
         // Main Container: fullWidth = sin imagen (POR MAYOR) → ocupa todo el ancho
         <div className={`${fullWidth ? 'w-full' : 'w-full xl:w-[30%]'} p-5 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none flex-1`}>
@@ -41,12 +45,12 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                         {/* Número de Cola */}
                         {order.numeroColaDisplay != null && (
                             <div className={`flex flex-col items-center justify-center px-3 py-1 rounded-xl shadow-md ring-2 min-w-[60px] ${
-                                order.esPrioridad
+                                esPrioritario
                                     ? 'bg-rose-500 ring-rose-300 shadow-rose-300/50'
                                     : 'bg-slate-700 ring-slate-400/40 shadow-slate-400/30'
                             }`}>
                                 <span className={`text-[9px] font-black uppercase tracking-widest leading-none mb-0.5 ${
-                                    order.esPrioridad ? 'text-rose-100' : 'text-slate-300'
+                                    esPrioritario ? 'text-rose-100' : 'text-slate-300'
                                 }`}>Cola</span>
                                 <span className="text-2xl font-black text-white leading-none tracking-tight">
                                     {order.numeroColaDisplay}
@@ -54,7 +58,7 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                             </div>
                         )}
 
-                        {order.isPriority && (
+                        {esPrioritario && (
                             <span className="px-2 py-0.5 bg-rose-100 text-rose-600 rounded-full text-[10px] font-bold ring-1 ring-rose-200 flex items-center gap-1 shadow-sm">
                                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
                                 PRIORIDAD

@@ -84,6 +84,8 @@ function App() {
         }
 
         // ── Orden de cola unificado para todas las etapas ───────────────────────────────
+        // Grupo 0: pedidos marcados como prioridad desde el CRM (prioridadCRM),
+        //          ordenados por el momento del marcado (el primero marcado, primero).
         // Grupo 1: pedidos prioritarios (esPrioridad=true y no en pausa por stock)
         //          ordenados ascendentemente por numeroCola.
         // Grupo 2: pedidos normales (no prioritarios, no en pausa por stock)
@@ -93,8 +95,21 @@ function App() {
             const aStock = a.isStockPaused ? 1 : 0;
             const bStock = b.isStockPaused ? 1 : 0;
 
-            // Pausa por stock siempre al final
+            // Pausa por stock siempre al final (sin stock no se puede preparar,
+            // aunque el CRM lo haya marcado como prioridad)
             if (aStock !== bStock) return aStock - bStock;
+
+            // Grupo 0: lo marcado desde el CRM va delante de todo lo activo.
+            const aCRM = a.prioridadCRM ? 0 : 1;
+            const bCRM = b.prioridadCRM ? 0 : 1;
+            if (aCRM !== bCRM) return aCRM - bCRM;
+            if (aCRM === 0) {
+                // Entre varios marcados: el que se marco primero se prepara primero.
+                // Sin fecha (dato viejo) va al final del grupo.
+                const aTs = a.prioridadCRMDesde?.seconds ?? Infinity;
+                const bTs = b.prioridadCRMDesde?.seconds ?? Infinity;
+                if (aTs !== bTs) return aTs - bTs;
+            }
 
             // Dentro de los activos: prioridad primero
             const aPriority = a.esPrioridad ? 0 : 1;
@@ -114,7 +129,8 @@ function App() {
         // La calculamos aquí, en el cliente, a partir del orden ya sorted, sin
         // costo de red ni escrituras a Firebase.
         //
-        //  Grupo prioridad activos → P-1, P-2, P-3 ...
+        //  Grupo prioridad activos → P-1, P-2, P-3 ...  (los marcados desde el
+        //                             CRM entran primeros en esa misma serie)
         //  Grupo normal activos    → 1, 2, 3 ...
         //  Pausa por stock         → sin número de cola
         let posPrioridad = 0;
@@ -124,7 +140,7 @@ function App() {
                 // En pausa por stock: sin número de cola asignado
                 return { ...order, numeroColaDisplay: null, numeroCola: null };
             }
-            if (order.esPrioridad) {
+            if (order.prioridadCRM || order.esPrioridad) {
                 posPrioridad++;
                 return {
                     ...order,
@@ -464,7 +480,11 @@ function App() {
                 {/* Card del pedido */}
                 <div
                     key={currentIndex}
-                    className={`flex flex-col xl:flex-row flex-1 min-w-0 h-full border border-white/60 rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm shadow-xl transition-all duration-300 ${!currentOrder ? 'opacity-80' : ''} ${animDirection === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
+                    className={`flex flex-col xl:flex-row flex-1 min-w-0 h-full rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm shadow-xl transition-all duration-300 ${
+                        currentOrder?.prioridadCRM
+                            ? 'border-4 border-red-500 ring-4 ring-red-500/30'
+                            : 'border border-white/60'
+                    } ${!currentOrder ? 'opacity-80' : ''} ${animDirection === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
                 >
                     {filteredOrders.length > 0 ? (
                         <>

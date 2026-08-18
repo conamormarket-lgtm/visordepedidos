@@ -232,6 +232,13 @@ const normalizeOrder = (doc) => {
 
     const esPrioridad = data.esPrioridad === true || data.EsPrioridad === true;
 
+    // -- Prioridad marcada desde el CRM -----------------------------------
+    // Campo propio, NO esPrioridad: solo adelanta la cola de la etapa actual.
+    // Reusar esPrioridad contaminaria los contadores del ERP y arrastraria la
+    // prioridad a Estampado/Empaquetado (buildQueueUpdate lee ese campo).
+    const prioridadCRM      = data.prioridadCRM === true;
+    const prioridadCRMDesde = normalizeDate(data.prioridadCRMDesde);
+
     const orderData = {
         id: doc.id,
         orderId: visualId,
@@ -240,6 +247,8 @@ const normalizeOrder = (doc) => {
         deliveryType,
         isPriority: esPrioridad,
         esPrioridad,
+        prioridadCRM,
+        prioridadCRMDesde,
         phone: data.clienteContacto,
         products: productList,
         itemsAgregados,
