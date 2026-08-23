@@ -1,5 +1,7 @@
 import React from 'react';
-import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building2 } from 'lucide-react';
+import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building2, Wallet } from 'lucide-react';
+import { formatearPagoCero } from '../utils/cobranza';
+import { ZONAS } from '../constants';
 
 const OrderDetails = ({ order, fullWidth = false }) => {
     if (!order) return null;
@@ -7,6 +9,12 @@ const OrderDetails = ({ order, fullWidth = false }) => {
     // Prioridad del ERP (casilla al registrar) o marcada desde el CRM: para el
     // operario es lo mismo, se pintan igual.
     const esPrioritario = order.esPrioridad || order.prioridadCRM;
+
+    // La cola de Provincia se ordena por el momento en que el cliente terminó
+    // de pagar, así que ahí se muestra la fecha: el operario ve por qué el
+    // pedido está en esa posición. En Lima el dato no ordena nada y no se pinta.
+    const esProvincia = order.zonaEnvio === ZONAS.PROVINCIA;
+    const pagoCero = esProvincia ? formatearPagoCero(order) : null;
 
     return (
         // Main Container: fullWidth = sin imagen (POR MAYOR) → ocupa todo el ancho
@@ -92,6 +100,20 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-violet-50 rounded-lg border border-violet-200 text-violet-800">
                             <Building2 size={14} className="stroke-[2px] shrink-0" />
                             <span className="text-xs font-black uppercase tracking-wide">{order.agenciaEnvio}</span>
+                        </div>
+                    )}
+
+                    {/* Momento del pago completo — es lo que ordena la cola de Provincia */}
+                    {esProvincia && (
+                        <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border ${
+                            pagoCero
+                                ? 'bg-emerald-50/60 border-emerald-200 text-emerald-800'
+                                : 'bg-amber-50/60 border-amber-200 text-amber-800'
+                        }`}>
+                            <Wallet size={14} className="stroke-[2px] shrink-0" />
+                            <span className="text-xs font-bold">
+                                {pagoCero ? `Pagó: ${pagoCero}` : 'Pago sin fecha registrada'}
+                            </span>
                         </div>
                     )}
                 </div>

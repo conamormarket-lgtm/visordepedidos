@@ -11,6 +11,7 @@ import { STAGES, ZONAS, isZonaSplitEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
 import { triggerConfetti } from './utils/confetti';
+import { segundosPagoCero } from './utils/cobranza';
 // Assuming Search is imported from a library like lucide-react or similar
 // import { Search } from 'lucide-react'; // Add this if Search is a component
 
@@ -119,9 +120,17 @@ function App() {
         // Buscar es "encontrar este pedido", no recorrer la cola: si el pedido
         // buscado fuera de la otra zona el operario vería "no encontrado"
         // aunque el pedido exista. La búsqueda se comporta igual que antes.
-        if (ZONA_SPLIT_ON && currentStage === STAGES.PREPARACION && !searchTerm) {
+        const filtrandoPorZona = ZONA_SPLIT_ON
+            && currentStage === STAGES.PREPARACION
+            && !searchTerm;
+
+        if (filtrandoPorZona) {
             stageOrders = stageOrders.filter(o => zonaDe(o) === prepZona);
         }
+
+        // Solo la cola de PROVINCIA se ordena por el momento en que el cliente
+        // terminó de pagar. Lima mantiene el orden por número de cola.
+        const ordenarPorPago = filtrandoPorZona && prepZona === ZONAS.PROVINCIA;
 
         // ── Orden de cola unificado para todas las etapas ───────────────────────────────
         // Grupo 0: pedidos marcados como prioridad desde el CRM (prioridadCRM),
@@ -156,8 +165,22 @@ function App() {
             const bPriority = b.esPrioridad ? 0 : 1;
             if (aPriority !== bPriority) return aPriority - bPriority;
 
+            // En la cola de Provincia manda el orden en que terminaron de
+            // pagar: el que canceló primero se prepara primero.
+            if (ordenarPorPago) {
+                const aPago = segundosPagoCero(a);
+                const bPago = segundosPagoCero(b);
+                if (aPago !== bPago) {
+                    if (aPago === null) return -1; // sin fecha = el más antiguo
+                    if (bPago === null) return 1;
+                    return aPago - bPago;
+                }
+            }
+
             // Dentro del mismo grupo: ordenar por numeroCola ascendente.
             // Si un pedido no tiene numeroCola va al final de su grupo.
+            // (En Provincia esto ya solo desempata pagos simultáneos o los
+            // pedidos que no tienen fechaPagoCero.)
             const aCol = a.numeroCola ?? Infinity;
             const bCol = b.numeroCola ?? Infinity;
             return aCol - bCol;

@@ -293,7 +293,15 @@ const normalizeOrder = (doc) => {
         etiquetaEmpaquetado: data.etiquetaEmpaquetado || null,
         clienteNumeroDocumento: data.clienteNumeroDocumento || data.envioNumeroDocumento || '',
         // ── Cobranza ──────────────────────────────────────────────────
-        cobranza: data.cobranza || null,
+        // fechaPagoCero: momento en que la deudaTotal del pedido llego a 0.
+        // Lo escribe el Sistema Gestion una sola vez (firestore-adapter) y es
+        // lo que ordena la cola de Provincia. Se normaliza explicitamente en
+        // vez de confiar en que sortObjectKeys conserve el Timestamp: si una
+        // version del SDK hiciera esos campos no enumerables, el orden se
+        // romperia en silencio.
+        cobranza: data.cobranza
+            ? { ...data.cobranza, fechaPagoCero: normalizeDate(data.cobranza.fechaPagoCero) }
+            : null,
         // ── Fecha Video ───────────────────────────────────────────────
         fechaVideo: data.fechaVideo || null,
     };
@@ -303,10 +311,10 @@ const normalizeOrder = (doc) => {
 };
 
 // Local Cache logic to minimize UI re-renders and bridge sessions
-// v2: los pedidos normalizados ahora incluyen 'zonaEnvio' (split Lima/Provincia).
-// Subir la version invalida la cache vieja, que no tiene ese campo y dejaria la
-// pestana de Preparacion vacia hasta que llegue el primer snapshot.
-const CACHE_KEY = 'pedidos_cache_v2';
+// v3: los pedidos normalizados incluyen 'zonaEnvio' (split Lima/Provincia) y
+// 'cobranza.fechaPagoCero' normalizada. Subir la version invalida la cache
+// vieja, que no tiene esos campos y ordenaria mal hasta el primer snapshot.
+const CACHE_KEY = 'pedidos_cache_v3';
 
 const getCache = () => {
     try {
