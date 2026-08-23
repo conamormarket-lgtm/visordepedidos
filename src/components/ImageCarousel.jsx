@@ -54,6 +54,9 @@ const ImageItem = ({ img, idx }) => {
                 alt={`Diseño ${idx + 1}`}
                 className="w-full h-auto rounded-lg shadow-sm border border-gray-200"
                 loading="lazy"
+                // decoding async: la decodificación de la imagen no bloquea el
+                // hilo principal, que es lo que trababa el swipe en tablets.
+                decoding="async"
                 referrerPolicy="no-referrer"
                 onError={() => setFailed(true)}
             />

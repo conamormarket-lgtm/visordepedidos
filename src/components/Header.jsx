@@ -1,12 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, X, Monitor, Maximize, Minimize } from 'lucide-react';
-import { STAGES, STAGE_LABELS } from '../constants';
+import { Search, X, Monitor, Maximize, Minimize, Home, Truck, Zap, ZapOff } from 'lucide-react';
+import { STAGES, STAGE_LABELS, ZONAS, ZONA_LABELS } from '../constants';
+import { isModoLigero, toggleModoLigero, subscribeModoLigero } from '../utils/modoLigero';
 
-const Header = ({ currentStage, onTabChange, onSearch, stats }) => {
+const Header = ({
+    currentStage,
+    onTabChange,
+    onSearch,
+    stats,
+    zonaSplitEnabled = false,
+    prepZona = ZONAS.LIMA,
+    onZonaChange = () => {},
+    zonaCounts = {},
+}) => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [modoLigero, setModoLigeroState] = useState(isModoLigero);
     const inputRef = useRef(null);
+
+    useEffect(() => subscribeModoLigero(setModoLigeroState), []);
 
     // Logic for sliding background
     const [tabStyle, setTabStyle] = useState({});
@@ -65,6 +78,15 @@ const Header = ({ currentStage, onTabChange, onSearch, stats }) => {
             setIsSearchOpen(true);
         }
     };
+
+    // Sub-pestañas de Preparación. Los colores replican la semántica que ya usa
+    // OrderDetails: verde = delivery (Lima), índigo = agencia (Provincia).
+    const ZONA_TABS = [
+        { zona: ZONAS.LIMA, Icon: Home, activeBg: 'from-emerald-500 to-teal-600' },
+        { zona: ZONAS.PROVINCIA, Icon: Truck, activeBg: 'from-indigo-500 to-violet-600' },
+    ];
+
+    const showZonaTabs = zonaSplitEnabled && currentStage === STAGES.PREPARACION;
 
     return (
         <div className="pt-3 px-4 z-30 relative">
@@ -159,6 +181,22 @@ const Header = ({ currentStage, onTabChange, onSearch, stats }) => {
                             {isSearchOpen ? <X size={18} /> : <Search size={18} />}
                         </button>
 
+                        {/* Modo ligero: apaga los efectos pesados (glass, blobs,
+                            animaciones) y baja la resolución de las imágenes.
+                            Encendido por defecto en las tablets del taller. */}
+                        <button
+                            onClick={toggleModoLigero}
+                            className={`w-10 h-10 flex items-center justify-center border rounded-xl transition-all duration-200 shadow-sm ${modoLigero
+                                ? 'bg-amber-500 border-amber-600 text-white'
+                                : 'bg-white/40 hover:bg-white/80 border-white/30 text-slate-700'
+                                }`}
+                            title={modoLigero
+                                ? 'Modo ligero ACTIVO — toca para volver a los efectos completos'
+                                : 'Efectos completos — toca para activar el modo ligero (más fluido en tablets)'}
+                        >
+                            {modoLigero ? <Zap size={18} /> : <ZapOff size={18} />}
+                        </button>
+
                         {/* Fullscreen Button */}
                         <button
                             onClick={toggleFullScreen}
@@ -169,6 +207,43 @@ const Header = ({ currentStage, onTabChange, onSearch, stats }) => {
                         </button>
                     </div>
                 </div>
+
+                {/* ── Sub-pestañas Lima / Provincia (solo en Preparación) ── */}
+                {showZonaTabs && (
+                    <div className="px-6 pb-3">
+                        <div className="w-full h-px bg-white/40 mb-3" />
+                        <div className="flex justify-center">
+                            <div className="bg-slate-200/50 p-1 rounded-xl flex gap-1 shadow-inner backdrop-blur-sm border border-white/20">
+                                {ZONA_TABS.map(({ zona, Icon, activeBg }) => {
+                                    const isActive = prepZona === zona;
+                                    return (
+                                        <button
+                                            key={zona}
+                                            onClick={() => onZonaChange(zona)}
+                                            className={`
+                                                flex items-center gap-1.5 px-4 sm:px-5 py-1.5 rounded-lg text-[11px] font-bold
+                                                transition-all duration-200 whitespace-nowrap
+                                                ${isActive
+                                                    ? `bg-gradient-to-r ${activeBg} text-white shadow-md`
+                                                    : 'text-slate-600 hover:text-slate-800 hover:bg-white/50'
+                                                }
+                                            `}
+                                        >
+                                            <Icon size={13} className="stroke-[2.5px]" />
+                                            {ZONA_LABELS[zona]}
+                                            <span className={`
+                                                px-1.5 py-0.5 rounded-md text-[10px] font-extrabold tabular-nums
+                                                ${isActive ? 'bg-white/25 text-white' : 'bg-white/70 text-slate-500'}
+                                            `}>
+                                                {zonaCounts?.[zona] ?? 0}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Subsección de búsqueda (se despliega debajo) ── */}
                 {/* Usamos un wrapper con altura fija para no depender de max-height */}

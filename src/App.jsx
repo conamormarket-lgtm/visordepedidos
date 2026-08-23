@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from './components/Layout';
 import Header from './components/Header';
@@ -7,15 +7,42 @@ import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
 import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
-import { STAGES } from './constants';
+import { STAGES, ZONAS, isZonaSplitEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
 import { triggerConfetti } from './utils/confetti';
 // Assuming Search is imported from a library like lucide-react or similar
 // import { Search } from 'lucide-react'; // Add this if Search is a component
 
+// Kill-switch del split Lima/Provincia. Se lee una sola vez al cargar la app:
+// apagarlo requiere recargar (localStorage.setItem('VISOR_ZONA_SPLIT','off')).
+const ZONA_SPLIT_ON = isZonaSplitEnabled();
+
+// La zona elegida se recuerda por dispositivo: cada equipo suele trabajar
+// siempre la misma cola y no queremos que vuelva a Lima en cada recarga.
+const ZONA_STORAGE_KEY = 'VISOR_PREP_ZONA';
+
+// Zona de un pedido. El fallback por deliveryType cubre pedidos que vengan de
+// una caché antigua (sin zonaEnvio): así el filtro y el contador siempre usan
+// el mismo criterio y ningún pedido queda fuera de ambas listas.
+const zonaDe = (order) => (
+    order?.zonaEnvio
+    ?? (order?.deliveryType === 'AGENCIA' ? ZONAS.PROVINCIA : ZONAS.LIMA)
+);
+
+const readZonaGuardada = () => {
+    try {
+        return localStorage.getItem(ZONA_STORAGE_KEY) === ZONAS.PROVINCIA
+            ? ZONAS.PROVINCIA
+            : ZONAS.LIMA;
+    } catch (e) {
+        return ZONAS.LIMA;
+    }
+};
+
 function App() {
     const [currentStage, setCurrentStage] = useState(STAGES.PREPARACION);
+    const [prepZona, setPrepZona] = useState(readZonaGuardada);
     const [allOrders, setAllOrders] = useState([]); // Store all fetched orders for the stage
     const [filteredOrders, setFilteredOrders] = useState([]); // Store filtered results
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -81,6 +108,19 @@ function App() {
         // Solo se muestran pedidos cuyo campo cobranza.estado sea "Habilitado".
         if (currentStage === STAGES.PREPARACION) {
             stageOrders = stageOrders.filter(o => o.cobranza?.estado === 'Habilitado');
+        }
+
+        // ── Split Lima / Provincia (solo en Preparación) ──────────────────────
+        // Mismo criterio que el Sistema Gestión (calcularTipoEnvio, ver
+        // utils/zonaEnvio.js). Se aplica ANTES de ordenar y renumerar para que
+        // cada zona tenga su propia cola 1, 2, 3...
+        //
+        // Excepción: mientras hay una búsqueda activa NO se filtra por zona.
+        // Buscar es "encontrar este pedido", no recorrer la cola: si el pedido
+        // buscado fuera de la otra zona el operario vería "no encontrado"
+        // aunque el pedido exista. La búsqueda se comporta igual que antes.
+        if (ZONA_SPLIT_ON && currentStage === STAGES.PREPARACION && !searchTerm) {
+            stageOrders = stageOrders.filter(o => zonaDe(o) === prepZona);
         }
 
         // ── Orden de cola unificado para todas las etapas ───────────────────────────────
@@ -191,7 +231,7 @@ function App() {
         if (currentIndex >= stageOrders.length && stageOrders.length > 0) {
             setCurrentIndex(0);
         }
-    }, [currentStage, allOrders, searchTerm]);
+    }, [currentStage, allOrders, searchTerm, prepZona]);
 
     const onTouchStart = (e) => {
         setTouchEndX(null);
@@ -225,11 +265,38 @@ function App() {
         }
     };
 
+    // Conteo de pedidos por zona en Preparación (cero costo de red: se calcula
+    // sobre la lista que ya está en memoria, con el mismo filtro de cobranza).
+    const zonaCounts = useMemo(() => {
+        const counts = { [ZONAS.LIMA]: 0, [ZONAS.PROVINCIA]: 0 };
+        if (!ZONA_SPLIT_ON) return counts;
+        allOrders.forEach(o => {
+            if (o.status !== STAGES.PREPARACION) return;
+            if (o.cobranza?.estado !== 'Habilitado') return;
+            counts[zonaDe(o)]++;
+        });
+        return counts;
+    }, [allOrders]);
+
     const handleTabChange = (stage) => {
         setCurrentStage(stage);
         setCurrentIndex(0);
         setSearchTerm(""); // Clear search on tab change
         setAnimDirection('right');
+    };
+
+    const handleZonaChange = (zona) => {
+        if (zona === prepZona) return;
+        setPrepZona(zona);
+        setCurrentIndex(0);
+        setSearchTerm("");
+        setAnimDirection('right');
+        try {
+            localStorage.setItem(ZONA_STORAGE_KEY, zona);
+        } catch (e) {
+            // Sin persistencia: el split sigue funcionando en la sesión actual
+            console.warn('[App] No se pudo guardar la zona de preparación:', e);
+        }
     };
 
     const handleSearch = (term) => {
@@ -433,6 +500,10 @@ function App() {
                         onTabChange={handleTabChange}
                         onSearch={handleSearch}
                         stats={stats}
+                        zonaSplitEnabled={ZONA_SPLIT_ON}
+                        prepZona={prepZona}
+                        onZonaChange={handleZonaChange}
+                        zonaCounts={zonaCounts}
                     />
                     <StockPauseAlert isPaused={currentOrder?.isStockPaused} />
                 </>

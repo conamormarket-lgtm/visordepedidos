@@ -82,3 +82,50 @@
 .animate-pulse-soft {
     animation: pulseSoft 2.5s ease-in-out infinite;
 }
+/* ══════════════════════════════════════════════════════════════════════════
+   MODO LIGERO — optimización para las tablets de gama baja del taller.
+   Se activa con la clase .modo-ligero en <html> (ver utils/modoLigero.js).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. backdrop-filter es lo más caro de la interfaz: obliga al navegador a
+      recapturar y desenfocar todo lo que hay detrás en cada frame. La app
+      tiene 15 capas superpuestas, y encima del fondo con mix-blend-multiply
+      el resultado no se puede cachear. Se apagan todas de una sola vez. */
+.modo-ligero *,
+.modo-ligero *::before,
+.modo-ligero *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Sin el desenfoque, las superficies "glass" quedan muy transparentes.
+      Se les sube la opacidad para que el texto siga legible. Solo se tocan
+      los blancos translúcidos grandes: los badges de color quedan igual. */
+.modo-ligero .bg-white\/30 { background-color: rgb(255 255 255 / 0.70); }
+.modo-ligero .bg-white\/40 { background-color: rgb(255 255 255 / 0.78); }
+
+/* 3. Los dos blobs del fondo son círculos del 80% del viewport con
+      blur(100px) y mix-blend-multiply. Aunque no se muevan, obligan a
+      recomponer todo lo que tienen encima. Se ocultan y queda el degradado
+      base, que es prácticamente idéntico a la vista. */
+.modo-ligero .fondo-blobs {
+    display: none;
+}
+
+/* 4. Las animaciones de entrada desplazan un subárbol que contiene las
+      imágenes del diseño. En GPU débil eso se ve como un tirón; sin ellas
+      el cambio de pedido se siente instantáneo. */
+.modo-ligero .animate-slide-in-right,
+.modo-ligero .animate-slide-in-left {
+    animation: none !important;
+}
+
+/* Respeta la preferencia del sistema, esté o no en modo ligero. */
+@media (prefers-reduced-motion: reduce) {
+    .animate-slide-in-right,
+    .animate-slide-in-left,
+    .animate-slide-up-fade,
+    .animate-shimmer {
+        animation: none !important;
+    }
+}

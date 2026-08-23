@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 import { securityMonitor } from "../utils/securityMonitor";
 import { descontarInventarioPorPedido } from "./inventory";
+import { calcularTipoEnvio } from "../utils/zonaEnvio";
+import { ZONAS } from "../constants";
 
 const COLLECTION_NAME = "pedidos";
 
@@ -161,11 +163,23 @@ const normalizeOrder = (doc) => {
 
     // Destination Logic
     const dept = data.envioDepartamento || "";
-    const prov = data.enviaProvincia || "";
+    // OJO: el campo canonico en Firebase es 'envioProvincia' (asi lo escribe el
+    // Sistema Gestion). 'enviaProvincia' se mantiene solo como fallback por si
+    // algun documento antiguo lo tuviera con el nombre viejo.
+    const prov = data.envioProvincia || data.enviaProvincia || "";
     const dist = data.envioDistrito || "";
 
-    const isDelivery = ["LIMA", "CALLAO"].includes(dept.toUpperCase());
-    const deliveryType = isDelivery ? "DELIVERY" : "AGENCIA";
+    // Lima vs Provincia: mismo criterio que el Sistema Gestion (calcularTipoEnvio).
+    // Lima Provincias (Barranca, Canete, Huaral...) NO es delivery aunque el
+    // departamento sea Lima.
+    const tipoEnvio = calcularTipoEnvio({
+        envioDepartamento: dept,
+        envioProvincia: prov,
+        clienteDepartamento: data.clienteDepartamento,
+        clienteProvincia: data.clienteProvincia,
+    });
+    const deliveryType = tipoEnvio === "delivery" ? "DELIVERY" : "AGENCIA";
+    const zonaEnvio = tipoEnvio === "delivery" ? ZONAS.LIMA : ZONAS.PROVINCIA;
     const fullDestination = [dept, prov, dist].filter(Boolean).join(", ");
 
     // Images — solo se aceptan URLs reales (que comiencen con "http")
@@ -245,6 +259,7 @@ const normalizeOrder = (doc) => {
         date: normalizeDate(data.fechaEnvio),
         destination: fullDestination,
         deliveryType,
+        zonaEnvio,
         isPriority: esPrioridad,
         esPrioridad,
         prioridadCRM,
@@ -288,7 +303,10 @@ const normalizeOrder = (doc) => {
 };
 
 // Local Cache logic to minimize UI re-renders and bridge sessions
-const CACHE_KEY = 'pedidos_cache_v1';
+// v2: los pedidos normalizados ahora incluyen 'zonaEnvio' (split Lima/Provincia).
+// Subir la version invalida la cache vieja, que no tiene ese campo y dejaria la
+// pestana de Preparacion vacia hasta que llegue el primer snapshot.
+const CACHE_KEY = 'pedidos_cache_v2';
 
 const getCache = () => {
     try {
@@ -299,13 +317,62 @@ const getCache = () => {
     }
 };
 
-const saveCache = (data) => {
+// El cache pesa ~350 KB y localStorage.setItem es SINCRONO: escribirlo en cada
+// snapshot congelaba el hilo principal en las tablets (eMMC lenta). Ahora se
+// agrupa y se escribe cuando el navegador esta ocioso. El estado en memoria se
+// actualiza igual de inmediato: esto solo difiere el guardado en disco.
+const CACHE_DEBOUNCE_MS = 1500;
+const CACHE_ESPERA_MAX_MS = 10000; // tope: nunca posponer mas de 10s
+
+let _cachePendiente = null;
+let _cacheTimer = null;
+let _cacheDesde = 0;
+
+const escribirCache = () => {
+    if (_cachePendiente === null) return;
+    const data = _cachePendiente;
+    _cachePendiente = null;
+    _cacheDesde = 0;
+    if (_cacheTimer) { clearTimeout(_cacheTimer); _cacheTimer = null; }
     try {
         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     } catch (e) {
         console.error("Error saving cache:", e);
     }
 };
+
+const saveCache = (data) => {
+    const primerPendiente = _cachePendiente === null;
+    _cachePendiente = data;
+    if (primerPendiente) _cacheDesde = Date.now();
+
+    // Anti-inanicion: si los pedidos cambian sin parar, el debounce se
+    // reiniciaria siempre y el cache no se escribiria nunca. Pasados 10s
+    // se fuerza la escritura.
+    if (Date.now() - _cacheDesde >= CACHE_ESPERA_MAX_MS) {
+        escribirCache();
+        return;
+    }
+
+    if (_cacheTimer) clearTimeout(_cacheTimer);
+    _cacheTimer = setTimeout(() => {
+        _cacheTimer = null;
+        if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(escribirCache, { timeout: 2000 });
+        } else {
+            escribirCache();
+        }
+    }, CACHE_DEBOUNCE_MS);
+};
+
+// Si se cierra la pestana o la tablet se bloquea, volcar lo que quede pendiente
+// para no perder el cache y arrancar sin el en la proxima sesion.
+if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') escribirCache();
+    });
+    window.addEventListener('pagehide', escribirCache);
+}
 
 /**
  * Elimina pedidos duplicados causados por el mismo numeroPedido con y sin ceros al inicio.
