@@ -23,7 +23,7 @@ const formatFechaVideo = (fechaVideo) => {
     return null;
 };
 
-const ImageItem = ({ img, idx }) => {
+const ImageItem = ({ img, idx, onImageClick }) => {
     const [failed, setFailed] = useState(false);
     const thumbnailUrl = convertDriveLink(img);
 
@@ -35,7 +35,7 @@ const ImageItem = ({ img, idx }) => {
                     La vista previa no está disponible.<br />Haz clic para abrir en Drive.
                 </p>
                 <button
-                    onClick={() => window.open(img, '_blank')}
+                    onClick={() => (onImageClick ? onImageClick(img) : window.open(img, '_blank'))}
                     className="mt-1 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition-all"
                 >
                     Abrir en Google Drive →
@@ -47,7 +47,7 @@ const ImageItem = ({ img, idx }) => {
     return (
         <div
             className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-shrink-0 w-full"
-            onClick={() => window.open(img, '_blank')}
+            onClick={() => (onImageClick ? onImageClick(img) : window.open(img, '_blank'))}
         >
             <img
                 src={thumbnailUrl}
@@ -64,7 +64,7 @@ const ImageItem = ({ img, idx }) => {
     );
 };
 
-const ImageCarousel = ({ images, fechaVideo }) => {
+const ImageCarousel = ({ images, fechaVideo, onImageClick }) => {
     const fechaVideoLabel = formatFechaVideo(fechaVideo);
 
     if (!images || images.length === 0) {
@@ -90,7 +90,7 @@ const ImageCarousel = ({ images, fechaVideo }) => {
                 </div>
             )}
             {images.map((img, idx) => (
-                <ImageItem key={idx} img={img} idx={idx} />
+                <ImageItem key={idx} img={img} idx={idx} onImageClick={onImageClick} />
             ))}
         </div>
     );

@@ -6,8 +6,9 @@ import ImageCarousel from './components/ImageCarousel';
 import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
+import ImageActionModal from './components/ImageActionModal';
 import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
-import { STAGES, ZONAS, isZonaSplitEnabled } from './constants';
+import { STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
 import { triggerConfetti } from './utils/confetti';
@@ -18,6 +19,10 @@ import { segundosPagoCero } from './utils/cobranza';
 // Kill-switch del split Lima/Provincia. Se lee una sola vez al cargar la app:
 // apagarlo requiere recargar (localStorage.setItem('VISOR_ZONA_SPLIT','off')).
 const ZONA_SPLIT_ON = isZonaSplitEnabled();
+
+// Kill-switch del menú "Enviar a ERP". Apagado, tocar una imagen la abre
+// directamente en una pestaña nueva, igual que antes de esta función.
+const ENVIAR_ERP_ON = isEnviarErpEnabled();
 
 // La zona elegida se recuerda por dispositivo: cada equipo suele trabajar
 // siempre la misma cola y no queremos que vuelva a Lima en cada recarga.
@@ -53,6 +58,7 @@ function App() {
     const [operators, setOperators] = useState(["Sin Asignar"]);
     const [lastAction, setLastAction] = useState(null); // { orderId, prevStage, completedStage, prevSnapshot }
     const [stats, setStats] = useState(deviceStats.getStats());
+    const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
 
     const incrementStats = (stage) => {
         const updated = deviceStats.incrementCount(stage);
@@ -302,6 +308,7 @@ function App() {
     }, [allOrders]);
 
     const handleTabChange = (stage) => {
+        setImagenSeleccionada(null);
         setCurrentStage(stage);
         setCurrentIndex(0);
         setSearchTerm(""); // Clear search on tab change
@@ -583,7 +590,18 @@ function App() {
                     {filteredOrders.length > 0 ? (
                         <>
                             {!sinImagen && (
-                                <ImageCarousel images={currentOrder?.images || []} fechaVideo={currentOrder?.fechaVideo} />
+                                <ImageCarousel
+                                    images={currentOrder?.images || []}
+                                    fechaVideo={currentOrder?.fechaVideo}
+                                    // El menú (abrir / enviar a ERP) solo existe en
+                                    // Preparación. En el resto de etapas la imagen se
+                                    // abre directo, como siempre.
+                                    onImageClick={
+                                        ENVIAR_ERP_ON && currentStage === STAGES.PREPARACION
+                                            ? setImagenSeleccionada
+                                            : undefined
+                                    }
+                                />
                             )}
                             <OrderDetails order={currentOrder} fullWidth={sinImagen} />
                         </>
@@ -614,6 +632,15 @@ function App() {
                 </button>
 
             </div>
+
+            {/* Menú de acciones sobre una imagen (solo Preparación) */}
+            {imagenSeleccionada && (
+                <ImageActionModal
+                    imagen={imagenSeleccionada}
+                    order={currentOrder}
+                    onClose={() => setImagenSeleccionada(null)}
+                />
+            )}
 
             {/* Emergency Brake Overlay */}
             {isLocked && (
