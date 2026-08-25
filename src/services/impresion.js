@@ -18,13 +18,41 @@ import { securityMonitor } from "../utils/securityMonitor";
  */
 export const COLECCION_AGREGADOS = "impresion_agregados";
 
-export const enviarImagenAImpresion = async (order, imagenUrl) => {
+// Tope alto a propósito: no es una regla de negocio, es una red contra el
+// teclado (escribir 1000 cuando se quiso 100). Si algún día hace falta más,
+// se sube sin miedo.
+export const CANTIDAD_MIN = 1;
+export const CANTIDAD_MAX = 999;
+
+/**
+ * Normaliza lo que se escribió en el campo de cantidad.
+ * Devuelve un entero dentro del rango, o null si no es un número usable.
+ */
+export const normalizarCantidad = (valor) => {
+    if (valor === null || valor === undefined || valor === "") return null;
+    const n = Number(valor);
+    if (!Number.isFinite(n)) return null;
+    const entero = Math.trunc(n);
+    if (entero < CANTIDAD_MIN || entero > CANTIDAD_MAX) return null;
+    return entero;
+};
+
+export const enviarImagenAImpresion = async (order, imagenUrl, cantidad) => {
     if (!imagenUrl) throw new Error("No hay imagen para enviar");
+
+    // La cantidad se valida acá y no solo en el formulario: es el dato con el
+    // que el impresor decide cuántas copias sacar, y un valor basura no debe
+    // llegar nunca a la lista del ERP.
+    const cantidadFinal = normalizarCantidad(cantidad);
+    if (cantidadFinal === null) {
+        throw new Error(`La cantidad debe ser un número entre ${CANTIDAD_MIN} y ${CANTIDAD_MAX}`);
+    }
 
     securityMonitor.registerOperation(1);
 
     await addDoc(collection(db, COLECCION_AGREGADOS), {
         imagenUrl,
+        cantidad: cantidadFinal,
         pedidoId: order?.id || null,
         numeroPedido: order?.orderId != null ? String(order.orderId) : null,
         destino: order?.destination || "",
