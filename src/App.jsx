@@ -7,6 +7,7 @@ import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
 import ImageActionModal from './components/ImageActionModal';
+import HistorialEnviosModal from './components/HistorialEnviosModal';
 import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
@@ -59,6 +60,13 @@ function App() {
     const [lastAction, setLastAction] = useState(null); // { orderId, prevStage, completedStage, prevSnapshot }
     const [stats, setStats] = useState(deviceStats.getStats());
     const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
+    const [verHistorialEnvios, setVerHistorialEnvios] = useState(false);
+
+    // Con un modal abierto no se navega entre pedidos. Sin esto, las flechas del
+    // teclado y el swipe siguen cambiando el pedido POR DETRÁS del modal: en el
+    // menú de acciones eso llega a asociar la imagen de un pedido con otro,
+    // porque la imagen queda fija y el pedido cambia debajo.
+    const hayModalAbierto = !!imagenSeleccionada || verHistorialEnvios;
 
     const incrementStats = (stage) => {
         const updated = deviceStats.incrementCount(stage);
@@ -275,6 +283,7 @@ function App() {
     };
 
     const onTouchEnd = () => {
+        if (hayModalAbierto) return;
         if (touchStartX === null || touchEndX === null || touchStartY === null || touchEndY === null) return;
 
         const distanceX = touchStartX - touchEndX;
@@ -309,6 +318,7 @@ function App() {
 
     const handleTabChange = (stage) => {
         setImagenSeleccionada(null);
+        setVerHistorialEnvios(false);
         setCurrentStage(stage);
         setCurrentIndex(0);
         setSearchTerm(""); // Clear search on tab change
@@ -352,12 +362,14 @@ function App() {
         const handleKeyDown = (e) => {
             // Ignorar si el usuario está escribiendo en un input/textarea
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            // Ni navegar por detrás de un modal abierto
+            if (hayModalAbierto) return;
             if (e.key === 'ArrowRight') handleNext();
             if (e.key === 'ArrowLeft') handlePrev();
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [handleNext, handlePrev]);
+    }, [handleNext, handlePrev, hayModalAbierto]);
 
     const handleAssign = async (operator) => {
         const currentOrder = filteredOrders[currentIndex];
@@ -601,6 +613,10 @@ function App() {
                                             ? setImagenSeleccionada
                                             : undefined
                                     }
+                                    // El historial sí está en todas las etapas: enviar
+                                    // solo se puede desde Preparación, pero saber qué se
+                                    // mandó a imprimir sirve también más adelante.
+                                    onVerHistorial={() => setVerHistorialEnvios(true)}
                                 />
                             )}
                             <OrderDetails order={currentOrder} fullWidth={sinImagen} />
@@ -632,6 +648,14 @@ function App() {
                 </button>
 
             </div>
+
+            {/* Historial de envíos a Impresión del pedido actual */}
+            {verHistorialEnvios && currentOrder && (
+                <HistorialEnviosModal
+                    order={currentOrder}
+                    onClose={() => setVerHistorialEnvios(false)}
+                />
+            )}
 
             {/* Menú de acciones sobre una imagen (solo Preparación) */}
             {imagenSeleccionada && (

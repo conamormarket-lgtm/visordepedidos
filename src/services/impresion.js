@@ -1,5 +1,5 @@
 import { db } from "../firebase/config";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
 import { securityMonitor } from "../utils/securityMonitor";
 
 /**
@@ -63,4 +63,51 @@ export const enviarImagenAImpresion = async (order, imagenUrl, cantidad) => {
         // El badge de la etapa Impresión cuenta los que tienen visto === false.
         visto: false,
     });
+};
+
+/**
+ * Envíos a Impresión que se hicieron para un pedido, del más nuevo al más viejo.
+ *
+ * Es una lectura puntual (getDocs) y no una suscripción: el historial se abre
+ * a demanda desde un modal y no necesita actualizarse solo. Un onSnapshot por
+ * pedido dejaría listeners abiertos mientras el operario recorre la cola.
+ *
+ * Se busca por numeroPedido y no por pedidoId: el mismo pedido puede existir
+ * en Firebase con y sin ceros al inicio ('006436' y '6436'), asi que el docId
+ * que quedo guardado en el envio puede no ser el que la app tiene cargado hoy.
+ * numeroPedido es el numero ya normalizado y es estable entre sesiones.
+ */
+export const obtenerEnviosDePedido = async (order) => {
+    const numero = order?.orderId != null ? String(order.orderId) : null;
+    if (!numero) return [];
+
+    securityMonitor.registerOperation(1);
+
+    const snap = await getDocs(query(
+        collection(db, COLECCION_AGREGADOS),
+        where("numeroPedido", "==", numero),
+    ));
+
+    const envios = snap.docs.map((d) => {
+        const x = d.data();
+        const ts = x.enviadoEn;
+        // serverTimestamp llega como Timestamp; si el doc se acaba de crear en
+        // este mismo cliente puede venir null por un instante.
+        const fecha = ts?.toDate ? ts.toDate()
+            : typeof ts?.seconds === "number" ? new Date(ts.seconds * 1000)
+            : null;
+        return {
+            id: d.id,
+            fecha,
+            cantidad: Number.isFinite(x.cantidad) ? Number(x.cantidad) : null,
+            imagenUrl: x.imagenUrl || "",
+            hecho: x.hecho === true,
+        };
+    });
+
+    // El orden se hace acá y no con orderBy para no depender de un índice
+    // compuesto (numeroPedido + enviadoEn) ni de que la fecha esté resuelta.
+    // Los que no tienen fecha van al final.
+    envios.sort((a, b) => (b.fecha?.getTime() ?? -Infinity) - (a.fecha?.getTime() ?? -Infinity));
+    return envios;
 };

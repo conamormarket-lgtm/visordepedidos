@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Video } from 'lucide-react';
+import { Video, Clock } from 'lucide-react';
 import { convertDriveLink } from '../utils/drive';
 
 const formatFechaVideo = (fechaVideo) => {
@@ -64,7 +64,7 @@ const ImageItem = ({ img, idx, onImageClick }) => {
     );
 };
 
-const ImageCarousel = ({ images, fechaVideo, onImageClick }) => {
+const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => {
     const fechaVideoLabel = formatFechaVideo(fechaVideo);
 
     if (!images || images.length === 0) {
@@ -82,13 +82,27 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick }) => {
 
     return (
         <div className="w-full xl:w-[70%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[51vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
-            {/* Badge Fecha Video — esquina superior derecha del carrusel */}
-            {fechaVideoLabel && (
-                <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-600/90 backdrop-blur-sm shadow-lg shadow-violet-500/30 border border-violet-400/40">
-                    <Video size={11} className="text-violet-100 shrink-0" />
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider leading-none">{fechaVideoLabel}</span>
-                </div>
-            )}
+            {/* Esquina superior derecha: fecha de video + historial de envíos.
+                Van en la misma fila para que no se pisen entre ellos. */}
+            <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                {fechaVideoLabel && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-600/90 backdrop-blur-sm shadow-lg shadow-violet-500/30 border border-violet-400/40">
+                        <Video size={11} className="text-violet-100 shrink-0" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-wider leading-none">{fechaVideoLabel}</span>
+                    </div>
+                )}
+
+                {onVerHistorial && (
+                    <button
+                        onClick={onVerHistorial}
+                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/50 hover:bg-white/90 border border-white/60 text-slate-600 hover:text-slate-900 shadow-sm transition-colors"
+                        title="Historial de envíos a Impresión"
+                        aria-label="Ver historial de envíos a Impresión"
+                    >
+                        <Clock size={15} />
+                    </button>
+                )}
+            </div>
             {images.map((img, idx) => (
                 <ImageItem key={idx} img={img} idx={idx} onImageClick={onImageClick} />
             ))}
