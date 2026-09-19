@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Video, Clock } from 'lucide-react';
 import { convertDriveLink } from '../utils/drive';
 
@@ -66,10 +66,31 @@ const ImageItem = ({ img, idx, onImageClick }) => {
 
 const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => {
     const fechaVideoLabel = formatFechaVideo(fechaVideo);
+    const panelRef = useRef(null);
+    const [panelHeight, setPanelHeight] = useState(null);
+
+    useLayoutEffect(() => {
+        const panel = panelRef.current;
+        if (!panel) return;
+        // Referencia medida: primera imagen del pedido 009837, 1600 × 1066.
+        // Ajustar al ancho visible y sumar el espacio interior y los bordes.
+        const updateHeight = () => {
+            const css = getComputedStyle(panel);
+            const px = name => parseFloat(css[name]) || 0;
+            const imageWidth = panel.clientWidth - px('paddingLeft') - px('paddingRight');
+            setPanelHeight(Math.ceil(imageWidth * 1066 / 1600
+                + px('paddingTop') + px('paddingBottom')
+                + px('borderTopWidth') + px('borderBottomWidth')));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(panel);
+        return () => observer.disconnect();
+    }, [images?.length > 0]);
 
     if (!images || images.length === 0) {
         return (
-            <div className="w-full xl:w-[35%] bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold h-[2267px] border-b xl:border-b-0 xl:border-r border-white/40 flex-shrink-0">
+            <div ref={panelRef} style={{ height: panelHeight ?? undefined }} className="w-full xl:w-[35%] bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold border-b xl:border-b-0 xl:border-r border-white/40 flex-shrink-0">
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-16 h-16 rounded-full bg-slate-300/50 flex items-center justify-center">
                         <span className="text-3xl">📷</span>
@@ -81,7 +102,7 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
     }
 
     return (
-        <div className="w-full xl:w-[35%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[2267px] p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
+        <div ref={panelRef} style={{ height: panelHeight ?? undefined }} className="w-full xl:w-[35%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
             {/* Esquina superior derecha: fecha de video + historial de envíos.
                 Van en la misma fila para que no se pisen entre ellos. */}
             <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
