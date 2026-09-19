@@ -8,7 +8,7 @@ import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
 import ImageActionModal from './components/ImageActionModal';
 import HistorialEnviosModal from './components/HistorialEnviosModal';
-import { startStamping, subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
+import { startStage, subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
@@ -396,10 +396,10 @@ function App() {
         }
     };
 
-    const handleStartStamping = async () => {
+    const handleStartStage = async () => {
         const order = filteredOrders[currentIndex];
-        if (!order || currentStage !== STAGES.ESTAMPADO) return;
-        await startStamping(order.id);
+        if (!order) return;
+        await startStage(order.id, currentStage);
     };
 
     const handleComplete = async () => {
@@ -519,8 +519,12 @@ function App() {
         if (!assignedOperator || assignedOperator === 'Sin Asignar') return;
 
         // Saltar directamente a despacho (En Reparto)
-        await updateOrderStage(currentOrder.id, 'despacho', currentStage);
-        incrementStats(currentStage);
+        try {
+            await updateOrderStage(currentOrder.id, 'despacho', currentStage);
+            incrementStats(currentStage);
+        } catch (err) {
+            alert(`Error al pasar a reparto: ${err.message}`);
+        }
     };
 
     const handleUndo = async () => {
@@ -567,7 +571,7 @@ function App() {
                     operators={operators}
                     onAssign={handleAssign}
                     onComplete={handleComplete}
-                    onStartStamping={handleStartStamping}
+                    onStartStage={handleStartStage}
                     onUndo={handleUndo}
                     onWholesale={handleWholesale}
                     onBox={handleBox}

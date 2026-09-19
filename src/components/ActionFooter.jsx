@@ -9,7 +9,7 @@ const ActionFooter = ({
     currentStage,
     onAssign,
     onComplete,
-    onStartStamping,
+    onStartStage,
     onUndo,
     onWholesale,
     onBox,
@@ -24,15 +24,15 @@ const ActionFooter = ({
     const [isOpen, setIsOpen] = useState(false);
     const [starting, setStarting] = useState(false);
     const startLock = useRef(false);
-    const inicioEstampado = fechaMilisegundos(currentOrder?.estampado?.fechaInicio);
-    const handleStartStamping = async () => {
+    const inicioEtapa = fechaMilisegundos(currentOrder?.[currentStage]?.fechaInicio);
+    const handleStartStage = async () => {
         if (startLock.current) return;
         startLock.current = true;
         setStarting(true);
         try {
-            await onStartStamping();
+            await onStartStage();
         } catch (error) {
-            alert(`No se pudo iniciar el estampado: ${error.message}`);
+            alert(`No se pudo iniciar la etapa: ${error.message}`);
         } finally {
             startLock.current = false;
             setStarting(false);
@@ -61,8 +61,8 @@ const ActionFooter = ({
     const currentTagValue = currentOrder?.[TAG_FIELD_BY_STAGE[currentStage]] || null;
 
     const isOperatorAssigned = assignedTo && assignedTo !== 'Sin Asignar';
-    const faltaInicioEstampado = currentStage === 'estampado' && inicioEstampado === null;
-    const puedeCompletar = !!currentOrder && isOperatorAssigned && !starting && !faltaInicioEstampado;
+    const faltaInicioEtapa = inicioEtapa === null;
+    const puedeCompletar = !!currentOrder && isOperatorAssigned && !starting && !faltaInicioEtapa;
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -329,14 +329,14 @@ const ActionFooter = ({
                 {currentStage === 'preparacion' && sinImagen && (
                     <button
                         onClick={onWholesale}
-                        disabled={!isOperatorAssigned}
+                        disabled={!puedeCompletar}
                         className={`w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border transition-all duration-300 transform
-                            ${isOperatorAssigned
+                            ${puedeCompletar
                                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white shadow-lg shadow-orange-500/30 active:scale-[0.99] border-white/10 cursor-pointer'
                                 : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'
                             }`}
                     >
-                        {isOperatorAssigned && (
+                        {puedeCompletar && (
                             <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
                         )}
                         <Truck size={20} className="shrink-0" />
@@ -347,21 +347,21 @@ const ActionFooter = ({
                 )}
 
                 {/* Complete Button */}
-                {currentStage === 'estampado' && currentOrder && (
+                {currentOrder && (
                     <div className="flex flex-col gap-1">
                         <button
-                            onClick={handleStartStamping}
-                            disabled={!isOperatorAssigned || starting || inicioEstampado !== null}
+                            onClick={handleStartStage}
+                            disabled={!isOperatorAssigned || starting || inicioEtapa !== null}
                             className="w-full py-3 px-4 rounded-2xl bg-amber-500 text-slate-950 font-bold disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed"
                         >
-                            {starting ? 'Guardando inicio…' : inicioEstampado !== null
-                                ? `Inicio: ${new Date(inicioEstampado).toLocaleString('es-PE', { timeZone: 'America/Lima', hour12: false })}`
-                                : 'Iniciar estampado'}
+                            {starting ? 'Guardando inicio…' : inicioEtapa !== null
+                                ? `Inicio: ${new Date(inicioEtapa).toLocaleString('es-PE', { timeZone: 'America/Lima', hour12: false })}`
+                                : `Iniciar ${stageName.toLowerCase()}`}
                         </button>
                         <span className="text-xs text-center text-slate-600">
-                            {inicioEstampado !== null
-                                ? `Iniciado por ${currentOrder.estampado.operadorInicio || assignedTo}. El tiempo se guarda al pasar a empaquetado.`
-                                : 'Pulsa Iniciar estampado antes de pasar a empaquetado, excepto BOX / CUADRO.'}
+                            {inicioEtapa !== null
+                                ? `Iniciado por ${currentOrder[currentStage]?.operadorInicio || assignedTo}. El tiempo se guarda al completar la etapa.`
+                                : `Pulsa Iniciar ${stageName.toLowerCase()} antes de pasar el pedido${currentStage === 'estampado' ? ', excepto BOX / CUADRO' : ''}.`}
                         </span>
                     </div>
                 )}

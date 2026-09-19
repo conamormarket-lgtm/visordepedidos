@@ -16,7 +16,10 @@ import { securityMonitor } from "../utils/securityMonitor";
 import { descontarInventarioPorPedido } from "./inventory";
 import { calcularTipoEnvio } from "../utils/zonaEnvio";
 import { ZONAS } from "../constants";
-import { calcularTiempoEstampado } from "../utils/tiempoEstampado";
+import { calcularTiempoEtapa, calcularTiempoImpresion } from "../utils/tiempoEstampado";
+
+const TIEMPO_CAMPO = { preparacion: 'tiempoPreparacion', estampado: 'tiempoEstampado', empaquetado: 'tiempoEmpaquetado' };
+const ESTADO_ETAPA = { preparacion: 'Listo para Preparar', estampado: 'En Estampado', empaquetado: 'En Empaquetado' };
 
 const COLLECTION_NAME = "pedidos";
 
@@ -278,6 +281,9 @@ const normalizeOrder = (doc) => {
         preparacion: normalizeStage(data.preparacion),
         estampado: normalizeStage(data.estampado),
         tiempoEstampado: data.tiempoEstampado ?? null,
+        tiempoPreparacion: data.tiempoPreparacion ?? null,
+        tiempoEmpaquetado: data.tiempoEmpaquetado ?? null,
+        tiempoImpresion: calcularTiempoImpresion(data.impresion),
         empaquetado: normalizeStage(data.empaquetado),
         isStockPaused: estGen === "En Pausa por Stock",
         images: images,
@@ -418,6 +424,25 @@ const deduplicateOrders = (orders) => {
     return result;
 };
 
+// La transición de impresión se escribe en el ERP. Sincronizar únicamente
+// diferencias, releyendo en transacción para no guardar fechas obsoletas.
+const sincronizarTiempoImpresion = async (snapshot) => {
+    const esperado = calcularTiempoImpresion(snapshot.data().impresion);
+    if (snapshot.data().tiempoImpresion === esperado) return;
+    try {
+        await runTransaction(db, async tx => {
+            const actual = await tx.get(snapshot.ref);
+            if (!actual.exists()) return;
+            const tiempoImpresion = calcularTiempoImpresion(actual.data().impresion);
+            if (actual.data().tiempoImpresion === tiempoImpresion) return;
+            tx.update(snapshot.ref, { tiempoImpresion });
+        });
+        securityMonitor.registerOperation(1);
+    } catch (error) {
+        console.error(`[tiempoImpresion] No se pudo guardar el pedido ${snapshot.id}:`, error);
+    }
+};
+
 export const subscribeToOrders = (callback, onError) => {
 
     // 1. Inmediate load from Storage Cache
@@ -444,7 +469,16 @@ export const subscribeToOrders = (callback, onError) => {
 
     let isFirstSnapshot = true;
 
-    return onSnapshot(q, (snapshot) => {
+    return onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+        // Solo cambios confirmados: evita escrituras repetidas por caché local
+        // y por snapshots optimistas de nuestras propias transacciones.
+        if (!snapshot.metadata.fromCache) {
+            snapshot.docChanges({ includeMetadataChanges: true }).forEach(change => {
+                if (change.type !== 'removed' && !change.doc.metadata.hasPendingWrites) {
+                    void sincronizarTiempoImpresion(change.doc);
+                }
+            });
+        }
         // Registrar el número de documentos leídos/cambiados
         securityMonitor.registerOperation(snapshot.docChanges().length);
 
@@ -620,28 +654,29 @@ const asignarNumeroCola = async (etapa, esPrioridad) => {
 
 
 // Se captura al pulsar; una segunda pulsación no reinicia el tiempo.
-export const startStamping = async (orderId) => {
+export const startStage = async (orderId, stage) => {
+    if (!TIEMPO_CAMPO[stage]) throw new Error("Etapa no válida.");
     const inicio = new Date();
     const refs = getAllRealIds(orderId).map(id => doc(db, COLLECTION_NAME, id));
     await runTransaction(db, async tx => {
         const snapshots = await Promise.all(refs.map(ref => tx.get(ref)));
-        if (snapshots.some(snap => !snap.exists() || snap.data().estadoGeneral !== 'En Estampado')) {
-            throw new Error('El pedido ya no está en estampado.');
+        if (snapshots.some(snap => !snap.exists() || snap.data().estadoGeneral !== ESTADO_ETAPA[stage])) {
+            throw new Error(`El pedido ya no está en ${stage}.`);
         }
-        if (snapshots.some(snap => snap.data().estampado?.fechaInicio)) return;
-        const operador = snapshots[0].data().estampado?.operador;
+        if (snapshots.some(snap => snap.data()[stage]?.fechaInicio)) return;
+        const operador = snapshots[0].data()[stage]?.operador;
         if (!operador || operador === 'Sin Asignar') throw new Error('Asigna un operario antes de iniciar.');
         refs.forEach(ref => tx.update(ref, {
-            'estampado.fechaInicio': inicio,
-            'estampado.operadorInicio': operador,
-            tiempoEstampado: null,
+            [`${stage}.fechaInicio`]: inicio,
+            [`${stage}.operadorInicio`]: operador,
+            [TIEMPO_CAMPO[stage]]: null,
             updatedAt: serverTimestamp(),
             historialModificaciones: arrayUnion({
                 timestamp: inicio,
                 usuarioId: 'visor-pedidos',
                 usuarioEmail: operador,
-                accion: 'Inicio de estampado',
-                detalle: 'Inicio manual de estampado',
+                accion: `Inicio de ${stage}`,
+                detalle: `Inicio manual de ${stage}`,
             }),
         }));
     });
@@ -665,21 +700,20 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "empaquetado") newEstadoGeneral = "En Empaquetado";
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
-    // Leer el doc principal para obtener el operador actual Y esPrioridad
-    // (una sola lectura de Firestore para ambos datos)
-    let operadorActual = "Visor Pedidos";
-    let esPrioridadDelPedido = false;
-    try {
-        const docSnap = await getDoc(primaryRef);
-        if (docSnap.exists()) {
-            const d = docSnap.data();
-            const op = d[currentStage]?.operador || d[currentStage]?.operadorNombre;
-            if (op && op !== "Sin Asignar") operadorActual = op;
-            esPrioridadDelPedido = d.esPrioridad === true || d.EsPrioridad === true;
-        }
-    } catch (e) {
-        console.warn("[updateOrderStage] No se pudo leer doc previo:", e);
+    const permiteSinInicio = esBoxCuadro && currentStage === 'estampado' && newStatus === 'empaquetado';
+    if (!TIEMPO_CAMPO[currentStage]) throw new Error('Etapa no válida.');
+    const previo = await getDoc(primaryRef);
+    if (!previo.exists() || previo.data().estadoGeneral !== ESTADO_ETAPA[currentStage]) {
+        throw new Error('El pedido ya no está en la etapa esperada. Actualiza la vista.');
     }
+    if (!previo.data()[currentStage]?.fechaInicio && !permiteSinInicio) {
+        throw new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`);
+    }
+
+    const datosPrevios = previo.data();
+    const op = datosPrevios[currentStage]?.operador || datosPrevios[currentStage]?.operadorNombre;
+    const operadorActual = op && op !== 'Sin Asignar' ? op : 'Visor Pedidos';
+    const esPrioridadDelPedido = datosPrevios.esPrioridad === true || datosPrevios.EsPrioridad === true;
 
     const nowDate = horaAccion;
     const historialEntry = {
@@ -766,19 +800,19 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     securityMonitor.registerOperation(realIds.length);
     // Escribir en TODOS los docIds hermanos simultaneamente
     // (esto solo llega si el inventario ya fue descontado correctamente)
-    if (currentStage === 'estampado' && newStatus === 'empaquetado') {
+    if (TIEMPO_CAMPO[currentStage]) {
         await runTransaction(db, async tx => {
             const refs = realIds.map(id => doc(db, COLLECTION_NAME, id));
             const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
-            if (snaps.some(snap => !snap.exists() || snap.data().estadoGeneral !== 'En Estampado')) {
-                throw new Error('El pedido ya no está en estampado. Actualiza la vista.');
+            if (snaps.some(snap => !snap.exists() || snap.data().estadoGeneral !== ESTADO_ETAPA[currentStage])) {
+                throw new Error('El pedido ya no está en la etapa esperada. Actualiza la vista.');
             }
-            const inicio = snaps.map(snap => snap.data().estampado?.fechaInicio).find(Boolean);
-            const tiempoEstampado = calcularTiempoEstampado(inicio, nowDate);
-            if (tiempoEstampado === null && !esBoxCuadro) {
-                throw new Error('Debes pulsar Iniciar estampado antes de pasar el pedido a empaquetado.');
+            const inicio = snaps.map(snap => snap.data()[currentStage]?.fechaInicio).find(Boolean);
+            const duracion = calcularTiempoEtapa(inicio, nowDate);
+            if (duracion === null && !permiteSinInicio) {
+                throw new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`);
             }
-            refs.forEach(ref => tx.update(ref, { ...updateData, tiempoEstampado }));
+            refs.forEach(ref => tx.update(ref, { ...updateData, [TIEMPO_CAMPO[currentStage]]: duracion }));
         });
     } else {
         await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
@@ -823,11 +857,11 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
     };
 
     securityMonitor.registerOperation(realIds.length);
-    if (prevStage === 'estampado') restoreData.tiempoEstampado = null;
-    if (completedStage === 'estampado') {
-        restoreData['estampado.fechaInicio'] = null;
-        restoreData['estampado.operadorInicio'] = null;
-        restoreData.tiempoEstampado = null;
+    if (TIEMPO_CAMPO[prevStage]) restoreData[TIEMPO_CAMPO[prevStage]] = null;
+    if (TIEMPO_CAMPO[completedStage]) {
+        restoreData[`${completedStage}.fechaInicio`] = null;
+        restoreData[`${completedStage}.operadorInicio`] = null;
+        restoreData[TIEMPO_CAMPO[completedStage]] = null;
     }
     await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), restoreData)));
 };
