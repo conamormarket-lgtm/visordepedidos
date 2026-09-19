@@ -16,6 +16,7 @@ import { securityMonitor } from "../utils/securityMonitor";
 import { descontarInventarioPorPedido } from "./inventory";
 import { calcularTipoEnvio } from "../utils/zonaEnvio";
 import { ZONAS } from "../constants";
+import { calcularTiempoEstampado } from "../utils/tiempoEstampado";
 
 const COLLECTION_NAME = "pedidos";
 
@@ -109,12 +110,12 @@ const resolveVisualId = (data, docId) => {
 // Helper to ensure dates are plain objects for JSON comparison
 const normalizeDate = (date) => {
     if (!date) return null;
+    if (date.seconds !== undefined) {
+        return { seconds: date.seconds, nanoseconds: date.nanoseconds || 0 };
+    }
     if (typeof date.toDate === 'function') {
         const d = date.toDate();
         return { seconds: Math.floor(d.getTime() / 1000), nanoseconds: 0 };
-    }
-    if (date.seconds !== undefined) {
-        return { seconds: date.seconds, nanoseconds: date.nanoseconds || 0 };
     }
     return date;
 };
@@ -126,7 +127,8 @@ const normalizeStage = (stage) => {
         ...stage,
         fechaEntrada: normalizeDate(stage.fechaEntrada),
         fechaSalida: normalizeDate(stage.fechaSalida),
-        fechaFin: normalizeDate(stage.fechaFin)
+        fechaFin: normalizeDate(stage.fechaFin),
+        fechaInicio: normalizeDate(stage.fechaInicio)
     };
 };
 
@@ -275,6 +277,7 @@ const normalizeOrder = (doc) => {
         estadoGeneral: estGen,
         preparacion: normalizeStage(data.preparacion),
         estampado: normalizeStage(data.estampado),
+        tiempoEstampado: data.tiempoEstampado ?? null,
         empaquetado: normalizeStage(data.empaquetado),
         isStockPaused: estGen === "En Pausa por Stock",
         images: images,
@@ -616,7 +619,37 @@ const asignarNumeroCola = async (etapa, esPrioridad) => {
 };
 
 
-export const updateOrderStage = async (orderId, newStatus, currentStage, updates) => {
+// Se captura al pulsar; una segunda pulsación no reinicia el tiempo.
+export const startStamping = async (orderId) => {
+    const inicio = new Date();
+    const refs = getAllRealIds(orderId).map(id => doc(db, COLLECTION_NAME, id));
+    await runTransaction(db, async tx => {
+        const snapshots = await Promise.all(refs.map(ref => tx.get(ref)));
+        if (snapshots.some(snap => !snap.exists() || snap.data().estadoGeneral !== 'En Estampado')) {
+            throw new Error('El pedido ya no está en estampado.');
+        }
+        if (snapshots.some(snap => snap.data().estampado?.fechaInicio)) return;
+        const operador = snapshots[0].data().estampado?.operador;
+        if (!operador || operador === 'Sin Asignar') throw new Error('Asigna un operario antes de iniciar.');
+        refs.forEach(ref => tx.update(ref, {
+            'estampado.fechaInicio': inicio,
+            'estampado.operadorInicio': operador,
+            tiempoEstampado: null,
+            updatedAt: serverTimestamp(),
+            historialModificaciones: arrayUnion({
+                timestamp: inicio,
+                usuarioId: 'visor-pedidos',
+                usuarioEmail: operador,
+                accion: 'Inicio de estampado',
+                detalle: 'Inicio manual de estampado',
+            }),
+        }));
+    });
+    securityMonitor.registerOperation(refs.length);
+};
+
+export const updateOrderStage = async (orderId, newStatus, currentStage, updates, { esBoxCuadro = false } = {}) => {
+    const horaAccion = new Date();
     // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
     const realIds = getAllRealIds(orderId);
     const primaryRef = doc(db, COLLECTION_NAME, realIds[0]);
@@ -648,7 +681,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         console.warn("[updateOrderStage] No se pudo leer doc previo:", e);
     }
 
-    const nowDate = new Date();
+    const nowDate = horaAccion;
     const historialEntry = {
         timestamp: nowDate,
         usuarioId: "visor-pedidos",
@@ -733,7 +766,23 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     securityMonitor.registerOperation(realIds.length);
     // Escribir en TODOS los docIds hermanos simultaneamente
     // (esto solo llega si el inventario ya fue descontado correctamente)
-    await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
+    if (currentStage === 'estampado' && newStatus === 'empaquetado') {
+        await runTransaction(db, async tx => {
+            const refs = realIds.map(id => doc(db, COLLECTION_NAME, id));
+            const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
+            if (snaps.some(snap => !snap.exists() || snap.data().estadoGeneral !== 'En Estampado')) {
+                throw new Error('El pedido ya no está en estampado. Actualiza la vista.');
+            }
+            const inicio = snaps.map(snap => snap.data().estampado?.fechaInicio).find(Boolean);
+            const tiempoEstampado = calcularTiempoEstampado(inicio, nowDate);
+            if (tiempoEstampado === null && !esBoxCuadro) {
+                throw new Error('Debes pulsar Iniciar estampado antes de pasar el pedido a empaquetado.');
+            }
+            refs.forEach(ref => tx.update(ref, { ...updateData, tiempoEstampado }));
+        });
+    } else {
+        await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
+    }
 };
 
 /**
@@ -774,6 +823,12 @@ export const undoOrderStage = async (orderId, prevStage, completedStage, prevSna
     };
 
     securityMonitor.registerOperation(realIds.length);
+    if (prevStage === 'estampado') restoreData.tiempoEstampado = null;
+    if (completedStage === 'estampado') {
+        restoreData['estampado.fechaInicio'] = null;
+        restoreData['estampado.operadorInicio'] = null;
+        restoreData.tiempoEstampado = null;
+    }
     await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), restoreData)));
 };
 

@@ -8,7 +8,7 @@ import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
 import ImageActionModal from './components/ImageActionModal';
 import HistorialEnviosModal from './components/HistorialEnviosModal';
-import { subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
+import { startStamping, subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
@@ -396,6 +396,12 @@ function App() {
         }
     };
 
+    const handleStartStamping = async () => {
+        const order = filteredOrders[currentIndex];
+        if (!order || currentStage !== STAGES.ESTAMPADO) return;
+        await startStamping(order.id);
+    };
+
     const handleComplete = async () => {
         const currentOrder = filteredOrders[currentIndex];
         if (!currentOrder) return;
@@ -485,16 +491,19 @@ function App() {
             [`${nextStage}.fechaEntrada`]: currentOrder[nextStage]?.fechaEntrada || null,
         };
 
-        setLastAction({
-            orderId: currentOrder.id,
-            orderVisualId: currentOrder.orderId,
-            prevStage: currentStage,
-            completedStage: nextStage,
-            prevSnapshot,
-        });
-
-        await updateOrderStage(currentOrder.id, nextStage, currentStage);
-        incrementStats(currentStage);
+        try {
+            await updateOrderStage(currentOrder.id, nextStage, currentStage, undefined, { esBoxCuadro: true });
+            setLastAction({
+                orderId: currentOrder.id,
+                orderVisualId: currentOrder.orderId,
+                prevStage: currentStage,
+                completedStage: nextStage,
+                prevSnapshot,
+            });
+            incrementStats(currentStage);
+        } catch (err) {
+            alert(`Error al pasar a empaquetado: ${err.message}`);
+        }
     };
 
     // Enviar pedido POR MAYOR directamente a Reparto (sin pasar por estampado/empaquetado)
@@ -558,6 +567,7 @@ function App() {
                     operators={operators}
                     onAssign={handleAssign}
                     onComplete={handleComplete}
+                    onStartStamping={handleStartStamping}
                     onUndo={handleUndo}
                     onWholesale={handleWholesale}
                     onBox={handleBox}

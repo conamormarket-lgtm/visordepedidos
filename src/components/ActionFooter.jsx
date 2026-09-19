@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Printer, Loader2, Truck } from 'lucide-react';
 import { printTicket } from '../services/printService';
+import { fechaMilisegundos } from '../utils/tiempoEstampado';
 
 const ActionFooter = ({
     currentOrderIndex,
@@ -8,6 +9,7 @@ const ActionFooter = ({
     currentStage,
     onAssign,
     onComplete,
+    onStartStamping,
     onUndo,
     onWholesale,
     onBox,
@@ -20,6 +22,22 @@ const ActionFooter = ({
     onTagSelect,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [starting, setStarting] = useState(false);
+    const startLock = useRef(false);
+    const inicioEstampado = fechaMilisegundos(currentOrder?.estampado?.fechaInicio);
+    const handleStartStamping = async () => {
+        if (startLock.current) return;
+        startLock.current = true;
+        setStarting(true);
+        try {
+            await onStartStamping();
+        } catch (error) {
+            alert(`No se pudo iniciar el estampado: ${error.message}`);
+        } finally {
+            startLock.current = false;
+            setStarting(false);
+        }
+    };
     const [isTagOpen, setIsTagOpen] = useState(false);
     const [undoCountdown, setUndoCountdown] = useState(null);
     const [printStatus, setPrintStatus] = useState(null); // null | 'loading' | 'success' | 'error'
@@ -43,6 +61,8 @@ const ActionFooter = ({
     const currentTagValue = currentOrder?.[TAG_FIELD_BY_STAGE[currentStage]] || null;
 
     const isOperatorAssigned = assignedTo && assignedTo !== 'Sin Asignar';
+    const faltaInicioEstampado = currentStage === 'estampado' && inicioEstampado === null;
+    const puedeCompletar = !!currentOrder && isOperatorAssigned && !starting && !faltaInicioEstampado;
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -327,16 +347,34 @@ const ActionFooter = ({
                 )}
 
                 {/* Complete Button */}
+                {currentStage === 'estampado' && currentOrder && (
+                    <div className="flex flex-col gap-1">
+                        <button
+                            onClick={handleStartStamping}
+                            disabled={!isOperatorAssigned || starting || inicioEstampado !== null}
+                            className="w-full py-3 px-4 rounded-2xl bg-amber-500 text-slate-950 font-bold disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed"
+                        >
+                            {starting ? 'Guardando inicio…' : inicioEstampado !== null
+                                ? `Inicio: ${new Date(inicioEstampado).toLocaleString('es-PE', { timeZone: 'America/Lima', hour12: false })}`
+                                : 'Iniciar estampado'}
+                        </button>
+                        <span className="text-xs text-center text-slate-600">
+                            {inicioEstampado !== null
+                                ? `Iniciado por ${currentOrder.estampado.operadorInicio || assignedTo}. El tiempo se guarda al pasar a empaquetado.`
+                                : 'Pulsa Iniciar estampado antes de pasar a empaquetado, excepto BOX / CUADRO.'}
+                        </span>
+                    </div>
+                )}
                 <button
                     onClick={onComplete}
-                    disabled={!isOperatorAssigned}
+                    disabled={!puedeCompletar}
                     className={`w-full group relative overflow-hidden py-4 rounded-2xl flex items-center justify-center gap-3 border transition-all duration-300 transform
-                        ${isOperatorAssigned
+                        ${puedeCompletar
                             ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white shadow-lg shadow-blue-600/25 active:scale-[0.99] border-white/10 cursor-pointer'
                             : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'
                         }`}
                 >
-                    {isOperatorAssigned && (
+                    {puedeCompletar && (
                         <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
                     )}
                     <span className="text-xl font-black tracking-wider uppercase drop-shadow-sm">
@@ -344,11 +382,12 @@ const ActionFooter = ({
                     </span>
                 </button>
 
-                {/* Botón BOX/CUADRO: solo en estampado → siempre activo, sin requerir operador */}
+                {/* BOX/CUADRO puede avanzar sin iniciar el cronómetro. */}
                 {currentStage === 'estampado' && (
                     <button
                         onClick={onBox}
-                        className="w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border border-white/10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] transition-all duration-300 transform cursor-pointer"
+                        disabled={starting || !currentOrder}
+                        className="w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border border-white/10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] transition-all duration-300 transform cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
                         <span className="text-2xl">📦</span>
