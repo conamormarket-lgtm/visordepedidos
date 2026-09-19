@@ -18,7 +18,7 @@ const OrderDetails = ({ order, fullWidth = false }) => {
 
     return (
         // Main Container: fullWidth = sin imagen (POR MAYOR) → ocupa todo el ancho
-        <div className={`${fullWidth ? 'w-full' : 'w-full xl:w-[30%]'} p-5 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none flex-1`}>
+        <div className={`${fullWidth ? 'w-full' : 'w-full xl:w-[65%]'} min-w-0 min-h-0 p-5 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none flex-1`}>
 
             {/* Header Section */}
             <div className="flex flex-col mb-4 pb-4 border-b border-slate-200/60">

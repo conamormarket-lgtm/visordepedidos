@@ -46,13 +46,13 @@ const ImageItem = ({ img, idx, onImageClick }) => {
 
     return (
         <div
-            className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-shrink-0 w-full"
+            className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-1 min-h-0 w-full flex items-center justify-center"
             onClick={() => (onImageClick ? onImageClick(img) : window.open(img, '_blank'))}
         >
             <img
                 src={thumbnailUrl}
                 alt={`Diseño ${idx + 1}`}
-                className="w-full h-auto rounded-lg shadow-sm border border-gray-200"
+                className="w-full h-full object-contain rounded-lg"
                 loading="lazy"
                 // decoding async: la decodificación de la imagen no bloquea el
                 // hilo principal, que es lo que trababa el swipe en tablets.
@@ -69,7 +69,7 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
 
     if (!images || images.length === 0) {
         return (
-            <div className="w-full xl:w-[70%] bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold h-[51vh] xl:h-full border-b xl:border-b-0 xl:border-r border-white/40 flex-shrink-0">
+            <div className="w-full xl:w-[35%] bg-slate-200/40 backdrop-blur-md flex items-center justify-center text-slate-500 font-bold h-[24vh] xl:h-full border-b xl:border-b-0 xl:border-r border-white/40 flex-shrink-0">
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-16 h-16 rounded-full bg-slate-300/50 flex items-center justify-center">
                         <span className="text-3xl">📷</span>
@@ -81,7 +81,7 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
     }
 
     return (
-        <div className="w-full xl:w-[70%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[51vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
+        <div className="w-full xl:w-[35%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-hidden h-[24vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
             {/* Esquina superior derecha: fecha de video + historial de envíos.
                 Van en la misma fila para que no se pisen entre ellos. */}
             <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
@@ -103,9 +103,7 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
                     </button>
                 )}
             </div>
-            {images.map((img, idx) => (
-                <ImageItem key={idx} img={img} idx={idx} onImageClick={onImageClick} />
-            ))}
+            <ImageItem key={images[0]} img={images[0]} idx={0} onImageClick={onImageClick} />
         </div>
     );
 };
