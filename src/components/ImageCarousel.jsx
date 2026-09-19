@@ -46,13 +46,13 @@ const ImageItem = ({ img, idx, onImageClick }) => {
 
     return (
         <div
-            className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-1 min-h-0 w-full flex items-center justify-center"
+            className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-zoom-in flex-shrink-0 w-full"
             onClick={() => (onImageClick ? onImageClick(img) : window.open(img, '_blank'))}
         >
             <img
                 src={thumbnailUrl}
                 alt={`Diseño ${idx + 1}`}
-                className="w-full h-full object-contain rounded-lg"
+                className="w-full h-auto object-contain rounded-lg"
                 loading="lazy"
                 // decoding async: la decodificación de la imagen no bloquea el
                 // hilo principal, que es lo que trababa el swipe en tablets.
@@ -81,7 +81,7 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
     }
 
     return (
-        <div className="w-full xl:w-[35%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-hidden h-[24vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
+        <div className="w-full xl:w-[35%] bg-white/30 backdrop-blur-sm border-b xl:border-b-0 xl:border-r border-white/30 overflow-y-auto h-[24vh] xl:h-full p-4 flex flex-col gap-4 relative no-scrollbar scroll-smooth flex-shrink-0">
             {/* Esquina superior derecha: fecha de video + historial de envíos.
                 Van en la misma fila para que no se pisen entre ellos. */}
             <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
@@ -103,7 +103,9 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
                     </button>
                 )}
             </div>
-            <ImageItem key={images[0]} img={images[0]} idx={0} onImageClick={onImageClick} />
+            {images.map((img, idx) => (
+                <ImageItem key={`${img}-${idx}`} img={img} idx={idx} onImageClick={onImageClick} />
+            ))}
         </div>
     );
 };
