@@ -585,7 +585,7 @@ function App() {
             }
         >
             {/* Wrapper relativo para posicionar las flechas laterales */}
-            <div className="relative w-full h-full flex items-stretch">
+            <div className={`relative w-full flex items-stretch ${currentOrder && !sinImagen ? 'min-h-full shrink-0' : 'h-full'}`}>
 
                 {/* Flecha IZQUIERDA — solo desktop */}
                 <button
@@ -607,7 +607,7 @@ function App() {
                 {/* Card del pedido */}
                 <div
                     key={currentIndex}
-                    className={`flex flex-col xl:flex-row flex-1 min-w-0 h-full rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm shadow-xl transition-all duration-300 ${
+                    className={`flex flex-col xl:flex-row flex-1 min-w-0 ${currentOrder && !sinImagen ? 'min-h-full' : 'h-full'} rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm shadow-xl transition-all duration-300 ${
                         currentOrder?.prioridadCRM
                             ? 'border-4 border-red-500 ring-4 ring-red-500/30'
                             : 'border border-white/60'
