@@ -176,6 +176,11 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                     invRef: item.ref,
                     invData: {
                         quantity: newQuantity,
+                        // El ERP arrastra el mismo número con dos nombres. Actualizar solo
+                        // `quantity` los hacía divergir: la verificación de stock del ERP
+                        // leía `cantidad`, que se quedaba en el valor previo al pedido, y
+                        // daba por disponibles prendas que ya habían salido.
+                        cantidad: newQuantity,
                         salidas: newSalidas,
                         updatedAt: serverTimestamp()
                     },
