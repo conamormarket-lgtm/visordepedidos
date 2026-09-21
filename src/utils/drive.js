@@ -67,6 +67,7 @@ export const convertDriveLink = (url) => {
 
     if (!id) return url;
 
-    // Use the thumbnail endpoint with 'w' (width) parameter
-    return `https://drive.google.com/thumbnail?id=${id}&sz=w${anchoMiniatura()}&v=${versionMiniatura(url)}`;
+    // Drive /thumbnail redirige a este host y elimina los parámetros extra.
+    // Versionar la URL final evita que esa redirección reutilice la caché vieja.
+    return `https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}=w${anchoMiniatura()}?v=${versionMiniatura(url)}`;
 };
