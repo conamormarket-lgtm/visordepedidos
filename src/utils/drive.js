@@ -1,4 +1,16 @@
-import { isModoLigero } from './modoLigero';
+import { isModoLigero } from './modoLigero.js';
+
+// Una versión por enlace y sesión evita reutilizar miniaturas antiguas del
+// navegador. Se comparte entre carrusel y modales, sin variar en cada render.
+const sesionMiniaturas = globalThis.crypto?.randomUUID?.()
+    ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+const versionesMiniaturas = new Map();
+const versionMiniatura = (url) => {
+    if (!versionesMiniaturas.has(url)) {
+        versionesMiniaturas.set(url, `${sesionMiniaturas}-${versionesMiniaturas.size}`);
+    }
+    return versionesMiniaturas.get(url);
+};
 
 /**
  * Ancho al que se piden las miniaturas de Drive.
@@ -56,5 +68,5 @@ export const convertDriveLink = (url) => {
     if (!id) return url;
 
     // Use the thumbnail endpoint with 'w' (width) parameter
-    return `https://drive.google.com/thumbnail?id=${id}&sz=w${anchoMiniatura()}`;
+    return `https://drive.google.com/thumbnail?id=${id}&sz=w${anchoMiniatura()}&v=${versionMiniatura(url)}`;
 };
