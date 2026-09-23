@@ -758,15 +758,27 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         }
     }
 
-    // ── DESCONTAR INVENTARIO antes de escribir en Firestore ────────────────────
-    // ORDEN CRÍTICO: validar y descontar el inventario PRIMERO.
-    // Si esto se hiciera después del updateDoc (como antes), una caída de
-    // red o cierre de la app entre los dos awaits dejaba el pedido en
-    // "En Estampado" sin stock descontado y sin forma de detectarlo.
-    // Al hacerlo primero: si falla, Firestore nunca recibe el avance y el
-    // pedido permanece en Preparación sin necesidad de revertir nada.
+    // Todas las lecturas y validaciones preceden a las escrituras de inventario.
+    const prepararAvance = async tx => {
+        const refs = realIds.map(id => doc(db, COLLECTION_NAME, id));
+        const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
+        if (snaps.some(snap => !snap.exists() || snap.data().estadoGeneral !== ESTADO_ETAPA[currentStage])) {
+            throw new Error('El pedido ya no está en la etapa esperada. Actualiza la vista.');
+        }
+        const inicio = snaps.map(snap => snap.data()[currentStage]?.fechaInicio).find(Boolean);
+        const duracion = calcularTiempoEtapa(inicio, nowDate);
+        if (duracion === null && !permiteSinInicio) {
+            throw new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`);
+        }
+        return () => refs.forEach(ref => tx.update(ref, {
+            ...updateData,
+            [TIEMPO_CAMPO[currentStage]]: duracion,
+            ...(currentStage === 'preparacion' && newStatus === 'estampado' && { inventarioDescontado: true }),
+        }));
+    };
+    // El descuento y el avance se confirman juntos o se cancelan juntos.
     if (newStatus === "estampado" && currentStage === "preparacion") {
-        const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual);
+        const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual, prepararAvance);
 
         if (!resultadoInventario.exito) {
             // El pedido AÚN ESTÁ en Preparación en Firestore (no escribimos nada todavía).
@@ -794,31 +806,17 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
                 throw new Error(`ERROR_INVENTARIO: ${resultadoInventario.mensaje}`);
             }
         }
-        // Inventario descontado exitosamente → continuar con el avance de Firestore
+        // La etapa ya se guardó junto al inventario.
+        securityMonitor.registerOperation(realIds.length);
+        return;
     }
 
     securityMonitor.registerOperation(realIds.length);
-    // Escribir en TODOS los docIds hermanos simultaneamente
-    // (esto solo llega si el inventario ya fue descontado correctamente)
-    if (TIEMPO_CAMPO[currentStage]) {
-        await runTransaction(db, async tx => {
-            const refs = realIds.map(id => doc(db, COLLECTION_NAME, id));
-            const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
-            if (snaps.some(snap => !snap.exists() || snap.data().estadoGeneral !== ESTADO_ETAPA[currentStage])) {
-                throw new Error('El pedido ya no está en la etapa esperada. Actualiza la vista.');
-            }
-            const inicio = snaps.map(snap => snap.data()[currentStage]?.fechaInicio).find(Boolean);
-            const duracion = calcularTiempoEtapa(inicio, nowDate);
-            if (duracion === null && !permiteSinInicio) {
-                throw new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`);
-            }
-            refs.forEach(ref => tx.update(ref, { ...updateData, [TIEMPO_CAMPO[currentStage]]: duracion }));
-        });
-    } else {
-        await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), updateData)));
-    }
+    await runTransaction(db, async tx => {
+        const guardarAvance = await prepararAvance(tx);
+        guardarAvance();
+    });
 };
-
 /**
  * Revierte un pedido a su etapa anterior.
  * @param {string} orderId - Document ID real del pedido

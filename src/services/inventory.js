@@ -67,7 +67,9 @@ function agruparPrendas(prendas) {
     return Array.from(byPrenda.values());
 }
 
-export async function descontarInventarioPorPedido(pedidoId, userLog) {
+// prepararAvance realiza sus lecturas y devuelve una función de escrituras.
+// Así inventario, historial y etapa se confirman en una sola transacción.
+export async function descontarInventarioPorPedido(pedidoId, userLog, prepararAvance) {
     try {
         const pedidoRef = doc(db, "pedidos", pedidoId);
         const historialRef = collection(db, COLLECTION_HISTORIAL);
@@ -81,9 +83,11 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
                 throw new Error("Pedido no encontrado");
             }
             const data = pedidoSnap.data();
+            const guardarAvance = prepararAvance ? await prepararAvance(transaction) : null;
 
             if (data.inventarioDescontado) {
-                throw new Error("ALREADY_DISCOUNTED");
+                guardarAvance?.();
+                return;
             }
 
             const prendasDetalladas = [];
@@ -213,6 +217,7 @@ export async function descontarInventarioPorPedido(pedidoId, userLog) {
             }
 
             transaction.update(pedidoRef, { inventarioDescontado: true });
+            guardarAvance?.();
 
             descontadasResult = descontadas;
         });
