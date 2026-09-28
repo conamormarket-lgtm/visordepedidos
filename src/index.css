@@ -120,6 +120,21 @@
     animation: none !important;
 }
 
+.modo-ligero .animate-pulse,
+.modo-ligero .animate-pulse-soft,
+.modo-ligero .animate-shimmer,
+.modo-ligero .animate-slide-up-fade {
+    animation: none !important;
+}
+
+.modo-ligero .transition-all {
+    transition: none !important;
+}
+
+.modo-ligero .scroll-smooth {
+    scroll-behavior: auto;
+}
+
 /* Respeta la preferencia del sistema, esté o no en modo ligero. */
 @media (prefers-reduced-motion: reduce) {
     .animate-slide-in-right,

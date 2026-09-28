@@ -22,22 +22,35 @@ const ActionFooter = ({
     onTagSelect,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [starting, setStarting] = useState(false);
-    const startLock = useRef(false);
-    const inicioEtapa = fechaMilisegundos(currentOrder?.[currentStage]?.fechaInicio);
+    const [startingKeys, setStartingKeys] = useState(() => new Set());
+    const [confirmedStart, setConfirmedStart] = useState(null);
+    const [startError, setStartError] = useState(null);
+    const startLock = useRef(new Set());
+    const stageKey = `${currentOrderId}:${currentStage}`;
+    const starting = startingKeys.has(stageKey);
+    const confirmed = confirmedStart?.key === stageKey ? confirmedStart : null;
+    const inicioEtapa = fechaMilisegundos(currentOrder?.[currentStage]?.fechaInicio)
+        ?? fechaMilisegundos(confirmed?.fechaInicio);
     const handleStartStage = async () => {
-        if (startLock.current) return;
-        startLock.current = true;
-        setStarting(true);
+        if (!currentOrder || startLock.current.has(stageKey) || inicioEtapa !== null) return;
+        startLock.current.add(stageKey);
+        setStartingKeys(keys => new Set(keys).add(stageKey));
+        setStartError(null);
         try {
-            await onStartStage();
+            const result = await onStartStage();
+            if (result) setConfirmedStart({ ...result, key: stageKey });
         } catch (error) {
-            alert(`No se pudo iniciar la etapa: ${error.message}`);
+            setStartError({ key: stageKey, message: error.message });
         } finally {
-            startLock.current = false;
-            setStarting(false);
+            startLock.current.delete(stageKey);
+            setStartingKeys(keys => { const next = new Set(keys); next.delete(stageKey); return next; });
         }
     };
+    useEffect(() => {
+        if (currentOrder?.[currentStage]?.fechaInicio && confirmedStart?.key === stageKey) {
+            setConfirmedStart(null);
+        }
+    }, [currentOrder, currentStage, stageKey, confirmedStart]);
     const [isTagOpen, setIsTagOpen] = useState(false);
     const [undoCountdown, setUndoCountdown] = useState(null);
     const [printStatus, setPrintStatus] = useState(null); // null | 'loading' | 'success' | 'error'
@@ -354,15 +367,16 @@ const ActionFooter = ({
                             disabled={!isOperatorAssigned || starting || inicioEtapa !== null}
                             className="w-full py-3 px-4 rounded-2xl bg-amber-500 text-slate-950 font-bold disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed"
                         >
-                            {starting ? 'Guardando inicio…' : inicioEtapa !== null
+                            {starting ? 'Confirmando inicio…' : inicioEtapa !== null
                                 ? `Inicio: ${new Date(inicioEtapa).toLocaleString('es-PE', { timeZone: 'America/Lima', hour12: false })}`
                                 : `Iniciar ${stageName.toLowerCase()}`}
                         </button>
                         <span className="text-xs text-center text-slate-600">
-                            {inicioEtapa !== null
-                                ? `Iniciado por ${currentOrder[currentStage]?.operadorInicio || assignedTo}. El tiempo se guarda al completar la etapa.`
+                            {starting ? 'Solicitud enviada. Esperando confirmación del servidor; no necesitas volver a pulsar.' : inicioEtapa !== null
+                                ? `Iniciado por ${currentOrder[currentStage]?.operadorInicio || confirmed?.operadorInicio || assignedTo}. El tiempo se guarda al completar la etapa.`
                                 : `Pulsa Iniciar ${stageName.toLowerCase()} antes de pasar el pedido${currentStage === 'estampado' ? ', excepto BOX / CUADRO' : ''}.`}
                         </span>
+                        {startError?.key === stageKey && <span role="alert" className="text-sm text-center text-red-700">No se pudo iniciar: {startError.message}. Puedes volver a intentarlo.</span>}
                     </div>
                 )}
                 <button

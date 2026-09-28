@@ -4,6 +4,14 @@ import { convertDriveLink } from './drive.js';
 
 const original = 'https://drive.google.com/file/d/archivoA/view?usp=sharing';
 
+test('ajusta la miniatura al panel real sin cambiar su versión', () => {
+    const small = new URL(convertDriveLink(original, 450));
+    const large = new URL(convertDriveLink(original, 1000));
+    assert.match(small.pathname, /=w600$/);
+    assert.match(large.pathname, /=w1000$/);
+    assert.equal(small.searchParams.get('v'), large.searchParams.get('v'));
+});
+
 test('reutiliza la miniatura entre renders y componentes de la misma sesión', () => {
     const first = convertDriveLink(original);
     assert.equal(convertDriveLink(original), first);

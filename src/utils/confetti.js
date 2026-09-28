@@ -3,6 +3,8 @@
  * Genera una explosión física de partículas desde las esquinas inferiores de la pantalla.
  */
 
+import { isModoLigero } from './modoLigero';
+
 class ConfettiParticle {
     constructor(x, y, vx, vy, color) {
         this.x = x;
@@ -63,6 +65,7 @@ class ConfettiParticle {
 }
 
 export const triggerConfetti = () => {
+    if (isModoLigero()) return;
     // Si ya existe un canvas activo de confeti, no duplicarlo
     if (document.getElementById('visor-confetti-canvas')) return;
 

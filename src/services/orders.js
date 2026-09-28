@@ -1,3 +1,4 @@
+import { readOrdersCache, writeOrdersCache } from '../utils/ordersCache';
 import { db } from "../firebase/config";
 import {
     collection,
@@ -319,25 +320,7 @@ const normalizeOrder = (doc) => {
     return sortObjectKeys(orderData);
 };
 
-// Local Cache logic to minimize UI re-renders and bridge sessions
-// v3: los pedidos normalizados incluyen 'zonaEnvio' (split Lima/Provincia) y
-// 'cobranza.fechaPagoCero' normalizada. Subir la version invalida la cache
-// vieja, que no tiene esos campos y ordenaria mal hasta el primer snapshot.
-const CACHE_KEY = 'pedidos_cache_v3';
-
-const getCache = () => {
-    try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        return cached ? JSON.parse(cached) : [];
-    } catch (e) {
-        return [];
-    }
-};
-
-// El cache pesa ~350 KB y localStorage.setItem es SINCRONO: escribirlo en cada
-// snapshot congelaba el hilo principal en las tablets (eMMC lenta). Ahora se
-// agrupa y se escribe cuando el navegador esta ocioso. El estado en memoria se
-// actualiza igual de inmediato: esto solo difiere el guardado en disco.
+// Persistencia asíncrona agrupada: no serializar toda la cola en localStorage.
 const CACHE_DEBOUNCE_MS = 1500;
 const CACHE_ESPERA_MAX_MS = 10000; // tope: nunca posponer mas de 10s
 
@@ -351,11 +334,7 @@ const escribirCache = () => {
     _cachePendiente = null;
     _cacheDesde = 0;
     if (_cacheTimer) { clearTimeout(_cacheTimer); _cacheTimer = null; }
-    try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    } catch (e) {
-        console.error("Error saving cache:", e);
-    }
+    void writeOrdersCache(data);
 };
 
 const saveCache = (data) => {
@@ -445,17 +424,18 @@ const sincronizarTiempoImpresion = async (snapshot) => {
 
 export const subscribeToOrders = (callback, onError) => {
 
-    // 1. Inmediate load from Storage Cache
-    let localOrders = getCache();
-    if (localOrders.length > 0) {
-        localOrders = deduplicateOrders(localOrders);
-        console.log("Monitor: Cargando desde caché local...", localOrders.length);
-        // IMPORTANTE: Poblar el mapa de IDs desde la caché para que getRealId funcione de inmediato
+    let localOrders = [];
+    let active = true;
+    let isFirstSnapshot = true;
+    void readOrdersCache().then(cached => {
+        // Una lectura lenta de disco nunca reemplaza un snapshot más reciente.
+        if (!active || !isFirstSnapshot || !cached.length) return;
+        localOrders = deduplicateOrders(cached);
         localOrders.forEach(o => {
             if (o.orderId && o.id) _pedidosIdMap.set(o.orderId, o.id);
         });
         callback(localOrders);
-    }
+    });
 
     const q = query(
         collection(db, COLLECTION_NAME),
@@ -467,9 +447,7 @@ export const subscribeToOrders = (callback, onError) => {
         ])
     );
 
-    let isFirstSnapshot = true;
-
-    return onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+    const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         // Solo cambios confirmados: evita escrituras repetidas por caché local
         // y por snapshots optimistas de nuestras propias transacciones.
         if (!snapshot.metadata.fromCache) {
@@ -491,16 +469,18 @@ export const subscribeToOrders = (callback, onError) => {
         if (isFirstSnapshot) {
             isFirstSnapshot = false;
             const freshOrders = [];
+            const cachedById = new Map(localOrders.map(o => [o.id, o]));
+            const snapshotIds = new Set(snapshot.docs.map(d => d.id));
 
             snapshot.docs.forEach((docSnap) => {
                 const normalized = normalizeOrder(docSnap);
                 freshOrders.push(normalized);
 
-                const cachedIdx = localOrders.findIndex(o => o.id === docSnap.id);
-                if (cachedIdx === -1) {
+                const cached = cachedById.get(docSnap.id);
+                if (!cached) {
                     hasChanges = true; // Doc nuevo no estaba en caché
                 } else {
-                    const oldStr = JSON.stringify(localOrders[cachedIdx]);
+                    const oldStr = JSON.stringify(cached);
                     const newStr = JSON.stringify(normalized);
                     if (oldStr !== newStr) {
                         hasChanges = true; // Doc cambió vs. caché
@@ -511,7 +491,7 @@ export const subscribeToOrders = (callback, onError) => {
 
             // Detectar docs que estaban en caché pero ya no están en Firebase
             localOrders.forEach(o => {
-                if (!snapshot.docs.find(d => d.id === o.id)) {
+                if (!snapshotIds.has(o.id)) {
                     hasChanges = true;
                 }
             });
@@ -572,6 +552,7 @@ export const subscribeToOrders = (callback, onError) => {
         if (onError) onError(error);
         else console.error("Firestore subscription error:", error);
     });
+    return () => { active = false; unsubscribe(); };
 };
 
 // Helper to get real ID from visual ID
@@ -658,12 +639,16 @@ export const startStage = async (orderId, stage) => {
     if (!TIEMPO_CAMPO[stage]) throw new Error("Etapa no válida.");
     const inicio = new Date();
     const refs = getAllRealIds(orderId).map(id => doc(db, COLLECTION_NAME, id));
-    await runTransaction(db, async tx => {
+    const result = await runTransaction(db, async tx => {
         const snapshots = await Promise.all(refs.map(ref => tx.get(ref)));
         if (snapshots.some(snap => !snap.exists() || snap.data().estadoGeneral !== ESTADO_ETAPA[stage])) {
             throw new Error(`El pedido ya no está en ${stage}.`);
         }
-        if (snapshots.some(snap => snap.data()[stage]?.fechaInicio)) return;
+        const iniciado = snapshots.find(snap => snap.data()[stage]?.fechaInicio);
+        if (iniciado) return {
+            fechaInicio: iniciado.data()[stage].fechaInicio,
+            operadorInicio: iniciado.data()[stage].operadorInicio || iniciado.data()[stage].operador,
+        };
         const operador = snapshots[0].data()[stage]?.operador;
         if (!operador || operador === 'Sin Asignar') throw new Error('Asigna un operario antes de iniciar.');
         refs.forEach(ref => tx.update(ref, {
@@ -679,8 +664,10 @@ export const startStage = async (orderId, stage) => {
                 detalle: `Inicio manual de ${stage}`,
             }),
         }));
+        return { fechaInicio: inicio, operadorInicio: operador };
     });
     securityMonitor.registerOperation(refs.length);
+    return result;
 };
 
 export const updateOrderStage = async (orderId, newStatus, currentStage, updates, { esBoxCuadro = false } = {}) => {

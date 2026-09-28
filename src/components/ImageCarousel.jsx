@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { memo, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { isModoLigero, subscribeModoLigero } from '../utils/modoLigero';
 import { Video, Clock } from 'lucide-react';
 import { convertDriveLink } from '../utils/drive';
 
@@ -23,9 +24,9 @@ const formatFechaVideo = (fechaVideo) => {
     return null;
 };
 
-const ImageItem = ({ img, idx, onImageClick }) => {
+const ImageItem = memo(({ img, idx, onImageClick, panelWidth, modoLigero }) => {
     const [failed, setFailed] = useState(false);
-    const thumbnailUrl = convertDriveLink(img);
+    const thumbnailUrl = convertDriveLink(img, panelWidth);
 
     if (failed) {
         return (
@@ -53,7 +54,7 @@ const ImageItem = ({ img, idx, onImageClick }) => {
                 src={thumbnailUrl}
                 alt={`Diseño ${idx + 1}`}
                 className="w-full h-auto object-contain rounded-lg"
-                loading="lazy"
+                loading={idx === 0 ? 'eager' : 'lazy'}
                 // decoding async: la decodificación de la imagen no bloquea el
                 // hilo principal, que es lo que trababa el swipe en tablets.
                 decoding="async"
@@ -62,12 +63,14 @@ const ImageItem = ({ img, idx, onImageClick }) => {
             />
         </div>
     );
-};
+});
 
 const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => {
     const fechaVideoLabel = formatFechaVideo(fechaVideo);
     const panelRef = useRef(null);
     const [panelHeight, setPanelHeight] = useState(null);
+    const [panelWidth, setPanelWidth] = useState(null);
+    const modoLigero = useSyncExternalStore(subscribeModoLigero, isModoLigero);
 
     useLayoutEffect(() => {
         const panel = panelRef.current;
@@ -78,6 +81,7 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
             const css = getComputedStyle(panel);
             const px = name => parseFloat(css[name]) || 0;
             const imageWidth = panel.clientWidth - px('paddingLeft') - px('paddingRight');
+            setPanelWidth(imageWidth);
             setPanelHeight(Math.ceil(imageWidth * 1066 / 1600
                 + px('paddingTop') + px('paddingBottom')
                 + px('borderTopWidth') + px('borderBottomWidth')));
@@ -124,11 +128,17 @@ const ImageCarousel = ({ images, fechaVideo, onImageClick, onVerHistorial }) => 
                     </button>
                 )}
             </div>
-            {images.map((img, idx) => (
-                <ImageItem key={`${img}-${idx}`} img={img} idx={idx} onImageClick={onImageClick} />
+            {panelWidth !== null && images.map((img, idx) => (
+                <ImageItem key={`${img}-${idx}`} img={img} idx={idx} onImageClick={onImageClick} panelWidth={panelWidth} modoLigero={modoLigero} />
             ))}
         </div>
     );
 };
 
-export default ImageCarousel;
+export default memo(ImageCarousel, (prev, next) =>
+    prev.fechaVideo === next.fechaVideo
+    && prev.onImageClick === next.onImageClick
+    && prev.onVerHistorial === next.onVerHistorial
+    && prev.images?.length === next.images?.length
+    && (prev.images || []).every((url, index) => url === next.images[index])
+);

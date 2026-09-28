@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from './components/Layout';
 import Header from './components/Header';
@@ -6,8 +6,8 @@ import ImageCarousel from './components/ImageCarousel';
 import OrderDetails from './components/OrderDetails';
 import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
-import ImageActionModal from './components/ImageActionModal';
-import HistorialEnviosModal from './components/HistorialEnviosModal';
+const ImageActionModal = lazy(() => import('./components/ImageActionModal'));
+const HistorialEnviosModal = lazy(() => import('./components/HistorialEnviosModal'));
 import { startStage, subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
@@ -51,7 +51,6 @@ function App() {
     const [currentStage, setCurrentStage] = useState(STAGES.PREPARACION);
     const [prepZona, setPrepZona] = useState(readZonaGuardada);
     const [allOrders, setAllOrders] = useState([]); // Store all fetched orders for the stage
-    const [filteredOrders, setFilteredOrders] = useState([]); // Store filtered results
     const [currentIndex, setCurrentIndex] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
     const [isLocked, setIsLocked] = useState(securityMonitor.getIsLocked());
@@ -67,6 +66,7 @@ function App() {
     // menú de acciones eso llega a asociar la imagen de un pedido con otro,
     // porque la imagen queda fija y el pedido cambia debajo.
     const hayModalAbierto = !!imagenSeleccionada || verHistorialEnvios;
+    const openHistorial = useCallback(() => setVerHistorialEnvios(true), []);
 
     const incrementStats = (stage) => {
         const updated = deviceStats.incrementCount(stage);
@@ -78,10 +78,7 @@ function App() {
     };
 
     // Swipe Logic
-    const [touchStartX, setTouchStartX] = useState(null);
-    const [touchStartY, setTouchStartY] = useState(null);
-    const [touchEndX, setTouchEndX] = useState(null);
-    const [touchEndY, setTouchEndY] = useState(null);
+    const touch = useRef({});
     const [animDirection, setAnimDirection] = useState('right'); // 'right' means sliding IN from right (Next), 'left' means IN from left (Prev)
     const minSwipeDistance = 50;
 
@@ -116,7 +113,8 @@ function App() {
     }, []); // SIN DEPENDENCIAS: Se ejecuta una sola vez al cargar la app
 
     // Filtrado local por etapa actual (Cero costo de red)
-    useEffect(() => {
+    const hasSearch = Boolean(searchTerm);
+    const sortedStageOrders = useMemo(() => {
         let stageOrders = allOrders.filter(o => o.status === currentStage);
 
         // ── Filtro de cobranza (solo en Preparación) ──────────────────────────
@@ -136,7 +134,7 @@ function App() {
         // aunque el pedido exista. La búsqueda se comporta igual que antes.
         const filtrandoPorZona = ZONA_SPLIT_ON
             && currentStage === STAGES.PREPARACION
-            && !searchTerm;
+            && !hasSearch;
 
         if (filtrandoPorZona) {
             stageOrders = stageOrders.filter(o => zonaDe(o) === prepZona);
@@ -233,6 +231,11 @@ function App() {
             };
         });
 
+        return stageOrders;
+    }, [currentStage, allOrders, hasSearch, prepZona]);
+
+    const filteredOrders = useMemo(() => {
+        const stageOrders = sortedStageOrders;
         if (searchTerm) {
             const term = searchTerm.trim();
             const termLower = term.toLowerCase();
@@ -259,32 +262,30 @@ function App() {
                     (o.comments && o.comments.toLowerCase().includes(termLower))
                 );
             }
-            setFilteredOrders(filtered);
+            return filtered;
         } else {
-            setFilteredOrders(stageOrders);
+            return stageOrders;
         }
+    }, [sortedStageOrders, searchTerm]);
 
-        // Reset index bounds check
-        if (currentIndex >= stageOrders.length && stageOrders.length > 0) {
-            setCurrentIndex(0);
-        }
-    }, [currentStage, allOrders, searchTerm, prepZona]);
+    useEffect(() => {
+        if (currentIndex >= filteredOrders.length) setCurrentIndex(0);
+    }, [currentIndex, filteredOrders.length]);
 
     const onTouchStart = (e) => {
-        setTouchEndX(null);
-        setTouchEndY(null);
-        setTouchStartX(e.targetTouches[0].clientX);
-        setTouchStartY(e.targetTouches[0].clientY);
+        touch.current = { startX: e.targetTouches[0].clientX, startY: e.targetTouches[0].clientY };
     };
 
     const onTouchMove = (e) => {
-        setTouchEndX(e.targetTouches[0].clientX);
-        setTouchEndY(e.targetTouches[0].clientY);
+        touch.current.endX = e.targetTouches[0].clientX;
+        touch.current.endY = e.targetTouches[0].clientY;
     };
 
     const onTouchEnd = () => {
         if (hayModalAbierto) return;
-        if (touchStartX === null || touchEndX === null || touchStartY === null || touchEndY === null) return;
+        const { startX: touchStartX, startY: touchStartY, endX: touchEndX, endY: touchEndY } = touch.current;
+        touch.current = {};
+        if (touchStartX == null || touchEndX == null || touchStartY == null || touchEndY == null) return;
 
         const distanceX = touchStartX - touchEndX;
         const distanceY = touchStartY - touchEndY;
@@ -341,6 +342,7 @@ function App() {
 
     const handleSearch = (term) => {
         setSearchTerm(term);
+        setCurrentIndex(0);
     };
 
     const handleNext = useCallback(() => {
@@ -399,7 +401,7 @@ function App() {
     const handleStartStage = async () => {
         const order = filteredOrders[currentIndex];
         if (!order) return;
-        await startStage(order.id, currentStage);
+        return startStage(order.id, currentStage);
     };
 
     const handleComplete = async () => {
@@ -548,6 +550,7 @@ function App() {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
+            onTouchCancel={() => { touch.current = {}; }}
             header={
                 <>
                     <Header
@@ -613,7 +616,7 @@ function App() {
                             : 'border border-white/60'
                     } ${!currentOrder ? 'opacity-80' : ''} ${animDirection === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
                 >
-                    {filteredOrders.length > 0 ? (
+                    {currentOrder ? (
                         <>
                             {!sinImagen && (
                                 <ImageCarousel
@@ -630,7 +633,7 @@ function App() {
                                     // El historial sí está en todas las etapas: enviar
                                     // solo se puede desde Preparación, pero saber qué se
                                     // mandó a imprimir sirve también más adelante.
-                                    onVerHistorial={() => setVerHistorialEnvios(true)}
+                                    onVerHistorial={openHistorial}
                                 />
                             )}
                             <OrderDetails order={currentOrder} fullWidth={sinImagen} />
@@ -664,6 +667,7 @@ function App() {
             </div>
 
             {/* Historial de envíos a Impresión del pedido actual */}
+            <Suspense fallback={<div role="status" className="fixed inset-0 z-50 bg-white/95 flex items-center justify-center">Cargando…</div>}>
             {verHistorialEnvios && currentOrder && (
                 <HistorialEnviosModal
                     order={currentOrder}
@@ -681,6 +685,7 @@ function App() {
             )}
 
             {/* Emergency Brake Overlay */}
+            </Suspense>
             {isLocked && (
                 <div className="fixed inset-0 z-[9999] bg-red-600/95 backdrop-blur-md flex flex-col items-center justify-center text-white p-8 text-center">
                     <div className="bg-white text-red-600 rounded-full p-6 mb-6 animate-bounce">
