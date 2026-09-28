@@ -1,6 +1,6 @@
 ---
 name: project
-description: "Project for visordepedidos. 141 gotchas, 376 conventions, 46 fixes."
+description: "Project for visordepedidos. 141 gotchas, 628 conventions, 46 fixes."
 domain: project
 triggers:
   - glob: "**/*"
@@ -10,7 +10,7 @@ enabled: true
 
 # Project
 
-Auto-compiled from **1037 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
+Auto-compiled from **1297 real patterns** in **visordepedidos**. This skill is auto-routed to agents when working on project files.
 
 ## ⚠️ Anti-Patterns & Gotchas
 

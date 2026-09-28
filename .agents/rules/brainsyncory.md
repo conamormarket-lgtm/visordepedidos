@@ -1,7 +1,7 @@
 
 
 # Project Memory — visordepedidos
-> 1405 notes | Score threshold: >40
+> 1414 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -18,10 +18,16 @@
 
 **Stack:** JavaScript · React + Tailwind · DB: Firebase
 
-## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Active: `src/services`
+## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Project Standards
 
-- **what-changed in orders.js**
-- **Fixed null crash in orders — prevents null/undefined runtime crashes**
+- Fixed null crash in Tope — prevents null/undefined runtime crashes — confirmed 3x
+- what-changed in constants.js — confirmed 3x
+- Version your API from day 1 (/api/v1/)
+- Use consistent response format across all endpoints
+- Implement soft delete for important data — don't hard delete without confirmation
+- Handle timezone correctly — store UTC, display in user's timezone
+- Make layouts responsive from the start — mobile-first approach
+- Disable submit button during form submission — prevent double-submit
 
 ## Known Fixes
 

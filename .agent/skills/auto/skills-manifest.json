@@ -1,19 +1,19 @@
 {
   "javascript": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.804Z",
-    "observationCount": 19,
+    "lastGenerated": "2026-08-31T13:28:12.307Z",
+    "observationCount": 23,
     "skillCount": 0,
     "domain": "javascript",
     "triggerGlobs": [
       "**/*.js",
       "**/*.jsx"
     ],
-    "description": "Javascript for visordepedidos. 3 conventions, 2 fixes."
+    "description": "Javascript for visordepedidos. 5 conventions, 2 fixes."
   },
   "javascript-react": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.805Z",
+    "lastGenerated": "2026-08-31T13:28:12.310Z",
     "observationCount": 6,
     "skillCount": 0,
     "domain": "javascript-react",
@@ -24,18 +24,18 @@
   },
   "project": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.804Z",
-    "observationCount": 1037,
+    "lastGenerated": "2026-08-31T13:28:12.307Z",
+    "observationCount": 1297,
     "skillCount": 0,
     "domain": "project",
     "triggerGlobs": [
       "**/*"
     ],
-    "description": "Project for visordepedidos. 141 gotchas, 376 conventions, 46 fixes."
+    "description": "Project for visordepedidos. 141 gotchas, 628 conventions, 46 fixes."
   },
   "problem-fix": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.807Z",
+    "lastGenerated": "2026-08-31T13:28:12.312Z",
     "observationCount": 0,
     "skillCount": 1,
     "domain": "problem-fix",
@@ -46,7 +46,7 @@
   },
   "config": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.805Z",
+    "lastGenerated": "2026-08-31T13:28:12.309Z",
     "observationCount": 462,
     "skillCount": 0,
     "domain": "config",
@@ -60,7 +60,7 @@
   },
   "decision": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.806Z",
+    "lastGenerated": "2026-08-31T13:28:12.310Z",
     "observationCount": 0,
     "skillCount": 6,
     "domain": "decision",
@@ -71,7 +71,7 @@
   },
   "gotcha": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.807Z",
+    "lastGenerated": "2026-08-31T13:28:12.311Z",
     "observationCount": 0,
     "skillCount": 43,
     "domain": "gotcha",
@@ -82,7 +82,7 @@
   },
   "convention": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.806Z",
+    "lastGenerated": "2026-08-31T13:28:12.311Z",
     "observationCount": 0,
     "skillCount": 77,
     "domain": "convention",
@@ -93,13 +93,24 @@
   },
   "python": {
     "enabled": true,
-    "lastGenerated": "2026-06-06T15:07:22.804Z",
-    "observationCount": 5,
+    "lastGenerated": "2026-08-31T13:28:12.308Z",
+    "observationCount": 6,
     "skillCount": 0,
     "domain": "python",
     "triggerGlobs": [
       "**/*.py"
     ],
     "description": "Python for visordepedidos. 3 conventions."
+  },
+  "typescript-react": {
+    "enabled": true,
+    "lastGenerated": "2026-08-31T13:28:12.308Z",
+    "observationCount": 2,
+    "skillCount": 0,
+    "domain": "typescript-react",
+    "triggerGlobs": [
+      "**/*.tsx"
+    ],
+    "description": "Typescript React for visordepedidos. 1 conventions."
   }
 }
