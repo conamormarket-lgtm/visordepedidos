@@ -10,6 +10,17 @@ export const STAGE_LABELS = {
     [STAGES.EMPAQUETADO]: 'EMPAQUETADO',
 };
 
+// Prioridad es una vista transversal; nunca una etapa que se escriba al pedido.
+export const ORDER_VIEWS = {
+    ...STAGES,
+    PRIORIDAD: 'prioridad',
+};
+
+export const ORDER_VIEW_LABELS = {
+    ...STAGE_LABELS,
+    [ORDER_VIEWS.PRIORIDAD]: 'PRIORIDAD',
+};
+
 export const STAGE_COLORS = {
     [STAGES.PREPARACION]: 'bg-blue-500',
     [STAGES.ESTAMPADO]: 'bg-indigo-500', // Placeholder

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, Monitor, Maximize, Minimize, Home, Truck, Zap, ZapOff } from 'lucide-react';
-import { STAGES, STAGE_LABELS, ZONAS, ZONA_LABELS } from '../constants';
+import { ORDER_VIEWS, ORDER_VIEW_LABELS, STAGES, ZONAS, ZONA_LABELS } from '../constants';
+import AreaIcon from './AreaIcon';
 import { isModoLigero, toggleModoLigero, subscribeModoLigero } from '../utils/modoLigero';
 
 const Header = ({
-    currentStage,
+    currentView,
     onTabChange,
     onSearch,
     stats,
@@ -21,20 +22,8 @@ const Header = ({
 
     useEffect(() => subscribeModoLigero(setModoLigeroState), []);
 
-    // Logic for sliding background
-    const [tabStyle, setTabStyle] = useState({});
-    const tabsRef = useRef([]);
-
-    useEffect(() => {
-        const activeIndex = Object.values(STAGES).indexOf(currentStage);
-        const activeTab = tabsRef.current[activeIndex];
-        if (activeTab) {
-            setTabStyle({
-                left: activeTab.offsetLeft,
-                width: activeTab.offsetWidth
-            });
-        }
-    }, [currentStage]);
+    // El padre limpia la búsqueda al cambiar de vista; reflejarlo en el input.
+    useEffect(() => setSearchTerm(''), [currentView]);
 
     useEffect(() => {
         const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -86,21 +75,21 @@ const Header = ({
         { zona: ZONAS.PROVINCIA, Icon: Truck, activeBg: 'from-indigo-500 to-violet-600' },
     ];
 
-    const showZonaTabs = zonaSplitEnabled && currentStage === STAGES.PREPARACION;
+    const showZonaTabs = zonaSplitEnabled && currentView === STAGES.PREPARACION;
 
     return (
         <div className="pt-3 px-4 z-30 relative">
             <div className="bg-white/40 backdrop-blur-xl border border-white/40 rounded-3xl shadow-lg overflow-hidden">
 
                 {/* ── Fila principal ── */}
-                <div className="flex justify-between items-center gap-4 px-6 py-3">
+                <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-3 sm:px-6 py-3">
 
                     {/* Left: Title */}
                     <div className="flex items-center gap-2.5 min-w-fit">
                         <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/10">
                             <Monitor size={14} />
                         </div>
-                        <div className="hidden sm:block">
+                        <div className="hidden lg:block">
                             <h1 className="text-[11px] font-bold text-slate-800 leading-tight">Visor de Pedidos</h1>
                             <p className="text-[9px] font-medium text-slate-800/60 leading-none">Producción v1.0</p>
                         </div>
@@ -133,42 +122,40 @@ const Header = ({
                     </div>
 
                     {/* Center: Navigation Tabs */}
-                    <div className="flex-1 flex justify-center overflow-hidden">
-                        <div className="bg-slate-200/50 p-1 rounded-xl flex relative shadow-inner backdrop-blur-sm border border-white/20">
-
-                            {/* Sliding Background */}
-                            <div
-                                className="absolute bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg shadow-md transition-all duration-300 ease-out h-[calc(100%-0.5rem)] top-1"
-                                style={{
-                                    left: tabStyle.left,
-                                    width: tabStyle.width
-                                }}
-                            />
-
-                            {Object.values(STAGES).map((stage, idx) => {
-                                const isActive = currentStage === stage;
+                    <nav aria-label="Áreas de producción" className="order-last col-span-2 flex justify-center sm:order-none sm:col-span-1">
+                        <div className="bg-slate-200/50 p-1 rounded-xl flex gap-1 shadow-inner backdrop-blur-sm border border-white/20">
+                            {Object.values(ORDER_VIEWS).map(view => {
+                                const isActive = currentView === view;
                                 return (
                                     <button
-                                        key={stage}
-                                        ref={el => tabsRef.current[idx] = el}
-                                        onClick={() => onTabChange(stage)}
+                                        key={view}
+                                        type="button"
+                                        onClick={() => onTabChange(view)}
+                                        title={ORDER_VIEW_LABELS[view]}
+                                        aria-label={ORDER_VIEW_LABELS[view]}
+                                        aria-pressed={isActive}
                                         className={`
-                                            relative px-4 sm:px-6 py-1.5 rounded-lg text-xs font-bold transition-colors duration-300 z-10 whitespace-nowrap
+                                            w-11 h-11 sm:w-14 flex items-center justify-center rounded-lg transition-colors duration-200
+                                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2
                                             ${isActive
-                                                ? 'text-white'
-                                                : 'text-slate-600 hover:text-slate-800'
+                                                ? view === ORDER_VIEWS.PRIORIDAD
+                                                    ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-md'
+                                                    : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md'
+                                                : view === ORDER_VIEWS.PRIORIDAD
+                                                    ? 'text-red-600 hover:bg-red-100'
+                                                    : 'text-slate-600 hover:text-slate-800 hover:bg-white/50'
                                             }
                                         `}
                                     >
-                                        {STAGE_LABELS[stage]}
+                                        <AreaIcon area={view} />
                                     </button>
                                 );
                             })}
                         </div>
-                    </div>
+                    </nav>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-end gap-2">
                         {/* Search toggle button */}
                         <button
                             onClick={handleToggleSearch}

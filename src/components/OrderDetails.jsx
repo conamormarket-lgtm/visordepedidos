@@ -1,9 +1,10 @@
 import React from 'react';
 import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building2, Wallet } from 'lucide-react';
 import { formatearPagoCero } from '../utils/cobranza';
-import { ZONAS } from '../constants';
+import { STAGE_LABELS, ZONAS } from '../constants';
+import AreaIcon from './AreaIcon';
 
-const OrderDetails = ({ order, fullWidth = false }) => {
+const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
     if (!order) return null;
 
     // Prioridad del ERP (casilla al registrar) o marcada desde el CRM: para el
@@ -79,6 +80,12 @@ const OrderDetails = ({ order, fullWidth = false }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                    {showStage && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-lg border border-blue-200 text-blue-700">
+                            <AreaIcon area={order.status} size={14} />
+                            <span className="text-xs font-bold">{STAGE_LABELS[order.status]}</span>
+                        </div>
+                    )}
                     {order.deliveryType === 'AGENCIA' ? (
                         <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50/50 rounded-lg border border-indigo-100 text-indigo-700">
                             <Truck size={14} className="stroke-[2px]" />
