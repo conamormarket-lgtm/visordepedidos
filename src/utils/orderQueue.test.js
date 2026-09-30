@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ORDER_VIEWS, STAGES, ZONAS } from '../constants.js';
-import { getOrdersForView } from './orderQueue.js';
+import { getOrdersForView, isOrderInView } from './orderQueue.js';
 
 const order = (id, overrides = {}) => ({
     id,
@@ -30,12 +30,31 @@ test('Prioridad reúne el marcado compartido de los buscadores en las tres área
     assert.deepEqual(result.map(o => o.numeroColaDisplay), ['P-1', 'P-2', 'P-3', 'P-4']);
 });
 
-test('el pedido marcado sigue visible también en su área actual', () => {
+test('el pedido marcado solo aparece en Prioridad, incluso al buscar en su área', () => {
     for (const status of Object.values(STAGES)) {
-        const orders = [order('marcado', { status, prioridadCRM: true })];
-        assert.deepEqual(ids(getOrdersForView(orders, status)), ['marcado']);
+        const orders = [order('marcado', { status, prioridadCRM: true }), order('normal', { status })];
+        assert.deepEqual(ids(getOrdersForView(orders, status)), ['normal']);
+        assert.deepEqual(ids(getOrdersForView(orders, status, { hasSearch: true })), ['normal']);
         assert.deepEqual(ids(priorityOrders(orders)), ['marcado']);
     }
+});
+
+test('los contadores usan la misma elegibilidad que las colas', () => {
+    const orders = [
+        order('lima', { prioridadCRM: true }),
+        order('provincia', { prioridadCRM: true, zonaEnvio: ZONAS.PROVINCIA }),
+        order('stock', { prioridadCRM: true, isStockPaused: true }),
+        order('estampado', { prioridadCRM: true, status: STAGES.ESTAMPADO }),
+        order('empaquetado', { prioridadCRM: true, status: STAGES.EMPAQUETADO }),
+        order('cobranza', { prioridadCRM: true, cobranza: { estado: 'Pendiente' } }),
+        order('reparto', { prioridadCRM: true, status: 'despacho' }),
+        order('normal'),
+        order('registro', { esPrioridad: true }),
+    ];
+    const count = orders.filter(o => isOrderInView(o, ORDER_VIEWS.PRIORIDAD)).length;
+    assert.equal(count, 5);
+    assert.equal(count, priorityOrders(orders).length);
+    assert.deepEqual(ids(orders.filter(o => isOrderInView(o, STAGES.PREPARACION))), ['normal', 'registro']);
 });
 
 test('Prioridad respeta cobranza en Preparación y conserva pedidos posteriores', () => {
@@ -65,6 +84,7 @@ test('al desmarcar o salir a Reparto desaparece de Prioridad', () => {
     const marked = order('pedido', { prioridadCRM: true });
     assert.equal(priorityOrders([marked]).length, 1);
     assert.equal(priorityOrders([{ ...marked, prioridadCRM: false }]).length, 0);
+    assert.deepEqual(ids(getOrdersForView([{ ...marked, prioridadCRM: false }], STAGES.PREPARACION)), ['pedido']);
     assert.equal(priorityOrders([{ ...marked, status: 'despacho' }]).length, 0);
     assert.equal(priorityOrders([{ ...marked, status: STAGES.EMPAQUETADO }])[0].status, STAGES.EMPAQUETADO);
 });
@@ -80,7 +100,7 @@ test('Preparación conserva el split por zona y buscar permite encontrar ambas z
     assert.deepEqual(ids(getOrdersForView(orders, STAGES.PREPARACION, { ...options, hasSearch: true })), ['lima', 'provincia', 'cache-agencia']);
 });
 
-test('las áreas conservan prioridad CRM, prioridad de registro y orden de pago en Provincia', () => {
+test('las áreas conservan prioridad de registro y orden de pago, excluyendo prioridad CRM', () => {
     const orders = [
         order('pago-reciente', { cobranza: { estado: 'Habilitado', fechaPagoCero: { seconds: 20 } } }),
         order('pago-antiguo', { cobranza: { estado: 'Habilitado', fechaPagoCero: { seconds: 10 } }, numeroCola: 50 }),
@@ -90,6 +110,6 @@ test('las áreas conservan prioridad CRM, prioridad de registro y orden de pago 
         order('pausado', { isStockPaused: true }),
     ].map(o => ({ ...o, zonaEnvio: ZONAS.PROVINCIA }));
     const result = getOrdersForView(orders, STAGES.PREPARACION, { zonaSplitEnabled: true, prepZona: ZONAS.PROVINCIA });
-    assert.deepEqual(ids(result), ['crm', 'registro', 'sin-fecha', 'pago-antiguo', 'pago-reciente', 'pausado']);
-    assert.deepEqual(result.map(o => o.numeroColaDisplay), ['P-1', 'P-2', '1', '2', '3', null]);
+    assert.deepEqual(ids(result), ['registro', 'sin-fecha', 'pago-antiguo', 'pago-reciente', 'pausado']);
+    assert.deepEqual(result.map(o => o.numeroColaDisplay), ['P-1', '1', '2', '3', null]);
 });

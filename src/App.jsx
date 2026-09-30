@@ -13,7 +13,7 @@ import { ORDER_VIEWS, STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } fr
 import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
 import { triggerConfetti } from './utils/confetti';
-import { getOrdersForView, zonaDe } from './utils/orderQueue';
+import { getOrdersForView, isOrderInView, zonaDe } from './utils/orderQueue';
 // Assuming Search is imported from a library like lucide-react or similar
 // import { Search } from 'lucide-react'; // Add this if Search is a component
 
@@ -105,6 +105,10 @@ function App() {
     }, []); // SIN DEPENDENCIAS: Se ejecuta una sola vez al cargar la app
 
     // Vistas locales sobre la misma suscripción: no se agregan lecturas.
+    // El aviso cuenta toda la cola de Prioridad, independientemente de la búsqueda.
+    const priorityCount = useMemo(() => allOrders.filter(order => (
+        isOrderInView(order, ORDER_VIEWS.PRIORIDAD)
+    )).length, [allOrders]);
     const hasSearch = Boolean(searchTerm);
     const sortedStageOrders = useMemo(() => getOrdersForView(allOrders, currentView, {
         zonaSplitEnabled: ZONA_SPLIT_ON,
@@ -188,8 +192,7 @@ function App() {
         const counts = { [ZONAS.LIMA]: 0, [ZONAS.PROVINCIA]: 0 };
         if (!ZONA_SPLIT_ON) return counts;
         allOrders.forEach(o => {
-            if (o.status !== STAGES.PREPARACION) return;
-            if (o.cobranza?.estado !== 'Habilitado') return;
+            if (!isOrderInView(o, STAGES.PREPARACION)) return;
             counts[zonaDe(o)]++;
         });
         return counts;
@@ -437,6 +440,7 @@ function App() {
                 <>
                     <Header
                         currentView={currentView}
+                        priorityCount={priorityCount}
                         onTabChange={handleTabChange}
                         onSearch={handleSearch}
                         stats={stats}

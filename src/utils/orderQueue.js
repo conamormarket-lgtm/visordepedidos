@@ -6,19 +6,20 @@ export const zonaDe = (order) => (
     ?? (order?.deliveryType === 'AGENCIA' ? ZONAS.PROVINCIA : ZONAS.LIMA)
 );
 
-// Las mismas reglas de elegibilidad se aplican a la vista de un área y a Prioridad.
+// Compartido por las colas y sus contadores: cada pedido pertenece a una vista.
+export const isOrderInView = (order, view) => (
+    (view === ORDER_VIEWS.PRIORIDAD
+        ? order.prioridadCRM === true && Object.values(STAGES).includes(order.status)
+        : order.status === view && order.prioridadCRM !== true)
+    && (order.status !== STAGES.PREPARACION || order.cobranza?.estado === 'Habilitado')
+);
+
 export const getOrdersForView = (allOrders, currentView, {
     zonaSplitEnabled = false,
     prepZona = ZONAS.LIMA,
     hasSearch = false,
 } = {}) => {
-    const priorityView = currentView === ORDER_VIEWS.PRIORIDAD;
-    let stageOrders = allOrders.filter(order => (
-        (priorityView
-            ? order.prioridadCRM === true && Object.values(STAGES).includes(order.status)
-            : order.status === currentView)
-        && (order.status !== STAGES.PREPARACION || order.cobranza?.estado === 'Habilitado')
-    ));
+    let stageOrders = allOrders.filter(order => isOrderInView(order, currentView));
 
     // Prioridad reúne Lima y Provincia. Buscar dentro de Preparación también
     // encuentra ambas zonas, igual que antes.

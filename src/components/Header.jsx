@@ -6,6 +6,7 @@ import { isModoLigero, toggleModoLigero, subscribeModoLigero } from '../utils/mo
 
 const Header = ({
     currentView,
+    priorityCount = 0,
     onTabChange,
     onSearch,
     stats,
@@ -126,16 +127,19 @@ const Header = ({
                         <div className="bg-slate-200/50 p-1 rounded-xl flex gap-1 shadow-inner backdrop-blur-sm border border-white/20">
                             {Object.values(ORDER_VIEWS).map(view => {
                                 const isActive = currentView === view;
+                                const label = view === ORDER_VIEWS.PRIORIDAD
+                                    ? `${ORDER_VIEW_LABELS[view]}: ${priorityCount} ${priorityCount === 1 ? 'pedido en espera' : 'pedidos en espera'}`
+                                    : ORDER_VIEW_LABELS[view];
                                 return (
                                     <button
                                         key={view}
                                         type="button"
                                         onClick={() => onTabChange(view)}
-                                        title={ORDER_VIEW_LABELS[view]}
-                                        aria-label={ORDER_VIEW_LABELS[view]}
+                                        title={label}
+                                        aria-label={label}
                                         aria-pressed={isActive}
                                         className={`
-                                            w-11 h-11 sm:w-14 flex items-center justify-center rounded-lg transition-colors duration-200
+                                            relative w-11 h-11 sm:w-14 flex items-center justify-center rounded-lg transition-colors duration-200
                                             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2
                                             ${isActive
                                                 ? view === ORDER_VIEWS.PRIORIDAD
@@ -148,6 +152,11 @@ const Header = ({
                                         `}
                                     >
                                         <AreaIcon area={view} />
+                                        {view === ORDER_VIEWS.PRIORIDAD && priorityCount > 0 && (
+                                            <span aria-hidden="true" className="absolute -top-1 -right-1 min-w-5 h-5 px-1 flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] font-extrabold tabular-nums ring-2 ring-white shadow-sm">
+                                                {priorityCount}
+                                            </span>
+                                        )}
                                     </button>
                                 );
                             })}
