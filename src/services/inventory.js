@@ -205,7 +205,7 @@ export async function descontarInventarioPorPedido(pedidoId, userLog, prepararAv
                         quantity: cantidadReq,
                         source: "visor_pedidos",
                         timestamp: serverTimestamp(),
-                        user: typeof userLog === 'string' ? userLog : "Sistema"
+                        user: typeof userLog === 'function' ? userLog() : typeof userLog === 'string' ? userLog : "Sistema"
                     }
                 });
             }
@@ -226,6 +226,8 @@ export async function descontarInventarioPorPedido(pedidoId, userLog, prepararAv
         return { exito: true, mensaje: "Stock reducido correctamente" };
 
     } catch (error) {
+        // Conflictos/validaciones de etapa no son fallos de inventario.
+        if (error.code?.startsWith('ETAPA_')) throw error;
         if (error.message === "ALREADY_DISCOUNTED") {
             return { exito: true, mensaje: "Ya descontado previamente" };
         }

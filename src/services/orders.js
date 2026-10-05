@@ -6,8 +6,6 @@ import {
     query,
     where,
     doc,
-    getDoc,
-    setDoc,
     updateDoc,
     runTransaction,
     arrayUnion,
@@ -579,58 +577,32 @@ const getAllRealIds = (orderId) => {
 /**
  * Asigna atómicamente el siguiente número de cola a un pedido que entra a una etapa.
  *
- * Réplica exacta del queue-counter.ts del Sistema Gestión.
  * Usa el MISMO documento configuracion/contadores_cola y los MISMOS campos
  * (ej: preparacion_normal, estampado_prioridad) para que ambos sistemas
  * compartan el mismo contador sin colisiones.
  *
- * Usa runTransaction para garantizar atomicidad: dos pedidos que avancen
- * exactamente al mismo tiempo reciben números diferentes.
+ * Participa en la transacción del avance: un reintento o un fallo de stock
+ * no consume otro número. La escritura se difiere hasta terminar las lecturas.
  *
  * @param {string}  etapa        - 'preparacion' | 'estampado' | 'empaquetado'
  * @param {boolean} esPrioridad  - si el pedido es prioritario
- * @returns {{ numeroCola: number, numeroColaDisplay: string } | null}
+ * @returns {{ numeroCola: number, numeroColaDisplay: string, guardar: Function }}
  */
 const QUEUE_COUNTERS_DOC_REF = () => doc(db, "configuracion", "contadores_cola");
 
-const asignarNumeroCola = async (etapa, esPrioridad) => {
+const prepararNumeroCola = async (tx, etapa, esPrioridad) => {
     const ref = QUEUE_COUNTERS_DOC_REF();
     const counterKey = `${etapa}_${esPrioridad ? "prioridad" : "normal"}`;
-
-    try {
-        // Garantizar que el documento de contadores existe
-        const snap = await getDoc(ref);
-        if (!snap.exists()) {
-            const initialData = { updatedAt: serverTimestamp() };
-            ["preparacion", "estampado", "empaquetado"].forEach(e => {
-                initialData[`${e}_normal`]    = 0;
-                initialData[`${e}_prioridad`] = 0;
-            });
-            await setDoc(ref, initialData);
-            console.log("[QueueCounter] Documento contadores_cola inicializado.");
-        }
-
-        // Transacción atómica: leer contador actual → incrementar → devolver nuevo valor
-        const result = await runTransaction(db, async (tx) => {
-            const txSnap = await tx.get(ref);
-            const current = (txSnap.data()?.[counterKey]) ?? 0;
-            const next = current + 1;
-            tx.update(ref, {
-                [counterKey]: next,
-                updatedAt: serverTimestamp(),
-            });
-            return next;
-        });
-
-        securityMonitor.registerOperation(1);
-        const numeroColaDisplay = esPrioridad ? `P-${result}` : String(result);
-        console.log(`[QueueCounter] Asignado #${numeroColaDisplay} para etapa "${etapa}" (${esPrioridad ? "Prioridad" : "Normal"})`);
-        return { numeroCola: result, numeroColaDisplay };
-
-    } catch (err) {
-        console.error("[QueueCounter] Error al asignar número de cola:", err);
-        return null;
-    }
+    const snap = await tx.get(ref);
+    const numeroCola = (snap.data()?.[counterKey] ?? 0) + 1;
+    return {
+        numeroCola,
+        numeroColaDisplay: esPrioridad ? `P-${numeroCola}` : String(numeroCola),
+        guardar: () => tx.set(ref, {
+            [counterKey]: numeroCola,
+            updatedAt: serverTimestamp(),
+        }, { merge: true }),
+    };
 };
 
 
@@ -674,7 +646,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     const horaAccion = new Date();
     // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
     const realIds = getAllRealIds(orderId);
-    const primaryRef = doc(db, COLLECTION_NAME, realIds[0]);
+    const refs = realIds.map(id => doc(db, COLLECTION_NAME, id));
 
     if (realIds.length > 1) {
         console.log(`[updateOrderStage] Pedido con IDs duplicados: ${realIds.join(' + ')}. Escribiendo en ambos.`);
@@ -688,121 +660,130 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
     const permiteSinInicio = esBoxCuadro && currentStage === 'estampado' && newStatus === 'empaquetado';
-    if (!TIEMPO_CAMPO[currentStage]) throw new Error('Etapa no válida.');
-    const previo = await getDoc(primaryRef);
-    if (!previo.exists() || previo.data().estadoGeneral !== ESTADO_ETAPA[currentStage]) {
-        throw new Error('El pedido ya no está en la etapa esperada. Actualiza la vista.');
-    }
-    if (!previo.data()[currentStage]?.fechaInicio && !permiteSinInicio) {
-        throw new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`);
-    }
+    if (!TIEMPO_CAMPO[currentStage] || !newEstadoGeneral) throw new Error('Etapa no válida.');
+    let operadorActual;
 
-    const datosPrevios = previo.data();
-    const op = datosPrevios[currentStage]?.operador || datosPrevios[currentStage]?.operadorNombre;
-    const operadorActual = op && op !== 'Sin Asignar' ? op : 'Visor Pedidos';
-    const esPrioridadDelPedido = datosPrevios.esPrioridad === true || datosPrevios.EsPrioridad === true;
-
-    const nowDate = horaAccion;
-    const historialEntry = {
-        timestamp: nowDate,
-        usuarioId: "visor-pedidos",
-        usuarioEmail: operadorActual,
-        accion: "Avance de etapa",
-        detalle: `Etapa '${currentStage}' completada → nuevo estado: '${newEstadoGeneral}'`,
-    };
-
-    const updateData = {
-        ...(newEstadoGeneral && { estadoGeneral: newEstadoGeneral }),
-        updatedAt: serverTimestamp(),
-        [`${currentStage}.estado`]: "LISTO",
-        [`${currentStage}.fechaSalida`]: nowDate,
-        [`${currentStage}.fechaFin`]: nowDate,
-        [`${currentStage}.operador`]: operadorActual,
-        [`${currentStage}.operadorNombre`]: operadorActual,
-        ...(newStatus !== 'despacho' && {
-            [`${newStatus}.fechaEntrada`]: nowDate,
-            [`${newStatus}.estado`]: "EN PROCESO",
-        }),
-        // Al pasar a Reparto ("despacho"), registrar fechaEntrada en el sub-objeto reparto.
-        // La condición anterior excluía este campo porque newStatus === 'despacho',
-        // pero el Sistema Gestión sí lo escribe (ver empaquetado-tab.tsx → reparto.fechaEntrada).
-        ...(newStatus === 'despacho' && {
-            "reparto.fechaEntrada": nowDate,
-            "reparto.estado": "EN PROCESO",
-        }),
-        historialModificaciones: arrayUnion(historialEntry),
-        ...updates
-    };
-
-    // ── Asignar número de cola en la etapa destino ────────────────────────────
-    // Réplica exacta de buildQueueUpdate() del Sistema Gestión.
-    // Solo aplica cuando el destino es una etapa productiva (no despacho).
-    if (newStatus !== 'despacho') {
-        const colaAsignada = await asignarNumeroCola(newStatus, esPrioridadDelPedido);
-        if (colaAsignada !== null) {
-            updateData[`${newStatus}.numeroCola`]        = colaAsignada.numeroCola;
-            updateData[`${newStatus}.numeroColaDisplay`] = colaAsignada.numeroColaDisplay;
+    // Se vuelve a validar en cada intento de la transacción, incluso si otra
+    // tablet confirma el mismo avance mientras esta solicitud está en curso.
+    const validarEtapa = snaps => {
+        const yaCompletado = snaps.every(snap => snap.exists()
+            && snap.data().estadoGeneral === newEstadoGeneral
+            && snap.data()[currentStage]?.estado === 'LISTO'
+            && snap.data()[currentStage]?.fechaFin
+            && (currentStage !== 'preparacion' || newStatus !== 'estampado' || snap.data().inventarioDescontado === true));
+        if (yaCompletado) {
+            throw Object.assign(new Error('El avance ya estaba confirmado.'), { code: 'ETAPA_YA_COMPLETADA' });
         }
-    }
-
-    // Todas las lecturas y validaciones preceden a las escrituras de inventario.
-    const prepararAvance = async tx => {
-        const refs = realIds.map(id => doc(db, COLLECTION_NAME, id));
-        const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
         if (snaps.some(snap => !snap.exists() || snap.data().estadoGeneral !== ESTADO_ETAPA[currentStage])) {
-            throw new Error('El pedido ya no está en la etapa esperada. Actualiza la vista.');
+            const estados = [...new Set(snaps.map(snap => snap.exists() ? snap.data().estadoGeneral : 'Pedido eliminado'))];
+            throw Object.assign(new Error(`El pedido cambió de etapa. Estado actual: ${estados.join(', ')}. Actualiza la vista.`), { code: 'ETAPA_CAMBIADA' });
         }
+    };
+    const prepararAvance = async tx => {
+        const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
+        validarEtapa(snaps);
+        const datos = snaps[0].data();
+        const op = datos[currentStage]?.operador || datos[currentStage]?.operadorNombre;
+        operadorActual = op && op !== 'Sin Asignar' ? op : 'Visor Pedidos';
         const inicio = snaps.map(snap => snap.data()[currentStage]?.fechaInicio).find(Boolean);
-        const duracion = calcularTiempoEtapa(inicio, nowDate);
+        const duracion = calcularTiempoEtapa(inicio, horaAccion);
         if (duracion === null && !permiteSinInicio) {
-            throw new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`);
+            throw Object.assign(new Error(`Debes iniciar ${currentStage} antes de pasar el pedido.`), { code: 'ETAPA_SIN_INICIO' });
         }
-        return () => refs.forEach(ref => tx.update(ref, {
-            ...updateData,
+        const cola = newStatus !== 'despacho'
+            ? await prepararNumeroCola(tx, newStatus, datos.esPrioridad === true || datos.EsPrioridad === true)
+            : null;
+        const nowDate = horaAccion;
+        const updateData = {
+            ...(newEstadoGeneral && { estadoGeneral: newEstadoGeneral }),
+            updatedAt: serverTimestamp(),
+            [`${currentStage}.estado`]: "LISTO",
+            [`${currentStage}.fechaSalida`]: nowDate,
+            [`${currentStage}.fechaFin`]: nowDate,
+            [`${currentStage}.operador`]: operadorActual,
+            [`${currentStage}.operadorNombre`]: operadorActual,
+            ...(newStatus !== 'despacho' && {
+                [`${newStatus}.fechaEntrada`]: nowDate,
+                [`${newStatus}.estado`]: "EN PROCESO",
+            }),
+            // Al pasar a Reparto ("despacho"), registrar fechaEntrada en el sub-objeto reparto.
+            // La condición anterior excluía este campo porque newStatus === 'despacho',
+            // pero el Sistema Gestión sí lo escribe (ver empaquetado-tab.tsx → reparto.fechaEntrada).
+            ...(newStatus === 'despacho' && {
+                "reparto.fechaEntrada": nowDate,
+                "reparto.estado": "EN PROCESO",
+            }),
+            historialModificaciones: arrayUnion({
+                timestamp: nowDate,
+                usuarioId: 'visor-pedidos',
+                usuarioEmail: operadorActual,
+                accion: 'Avance de etapa',
+                detalle: `Etapa '${currentStage}' completada → nuevo estado: '${newEstadoGeneral}'`,
+            }),
+            ...updates,
+            ...(cola && {
+                [`${newStatus}.numeroCola`]: cola.numeroCola,
+                [`${newStatus}.numeroColaDisplay`]: cola.numeroColaDisplay,
+            }),
             [TIEMPO_CAMPO[currentStage]]: duracion,
             ...(currentStage === 'preparacion' && newStatus === 'estampado' && { inventarioDescontado: true }),
-        }));
+        };
+        return () => {
+            cola?.guardar();
+            refs.forEach(ref => tx.update(ref, updateData));
+        };
     };
     // El descuento y el avance se confirman juntos o se cancelan juntos.
-    if (newStatus === "estampado" && currentStage === "preparacion") {
-        const resultadoInventario = await descontarInventarioPorPedido(realIds[0], operadorActual, prepararAvance);
+    try {
+        if (newStatus === "estampado" && currentStage === "preparacion") {
+            const resultadoInventario = await descontarInventarioPorPedido(realIds[0], () => operadorActual, prepararAvance);
 
-        if (!resultadoInventario.exito) {
-            // El pedido AÚN ESTÁ en Preparación en Firestore (no escribimos nada todavía).
-            // Solo hay que marcar la pausa si corresponde.
-            if (resultadoInventario.sinStock) {
-                // Marcar como "En Pausa por Stock" para que sea visible en el Visor
-                await Promise.all(realIds.map(id => updateDoc(doc(db, COLLECTION_NAME, id), {
-                    estadoGeneral: "En Pausa por Stock",
-                    "preparacion.enPausa": true,
-                    updatedAt: serverTimestamp(),
-                    historialModificaciones: arrayUnion({
-                        timestamp: new Date(),
-                        usuarioId: "visor-pedidos",
-                        usuarioEmail: operadorActual,
-                        accion: "Bloqueado: Sin Stock",
-                        detalle: `No se pudo avanzar a Estampado — stock insuficiente: ${resultadoInventario.mensaje}`,
-                    }),
-                })));
-                throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
-            } else if (resultadoInventario.noEncontrado) {
-                throw new Error(`NO_EN_INVENTARIO: ${resultadoInventario.mensaje}`);
-            } else if (resultadoInventario.sinPrendas) {
-                throw new Error(`SIN_PRENDAS: ${resultadoInventario.mensaje}`);
-            } else {
-                throw new Error(`ERROR_INVENTARIO: ${resultadoInventario.mensaje}`);
+            if (!resultadoInventario.exito) {
+                // El descuento falló sin escrituras. Revalidar antes de pausar,
+                // porque otro equipo pudo avanzar desde entonces.
+                if (resultadoInventario.sinStock) {
+                    // Marcar como "En Pausa por Stock" para que sea visible en el Visor
+                    await runTransaction(db, async tx => {
+                        const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
+                        // Otro equipo pudo avanzar después de fallar el descuento.
+                        validarEtapa(snaps);
+                        refs.forEach(ref => tx.update(ref, {
+                            estadoGeneral: "En Pausa por Stock",
+                            "preparacion.enPausa": true,
+                            updatedAt: serverTimestamp(),
+                            historialModificaciones: arrayUnion({
+                                timestamp: new Date(),
+                                usuarioId: "visor-pedidos",
+                                usuarioEmail: operadorActual,
+                                accion: "Bloqueado: Sin Stock",
+                                detalle: `No se pudo avanzar a Estampado — stock insuficiente: ${resultadoInventario.mensaje}`,
+                            }),
+                        }));
+                    });
+                    throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
+                } else if (resultadoInventario.noEncontrado) {
+                    throw new Error(`NO_EN_INVENTARIO: ${resultadoInventario.mensaje}`);
+                } else if (resultadoInventario.sinPrendas) {
+                    throw new Error(`SIN_PRENDAS: ${resultadoInventario.mensaje}`);
+                } else {
+                    throw new Error(`ERROR_INVENTARIO: ${resultadoInventario.mensaje}`);
+                }
             }
+            // La etapa ya se guardó junto al inventario.
+            securityMonitor.registerOperation(realIds.length);
+            return { advanced: true };
         }
-        // La etapa ya se guardó junto al inventario.
-        securityMonitor.registerOperation(realIds.length);
-        return;
-    }
 
-    securityMonitor.registerOperation(realIds.length);
-    await runTransaction(db, async tx => {
-        const guardarAvance = await prepararAvance(tx);
-        guardarAvance();
-    });
+        securityMonitor.registerOperation(realIds.length);
+        await runTransaction(db, async tx => {
+            const guardarAvance = await prepararAvance(tx);
+            guardarAvance();
+        });
+        return { advanced: true };
+    } catch (error) {
+        if (error.code === 'ETAPA_YA_COMPLETADA') return { advanced: false };
+        throw error;
+    }
 };
 /**
  * Revierte un pedido a su etapa anterior.

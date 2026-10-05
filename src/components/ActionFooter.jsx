@@ -26,6 +26,20 @@ const ActionFooter = ({
     const [confirmedStart, setConfirmedStart] = useState(null);
     const [startError, setStartError] = useState(null);
     const startLock = useRef(new Set());
+    const advanceLock = useRef(false);
+    const [advancing, setAdvancing] = useState(false);
+    const handleAdvance = async action => {
+        // El ref bloquea incluso dos pulsaciones antes del siguiente render.
+        if (advanceLock.current) return;
+        advanceLock.current = true;
+        setAdvancing(true);
+        try {
+            await action();
+        } finally {
+            advanceLock.current = false;
+            setAdvancing(false);
+        }
+    };
     const stageKey = `${currentOrderId}:${currentStage}`;
     const starting = startingKeys.has(stageKey);
     const confirmed = confirmedStart?.key === stageKey ? confirmedStart : null;
@@ -75,7 +89,7 @@ const ActionFooter = ({
 
     const isOperatorAssigned = assignedTo && assignedTo !== 'Sin Asignar';
     const faltaInicioEtapa = inicioEtapa === null;
-    const puedeCompletar = !!currentOrder && isOperatorAssigned && !starting && !faltaInicioEtapa;
+    const puedeCompletar = !!currentOrder && isOperatorAssigned && !starting && !advancing && !faltaInicioEtapa;
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -341,7 +355,7 @@ const ActionFooter = ({
                 {/* Botón POR MAYOR: solo en preparacion + sin imágenes */}
                 {currentStage === 'preparacion' && sinImagen && (
                     <button
-                        onClick={onWholesale}
+                        onClick={() => handleAdvance(onWholesale)}
                         disabled={!puedeCompletar}
                         className={`w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border transition-all duration-300 transform
                             ${puedeCompletar
@@ -364,7 +378,7 @@ const ActionFooter = ({
                     <div className="flex flex-col gap-1">
                         <button
                             onClick={handleStartStage}
-                            disabled={!isOperatorAssigned || starting || inicioEtapa !== null}
+                            disabled={!isOperatorAssigned || starting || advancing || inicioEtapa !== null}
                             className="w-full py-3 px-4 rounded-2xl bg-amber-500 text-slate-950 font-bold disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed"
                         >
                             {starting ? 'Confirmando inicio…' : inicioEtapa !== null
@@ -380,8 +394,9 @@ const ActionFooter = ({
                     </div>
                 )}
                 <button
-                    onClick={onComplete}
+                    onClick={() => handleAdvance(onComplete)}
                     disabled={!puedeCompletar}
+                    aria-busy={advancing}
                     className={`w-full group relative overflow-hidden py-4 rounded-2xl flex items-center justify-center gap-3 border transition-all duration-300 transform
                         ${puedeCompletar
                             ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white shadow-lg shadow-blue-600/25 active:scale-[0.99] border-white/10 cursor-pointer'
@@ -392,15 +407,15 @@ const ActionFooter = ({
                         <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
                     )}
                     <span className="text-xl font-black tracking-wider uppercase drop-shadow-sm">
-                        {completeLabel}
+                        {advancing ? 'Confirmando avance…' : completeLabel}
                     </span>
                 </button>
 
                 {/* BOX/CUADRO puede avanzar sin iniciar el cronómetro. */}
                 {currentStage === 'estampado' && (
                     <button
-                        onClick={onBox}
-                        disabled={starting || !currentOrder}
+                        onClick={() => handleAdvance(onBox)}
+                        disabled={starting || advancing || !currentOrder}
                         className="w-full group relative overflow-hidden py-3 rounded-2xl flex items-center justify-center gap-3 border border-white/10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/30 active:scale-[0.99] transition-all duration-300 transform cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>

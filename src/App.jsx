@@ -313,7 +313,8 @@ function App() {
 
             try {
                 // Guardar snapshot para poder deshacer SOLO si el avance fue exitoso
-                await updateOrderStage(currentOrder.id, nextStage, currentStage);
+                const result = await updateOrderStage(currentOrder.id, nextStage, currentStage);
+                if (!result.advanced) return;
 
                 setLastAction({
                     orderId: currentOrder.id,
@@ -375,7 +376,8 @@ function App() {
         };
 
         try {
-            await updateOrderStage(currentOrder.id, nextStage, currentStage, undefined, { esBoxCuadro: true });
+            const result = await updateOrderStage(currentOrder.id, nextStage, currentStage, undefined, { esBoxCuadro: true });
+            if (!result.advanced) return;
             setLastAction({
                 orderId: currentOrder.id,
                 orderVisualId: currentOrder.orderId,
@@ -403,7 +405,8 @@ function App() {
 
         // Saltar directamente a despacho (En Reparto)
         try {
-            await updateOrderStage(currentOrder.id, 'despacho', currentStage);
+            const result = await updateOrderStage(currentOrder.id, 'despacho', currentStage);
+            if (!result.advanced) return;
             incrementStats(currentStage);
         } catch (err) {
             alert(`Error al pasar a reparto: ${err.message}`);
