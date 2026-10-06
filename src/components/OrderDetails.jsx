@@ -21,6 +21,16 @@ const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
         // Main Container: fullWidth = sin imagen (POR MAYOR) → ocupa todo el ancho
         <div className={`${fullWidth ? 'w-full' : 'w-full xl:w-[65%]'} min-w-0 min-h-0 p-5 overflow-y-auto flex flex-col h-auto xl:h-full relative backdrop-blur-xl bg-white/30 border-t xl:border-t-0 xl:border-l border-white/30 shadow-none flex-1`}>
 
+            {order.observations && (
+                <div className="bg-white/90 border border-slate-200 rounded-xl p-3 shadow-sm mb-4">
+                    <div className="flex items-center gap-1.5 mb-1 text-rose-500">
+                        <AlertTriangle size={14} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Observaciones</span>
+                    </div>
+                    <p className="text-sm font-medium text-slate-700">{order.observations}</p>
+                </div>
+            )}
+
             {/* Header Section */}
             <div className="flex flex-col mb-4 pb-4 border-b border-slate-200/60">
                 <div className="flex justify-between items-start mb-2">
@@ -245,8 +255,8 @@ const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
                     })()}
                 </div>
 
-                {/* Observations & Design Notes */}
-                {(order.notasDiseño || order.observations || order.comments) && (
+                {/* Design Notes & Comments */}
+                {(order.notasDiseño || order.comments) && (
                     <div className="bg-white/90 border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
                         {order.notasDiseño && (
                             <div className="bg-indigo-50/70 p-2.5 rounded-lg border border-indigo-100">
@@ -254,17 +264,8 @@ const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
                                 <p className="text-sm font-semibold text-indigo-900 leading-tight">{order.notasDiseño}</p>
                             </div>
                         )}
-                        {order.observations && (
-                            <div className={order.notasDiseño ? "pt-2 border-t border-slate-100" : ""}>
-                                <div className="flex items-center gap-1.5 mb-1 text-rose-500">
-                                    <AlertTriangle size={14} />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider">Observaciones</span>
-                                </div>
-                                <p className="text-sm font-medium text-slate-700">{order.observations}</p>
-                            </div>
-                        )}
                         {order.comments && (
-                            <div className={(order.notasDiseño || order.observations) ? "pt-2 border-t border-slate-100" : ""}>
+                            <div className={order.notasDiseño ? "pt-2 border-t border-slate-100" : ""}>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Comentarios</span>
                                 <p className="text-xs text-slate-600 italic">"{order.comments}"</p>
                             </div>
