@@ -1,6 +1,7 @@
 import net from 'net';
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 /**
  * ╔══════════════════════════════════════════════════════════╗
@@ -34,6 +35,15 @@ console.log('');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Las reglas de Firestore exigen una sesión (aunque sea anónima): sin ella la cola
+// se rechaza y no llega ningún ticket.
+try {
+    await signInAnonymously(getAuth(app));
+    console.log('  ✓ Sesión de Firebase iniciada');
+} catch (e) {
+    console.error('  ✗ No se pudo iniciar sesión en Firebase:', e?.message || e);
+}
 
 const q = query(
     collection(db, "print_queue"), 

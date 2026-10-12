@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDnQ5TPUyQfUTJ7GcgDHB71PncDj0De5pc",
@@ -16,4 +17,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export { db };
+// Las reglas de Firestore exigen una sesión (aunque sea anónima). main.jsx espera
+// esta promesa antes de montar la app: una consulta que sale sin sesión se rechaza
+// y Firestore no la reintenta.
+const auth = getAuth(app);
+const authReady = (async () => {
+    await auth.authStateReady();
+    if (!auth.currentUser) await signInAnonymously(auth);
+})().catch((e) => console.warn("[Firebase] Sesión anónima falló:", e?.message || e));
+
+export { db, authReady };
