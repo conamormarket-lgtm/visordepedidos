@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDnQ5TPUyQfUTJ7GcgDHB71PncDj0De5pc",
@@ -15,5 +16,24 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+let authAttempt = null;
 
-export { db };
+// Las reglas compartidas con el ERP requieren request.auth. Esperar también
+// la restauración de la sesión evita crear otro usuario en cada recarga.
+export const ensureFirebaseAuth = () => {
+    if (!authAttempt) {
+        authAttempt = (async () => {
+            await auth.authStateReady();
+            if (auth.currentUser) return auth.currentUser;
+            const credential = await signInAnonymously(auth);
+            return credential.user;
+        })().finally(() => {
+            // Un fallo de red no debe impedir un nuevo intento.
+            authAttempt = null;
+        });
+    }
+    return authAttempt;
+};
+
+export { app, db };

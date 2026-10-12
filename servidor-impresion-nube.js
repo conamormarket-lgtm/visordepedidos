@@ -1,6 +1,7 @@
 import net from 'net';
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { deleteApp } from "firebase/app";
+import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { app, db, ensureFirebaseAuth } from './src/firebase/config.js';
 
 /**
  * ╔══════════════════════════════════════════════════════════╗
@@ -14,33 +15,17 @@ const CONFIG = {
     PRINTER_PORT: 9100,
 };
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDnQ5TPUyQfUTJ7GcgDHB71PncDj0De5pc",
-    projectId: "sistema-gestion-3b225"
-};
-
 const timestamp = () => new Date().toLocaleTimeString('es-PE');
 
 console.log('');
 console.log('  ╔══════════════════════════════════════════════╗');
-console.log('  ║   Servidor de Impresión CLOUD QUEUE Activo   ║');
+console.log('  ║   Servidor de Impresión CLOUD QUEUE          ║');
 console.log('  ╠══════════════════════════════════════════════╣');
 console.log(`  ║  Impresora:      ${CONFIG.PRINTER_IP}:${CONFIG.PRINTER_PORT}       ║`);
-console.log('  ║  Firebase:       Conectado al proyecto       ║');
+console.log('  ║  Firebase:       Iniciando sesión...         ║');
 console.log('  ╚══════════════════════════════════════════════╝');
 console.log('');
-console.log('  Escuchando tickets entrantes de todo el mundo en Firebase...');
-console.log('');
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const q = query(
-    collection(db, "print_queue"), 
-    where("status", "==", "pending")
-);
-
-onSnapshot(q, (snapshot) => {
+const handleSnapshot = (snapshot) => {
     snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
             const data = change.doc.data();
@@ -90,4 +75,34 @@ onSnapshot(q, (snapshot) => {
             });
         }
     });
-});
+};
+
+async function startPrintQueue() {
+    await ensureFirebaseAuth();
+    const q = query(collection(db, 'print_queue'), where('status', '==', 'pending'));
+    let connected = false;
+    onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+        if (!connected && !snapshot.metadata.fromCache) {
+            connected = true;
+            console.log('  ✓ Firebase conectado. Escuchando tickets pendientes.');
+        }
+        handleSnapshot(snapshot);
+    }, stopWithError);
+}
+
+async function stopWithError(error) {
+    const message = error?.code === 'permission-denied'
+        ? 'Firebase denegó el acceso a print_queue. Revisa los permisos de la cola.'
+        : `No se pudo conectar la cola de impresión: ${error?.message || error}`;
+    console.error(`  ✗ ${message}`);
+    // El listener ya terminó. Salir con error permite al lanzador mostrar el
+    // fallo y evita que el proceso quede aparentando que sigue escuchando.
+    process.exitCode = 1;
+    try {
+        await deleteApp(app);
+    } catch (cleanupError) {
+        console.error('  ✗ Error al cerrar Firebase:', cleanupError.message);
+    }
+}
+
+startPrintQueue().catch(stopWithError);

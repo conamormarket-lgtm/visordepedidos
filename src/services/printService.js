@@ -5,21 +5,10 @@
  * ╚═══════════════════════════════════════════════╝
  *
  * Genera el ZPL a partir de los datos del pedido
- * y lo envía al servidor local print-server.js.
- *
- * ⚙️ CONFIGURACIÓN:
- *   Cambia PRINT_SERVER_URL a la IP de la PC donde
- *   corre print-server.js en tu red LAN.
- *   Ejemplo: 'http://192.168.18.50:3001'
- *
- *   También puedes sobreescribir la URL desde la
- *   consola del navegador con:
- *     localStorage.setItem('visor_print_server', 'http://192.168.18.XX:3001')
+ * y lo guarda en print_queue para servidor-impresion-nube.js.
  */
 
-// ── IP del servidor de impresión local (Abolido) ────────
-// Ya no usamos el servidor local por IP. Usaremos Firebase.
-import { db } from '../firebase/config.js';
+import { db, ensureFirebaseAuth } from '../firebase/config.js';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // ── Generador de ZPL ─────────────────────────────────────────────────────────
@@ -65,6 +54,7 @@ export const printTicket = async (order) => {
     console.log('[Print Cloud] Enviando ticket a Firebase...');
 
     try {
+        await ensureFirebaseAuth();
         await addDoc(collection(db, 'print_queue'), {
             zpl,
             orderId: order.id || order.Id || 'Desconocido',
@@ -72,10 +62,18 @@ export const printTicket = async (order) => {
             createdAt: serverTimestamp(),
             printedAt: null
         });
-        return { ok: true, message: 'Ticket en cola en la nube. La PC lo imprimirá enseguida.' };
+        return { ok: true, message: 'Ticket en cola. Pendiente de impresión en la PC de la Zebra.' };
     } catch (err) {
         console.error('Error enviando a la nube:', err);
-        throw new Error('No se pudo enviar el ticket. Verifica tu conexión a internet.');
+        const code = err?.code;
+        const message = code === 'permission-denied'
+            ? 'Firebase rechazó el acceso a la cola de impresión. Revisa los permisos de print_queue.'
+            : code?.startsWith('auth/')
+                ? 'No se pudo iniciar la sesión de Firebase para imprimir. Revisa la conexión y vuelve a intentarlo.'
+                : 'No se pudo enviar el ticket. Verifica tu conexión a internet.';
+        const error = new Error(message, { cause: err });
+        error.code = code;
+        throw error;
     }
 };
 

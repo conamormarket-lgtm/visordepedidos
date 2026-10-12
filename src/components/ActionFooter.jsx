@@ -180,9 +180,9 @@ const ActionFooter = ({
                 : 'bg-slate-800 hover:bg-slate-700 text-white shadow-md active:scale-95';
 
     const printBtnContent = printStatus === 'loading'
-        ? <><Loader2 size={15} className="animate-spin" /><span>Imprimiendo...</span></>
+        ? <><Loader2 size={15} className="animate-spin" /><span>Enviando...</span></>
         : printStatus === 'success'
-            ? <><CheckCircle size={15} /><span>¡Impreso!</span></>
+            ? <><CheckCircle size={15} /><span>En cola</span></>
             : printStatus === 'error'
                 ? <><AlertTriangle size={15} /><span>Error</span></>
                 : <><Printer size={15} /><span>Ticket</span></>;
