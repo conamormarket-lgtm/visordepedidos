@@ -4,6 +4,15 @@ import { formatearPagoCero } from '../utils/cobranza';
 import { STAGE_LABELS, ZONAS } from '../constants';
 import AreaIcon from './AreaIcon';
 
+// fechaEnvio puede llegar como Timestamp ({ seconds }), string, número o Date.
+// Antes solo se leía .seconds y los demás formatos pintaban "Invalid Date".
+const formatFechaEnvio = (fecha) => {
+    if (!fecha) return 'Pendiente';
+    const d = typeof fecha.seconds === 'number' ? new Date(fecha.seconds * 1000) : new Date(fecha);
+    if (isNaN(d.getTime())) return 'Pendiente';
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+};
+
 const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
     if (!order) return null;
 
@@ -84,7 +93,7 @@ const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
                             </span>
                         )}
                         <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
-                            {order.date ? new Date(order.date.seconds * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : 'Pendiente'}
+                            {formatFechaEnvio(order.date)}
                         </span>
                     </div>
                 </div>
