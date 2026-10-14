@@ -10,12 +10,15 @@ const updateSource = ordersSource.slice(ordersSource.indexOf('export const updat
     .replace('export const updateOrderStage =', 'globalThis.updateOrderStage =');
 const inventorySource = readFileSync(new URL('./inventory.js', import.meta.url), 'utf8')
     .replace(/^import .*;\r?\n/gm, '').replace('export async function', 'async function');
+const regalosSource = readFileSync(new URL('./regalos.js', import.meta.url), 'utf8')
+    .replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
 
 const STATES = { preparacion: 'Listo para Preparar', estampado: 'En Estampado', empaquetado: 'En Empaquetado' };
 const COUNTERS = 'configuracion/contadores_cola';
 const INVENTORY = 'inventarioPrendas/polo_negro_m';
+const GIFT = 'inventario-accesorios/gorro_negro_alianza';
 
-function setup({ stage = 'preparacion', quantity = 5, discounted = false, started = true, siblings = false, rejectCommit = false, onFailure } = {}) {
+function setup({ stage = 'preparacion', quantity = 5, discounted = false, started = true, siblings = false, rejectCommit = false, denyPause = false, giftStock = 2, onFailure } = {}) {
     const ids = siblings ? ['001', '1'] : ['1'];
     const order = {
         estadoGeneral: STATES[stage], inventarioDescontado: discounted,
@@ -26,6 +29,7 @@ function setup({ stage = 'preparacion', quantity = 5, discounted = false, starte
         ...ids.map(id => [`pedidos/${id}`, structuredClone(order)]),
         [INVENTORY, { quantity, cantidad: quantity, salidas: 0 }],
         [COUNTERS, { estampado_normal: 40, empaquetado_normal: 10 }],
+        [GIFT, { tipo: 'Gorro', attrs: { Color: 'Negro', 'Marca / Diseño': 'Alianza' }, quantity: giftStock }],
     ]);
     let revision = 0, serial = 0, retries = 0;
     const context = vm.createContext({
@@ -52,6 +56,9 @@ function setup({ stage = 'preparacion', quantity = 5, discounted = false, starte
                         },
                         update: (ref, data) => {
                             assert.ok(snapshot.has(ref), `No existe ${ref}`);
+                            if (denyPause && data.estadoGeneral === 'En Pausa por Stock') {
+                                throw Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' });
+                            }
                             writes.push([ref, data]);
                         },
                         set: (ref, data) => writes.push([ref, data]),
@@ -80,7 +87,7 @@ function setup({ stage = 'preparacion', quantity = 5, discounted = false, starte
         },
     });
     vm.runInContext(inventorySource, context);
-    vm.runInContext(queueSource + '\n' + updateSource, context);
+    vm.runInContext(regalosSource + '\n' + queueSource + '\n' + updateSource, context);
     return {
         state, retries: () => retries,
         run: (destination = stage === 'preparacion' ? 'estampado' : stage === 'estampado' ? 'empaquetado' : 'despacho', options) =>
@@ -158,6 +165,27 @@ test('stock insuficiente pausa el pedido sin descontar ni consumir número de co
     assert.equal(state.get(INVENTORY).quantity, 1);
 });
 
+test('si las reglas reservan la pausa al servidor, se informa sin stock y el pedido queda intacto', async () => {
+    const { state, run } = setup({ quantity: 1, denyPause: true });
+    const before = structuredClone(state);
+    await assert.rejects(run, error => error.message.startsWith('SIN_STOCK:') && error.pausado === false);
+    assert.deepEqual(state, before);
+});
+
+test('un pedido por mayor descuenta stock al saltar de preparación a reparto', async () => {
+    const { state, run } = setup();
+    assert.equal((await run('despacho')).advanced, true);
+    assert.equal(state.get(INVENTORY).quantity, 3);
+    assert.equal(state.get('pedidos/1').estadoGeneral, 'En Reparto');
+    assert.equal(state.get('pedidos/1').inventarioDescontado, true);
+    assert.equal(state.get(COUNTERS).estampado_normal, 40);
+    assert.equal((await run('despacho')).advanced, false);
+    assert.equal(state.get(INVENTORY).quantity, 3);
+    const sinStock = setup({ quantity: 1 });
+    await assert.rejects(() => sinStock.run('despacho'), /^Error: SIN_STOCK:/);
+    assert.equal(sinStock.state.get(INVENTORY).quantity, 1);
+});
+
 test('un fallo de stock tardío no devuelve a pausa un pedido avanzado por otro equipo', async () => {
     const { state, run } = setup({ quantity: 1, onFailure: (error, records) => {
         if (!error.message.startsWith('STOCK_INSUFICIENTE:')) return;
@@ -179,6 +207,39 @@ test('sin inicio se bloquea el avance normal; BOX/CUADRO conserva su excepción'
     const box = setup({ stage: 'estampado', started: false });
     assert.equal((await box.run('empaquetado', { esBoxCuadro: true })).advanced, true);
     assert.equal(box.state.get('pedidos/1').tiempoEstampado, null);
+});
+
+test('los regalos elegidos se descuentan junto con el paso de empaquetado a reparto', async () => {
+    const { state, run } = setup({ stage: 'empaquetado' });
+    const regalos = [{ id: 'gorro_negro_alianza', cantidad: 1 }, { id: 'gorro_negro_alianza', cantidad: 1 }];
+    assert.equal((await run('despacho', { regalos })).advanced, true);
+    assert.equal(state.get(GIFT).quantity, 0);
+    const order = state.get('pedidos/1');
+    assert.equal(order.estadoGeneral, 'En Reparto');
+    assert.deepEqual(order.empaquetado.regalosEntregados.map(r => [r.itemId, r.cantidad]), [['gorro_negro_alianza', 2]]);
+    const movimientos = [...state.values()].filter(value => value.inventarioId === 'inventario-accesorios');
+    assert.equal(movimientos.length, 1);
+    assert.deepEqual(
+        [movimientos[0].action, movimientos[0].quantity, movimientos[0].previousStock, movimientos[0].newStock, movimientos[0].user],
+        ['Salida', 2, 2, 0, 'Ana'],
+    );
+    assert.equal((await run('despacho', { regalos })).advanced, false);
+    assert.equal(state.get(GIFT).quantity, 0);
+});
+
+test('un regalo sin stock no descuenta nada ni avanza el pedido', async () => {
+    const { state, run } = setup({ stage: 'empaquetado', giftStock: 1 });
+    const before = structuredClone(state);
+    await assert.rejects(() => run('despacho', { regalos: [{ id: 'gorro_negro_alianza', cantidad: 2 }] }), /^Error: SIN_STOCK_REGALO:/);
+    assert.deepEqual(state, before);
+});
+
+test('tras deshacer un empaquetado, sus regalos no se descuentan otra vez', async () => {
+    const { state, run } = setup({ stage: 'empaquetado' });
+    state.get('pedidos/1').empaquetado.regalosEntregados = [{ itemId: 'gorro_negro_alianza', cantidad: 1 }];
+    assert.equal((await run('despacho', { regalos: [{ id: 'gorro_negro_alianza', cantidad: 1 }] })).advanced, true);
+    assert.equal(state.get(GIFT).quantity, 2);
+    assert.equal(state.get('pedidos/1').estadoGeneral, 'En Reparto');
 });
 
 test('el contador puede crearse y conserva las otras colas al avanzar', async () => {

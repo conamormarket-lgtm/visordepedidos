@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { securityMonitor } from "../utils/securityMonitor";
 import { descontarInventarioPorPedido } from "./inventory";
+import { prepararDescuentoRegalos } from "./regalos";
 import { calcularTipoEnvio } from "../utils/zonaEnvio";
 import { ZONAS } from "../constants";
 import { calcularTiempoEtapa, calcularTiempoImpresion } from "../utils/tiempoEstampado";
@@ -642,7 +643,7 @@ export const startStage = async (orderId, stage) => {
     return result;
 };
 
-export const updateOrderStage = async (orderId, newStatus, currentStage, updates, { esBoxCuadro = false } = {}) => {
+export const updateOrderStage = async (orderId, newStatus, currentStage, updates, { esBoxCuadro = false, regalos = [] } = {}) => {
     const horaAccion = new Date();
     // Obtener TODOS los docIds para este pedido (ej: ['006436', '6436'])
     const realIds = getAllRealIds(orderId);
@@ -660,8 +661,13 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     else if (newStatus === "despacho") newEstadoGeneral = "En Reparto";
 
     const permiteSinInicio = esBoxCuadro && currentStage === 'estampado' && newStatus === 'empaquetado';
+    // Las prendas salen del inventario al dejar Preparación, también cuando un
+    // pedido por mayor salta directo a Reparto.
+    const descuentaStock = currentStage === 'preparacion' && (newStatus === 'estampado' || newStatus === 'despacho');
+    const entregaRegalos = currentStage === 'empaquetado' && newStatus === 'despacho' && regalos.length > 0;
     if (!TIEMPO_CAMPO[currentStage] || !newEstadoGeneral) throw new Error('Etapa no válida.');
     let operadorActual;
+    let datosPedido;
 
     // Se vuelve a validar en cada intento de la transacción, incluso si otra
     // tablet confirma el mismo avance mientras esta solicitud está en curso.
@@ -670,7 +676,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
             && snap.data().estadoGeneral === newEstadoGeneral
             && snap.data()[currentStage]?.estado === 'LISTO'
             && snap.data()[currentStage]?.fechaFin
-            && (currentStage !== 'preparacion' || newStatus !== 'estampado' || snap.data().inventarioDescontado === true));
+            && (!descuentaStock || snap.data().inventarioDescontado === true));
         if (yaCompletado) {
             throw Object.assign(new Error('El avance ya estaba confirmado.'), { code: 'ETAPA_YA_COMPLETADA' });
         }
@@ -683,6 +689,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
         validarEtapa(snaps);
         const datos = snaps[0].data();
+        datosPedido = datos;
         const op = datos[currentStage]?.operador || datos[currentStage]?.operadorNombre;
         operadorActual = op && op !== 'Sin Asignar' ? op : 'Visor Pedidos';
         const inicio = snaps.map(snap => snap.data()[currentStage]?.fechaInicio).find(Boolean);
@@ -726,7 +733,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
                 [`${newStatus}.numeroColaDisplay`]: cola.numeroColaDisplay,
             }),
             [TIEMPO_CAMPO[currentStage]]: duracion,
-            ...(currentStage === 'preparacion' && newStatus === 'estampado' && { inventarioDescontado: true }),
+            ...(descuentaStock && { inventarioDescontado: true }),
         };
         return () => {
             cola?.guardar();
@@ -735,7 +742,7 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
     };
     // El descuento y el avance se confirman juntos o se cancelan juntos.
     try {
-        if (newStatus === "estampado" && currentStage === "preparacion") {
+        if (descuentaStock) {
             const resultadoInventario = await descontarInventarioPorPedido(realIds[0], () => operadorActual, prepararAvance);
 
             if (!resultadoInventario.exito) {
@@ -743,24 +750,33 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
                 // porque otro equipo pudo avanzar desde entonces.
                 if (resultadoInventario.sinStock) {
                     // Marcar como "En Pausa por Stock" para que sea visible en el Visor
-                    await runTransaction(db, async tx => {
-                        const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
-                        // Otro equipo pudo avanzar después de fallar el descuento.
-                        validarEtapa(snaps);
-                        refs.forEach(ref => tx.update(ref, {
-                            estadoGeneral: "En Pausa por Stock",
-                            "preparacion.enPausa": true,
-                            updatedAt: serverTimestamp(),
-                            historialModificaciones: arrayUnion({
-                                timestamp: new Date(),
-                                usuarioId: "visor-pedidos",
-                                usuarioEmail: operadorActual,
-                                accion: "Bloqueado: Sin Stock",
-                                detalle: `No se pudo avanzar a Estampado — stock insuficiente: ${resultadoInventario.mensaje}`,
-                            }),
-                        }));
-                    });
-                    throw new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`);
+                    let pausado = true;
+                    try {
+                        await runTransaction(db, async tx => {
+                            const snaps = await Promise.all(refs.map(ref => tx.get(ref)));
+                            // Otro equipo pudo avanzar después de fallar el descuento.
+                            validarEtapa(snaps);
+                            refs.forEach(ref => tx.update(ref, {
+                                estadoGeneral: "En Pausa por Stock",
+                                "preparacion.enPausa": true,
+                                updatedAt: serverTimestamp(),
+                                historialModificaciones: arrayUnion({
+                                    timestamp: new Date(),
+                                    usuarioId: "visor-pedidos",
+                                    usuarioEmail: operadorActual,
+                                    accion: "Bloqueado: Sin Stock",
+                                    detalle: `No se pudo avanzar a ${newEstadoGeneral} — stock insuficiente: ${resultadoInventario.mensaje}`,
+                                }),
+                            }));
+                        });
+                    } catch (error) {
+                        // Con la revisión de stock del servidor activa (stockReview_meta/control),
+                        // las reglas del ERP reservan Listo ↔ Pausa al servidor. El pedido
+                        // sigue sin stock: se informa así y no como un error de permisos.
+                        if (error.code !== 'permission-denied') throw error;
+                        pausado = false;
+                    }
+                    throw Object.assign(new Error(`SIN_STOCK: ${resultadoInventario.mensaje}`), { pausado });
                 } else if (resultadoInventario.noEncontrado) {
                     throw new Error(`NO_EN_INVENTARIO: ${resultadoInventario.mensaje}`);
                 } else if (resultadoInventario.sinPrendas) {
@@ -777,7 +793,17 @@ export const updateOrderStage = async (orderId, newStatus, currentStage, updates
         securityMonitor.registerOperation(realIds.length);
         await runTransaction(db, async tx => {
             const guardarAvance = await prepararAvance(tx);
+            // Si un avance anterior se deshizo, sus regalos ya salieron del inventario.
+            const descuentoRegalos = entregaRegalos && !datosPedido.empaquetado?.regalosEntregados?.length
+                ? await prepararDescuentoRegalos(tx, regalos, {
+                    numeroPedido: datosPedido.numeroPedido || realIds[0], pedidoId: realIds[0], usuario: operadorActual,
+                })
+                : null;
             guardarAvance();
+            if (descuentoRegalos) {
+                descuentoRegalos.guardar();
+                refs.forEach(ref => tx.update(ref, { 'empaquetado.regalosEntregados': descuentoRegalos.entregados }));
+            }
         });
         return { advanced: true };
     } catch (error) {

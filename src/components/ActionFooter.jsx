@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Printer, Loader2, Truck } from 'lucide-react';
+import { ChevronDown, User, UserPlus, CheckCircle, RotateCcw, AlertTriangle, Printer, Loader2, Truck, Gift } from 'lucide-react';
 import { printTicket } from '../services/printService';
 import { fechaMilisegundos } from '../utils/tiempoEstampado';
 
@@ -20,6 +20,8 @@ const ActionFooter = ({
     currentOrder,
     sinImagen,
     onTagSelect,
+    onRegalos,
+    regalosElegidos = 0,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [startingKeys, setStartingKeys] = useState(() => new Set());
@@ -303,6 +305,23 @@ const ActionFooter = ({
                                     </div>
                                 )}
                             </div>
+
+                        {/* Regalos: se descuentan del inventario al marcar como empaquetado */}
+                        {currentStage === 'empaquetado' && (
+                            <button
+                                type="button"
+                                onClick={onRegalos}
+                                disabled={!currentOrder || advancing}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 h-[40px] whitespace-nowrap border-2 disabled:opacity-40 ${
+                                    regalosElegidos || currentOrder?.empaquetado?.regalosEntregados?.length
+                                        ? 'bg-pink-600 border-pink-600 text-white shadow-md'
+                                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                                }`}
+                            >
+                                <Gift size={15} />
+                                <span>{regalosElegidos ? `Regalos (${regalosElegidos})` : 'Regalos'}</span>
+                            </button>
+                        )}
 
                         {/* Botón Imprimir: solo en empaquetado */}
                         {currentStage === 'empaquetado' && (

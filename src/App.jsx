@@ -8,6 +8,7 @@ import ActionFooter from './components/ActionFooter';
 import StockPauseAlert from './components/StockPauseAlert';
 const ImageActionModal = lazy(() => import('./components/ImageActionModal'));
 const HistorialEnviosModal = lazy(() => import('./components/HistorialEnviosModal'));
+const RegalosModal = lazy(() => import('./components/RegalosModal'));
 import { startStage, subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { ORDER_VIEWS, STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
 import { securityMonitor } from './utils/securityMonitor';
@@ -52,12 +53,15 @@ function App() {
     const [stats, setStats] = useState(deviceStats.getStats());
     const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
     const [verHistorialEnvios, setVerHistorialEnvios] = useState(false);
+    const [verRegalos, setVerRegalos] = useState(false);
+    // Regalos elegidos en Empaquetado, por pedido; se descuentan al marcarlo empaquetado.
+    const [regalosPorPedido, setRegalosPorPedido] = useState({});
 
     // Con un modal abierto no se navega entre pedidos. Sin esto, las flechas del
     // teclado y el swipe siguen cambiando el pedido POR DETRÁS del modal: en el
     // menú de acciones eso llega a asociar la imagen de un pedido con otro,
     // porque la imagen queda fija y el pedido cambia debajo.
-    const hayModalAbierto = !!imagenSeleccionada || verHistorialEnvios;
+    const hayModalAbierto = !!imagenSeleccionada || verHistorialEnvios || verRegalos;
     const openHistorial = useCallback(() => setVerHistorialEnvios(true), []);
 
     const incrementStats = (stage) => {
@@ -313,7 +317,9 @@ function App() {
 
             try {
                 // Guardar snapshot para poder deshacer SOLO si el avance fue exitoso
-                const result = await updateOrderStage(currentOrder.id, nextStage, currentStage);
+                const regalos = currentStage === STAGES.EMPAQUETADO ? regalosPorPedido[currentOrder.id] || [] : [];
+                const result = await updateOrderStage(currentOrder.id, nextStage, currentStage, undefined, { regalos });
+                if (regalos.length) setRegalosPorPedido(({ [currentOrder.id]: _, ...resto }) => resto);
                 if (!result.advanced) return;
 
                 setLastAction({
@@ -331,7 +337,9 @@ function App() {
                     alert(
                         `⚠️ SIN STOCK — El pedido #${currentOrder.orderId} no puede avanzar.\n\n` +
                         `${detalle}\n\n` +
-                        `El pedido ha sido movido automáticamente a "En Pausa por Stock".`
+                        (err.pausado === false
+                            ? `No se descontó nada. El ERP controla el paso a "En Pausa por Stock", así que el pedido sigue en Preparación hasta que haya stock.`
+                            : `El pedido ha sido movido automáticamente a "En Pausa por Stock".`)
                     );
                     setLastAction(null);
                 } else if (err.message?.startsWith('NO_EN_INVENTARIO:')) {
@@ -344,6 +352,16 @@ function App() {
                         `Revisá en el sistema de inventario que el producto esté dado de alta con el ID correcto (visible en consola del navegador).`
                     );
                     setLastAction(null);
+                } else if (err.message?.startsWith('SIN_STOCK_REGALO:') || err.message?.startsWith('REGALO_NO_ENCONTRADO:')) {
+                    alert(
+                        `⚠️ REGALO SIN STOCK — Pedido #${currentOrder.orderId}
+
+` +
+                        `${err.message.replace(/^[A-Z_]+: /, '')}
+
+` +
+                        `No se descontó nada y el pedido sigue en Empaquetado. Cambia el regalo en el botón "Regalos" y vuelve a intentarlo.`
+                    );
                 } else if (err.message?.startsWith('SIN_PRENDAS:')) {
                     // El pedido volvió a Preparación automáticamente
                     alert(
@@ -473,6 +491,8 @@ function App() {
                     currentOrderId={currentOrder?.id}
                     currentOrder={currentOrder}
                     sinImagen={sinImagen}
+                    onRegalos={() => setVerRegalos(true)}
+                    regalosElegidos={(regalosPorPedido[currentOrder?.id] || []).reduce((n, r) => n + r.cantidad, 0)}
                 />
             }
         >
@@ -561,6 +581,15 @@ function App() {
                 <HistorialEnviosModal
                     order={currentOrder}
                     onClose={() => setVerHistorialEnvios(false)}
+                />
+            )}
+
+            {verRegalos && currentOrder && (
+                <RegalosModal
+                    order={currentOrder}
+                    seleccion={regalosPorPedido[currentOrder.id] || []}
+                    onGuardar={seleccion => setRegalosPorPedido(prev => ({ ...prev, [currentOrder.id]: seleccion }))}
+                    onClose={() => setVerRegalos(false)}
                 />
             )}
 
