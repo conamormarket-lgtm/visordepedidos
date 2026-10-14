@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Gift, X, Loader2, AlertTriangle, Minus, Plus } from 'lucide-react';
+import { Gift, X, Loader2, AlertTriangle, Minus, Plus, Search } from 'lucide-react';
 import { cargarRegalos, etiquetaRegalo } from '../services/regalos';
+
+// "marrón" encuentra "Marron" y "gorro negro" encuentra "Gorro Negro Alianza".
+const normalizar = texto => String(texto).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 /**
  * Elegir los regalos que van en el paquete. Solo arma la selección: el stock se
@@ -11,6 +14,7 @@ const RegalosModal = ({ order, seleccion, onGuardar, onClose }) => {
     const [items, setItems] = useState([]);
     const [error, setError] = useState('');
     const [cantidades, setCantidades] = useState(() => new Map(seleccion.map(r => [r.id, r.cantidad])));
+    const [busqueda, setBusqueda] = useState('');
     const yaEntregados = order?.empaquetado?.regalosEntregados || [];
 
     useEffect(() => {
@@ -37,14 +41,17 @@ const RegalosModal = ({ order, seleccion, onGuardar, onClose }) => {
     }, []);
 
     const grupos = useMemo(() => {
+        const palabras = normalizar(busqueda).split(/\s+/).filter(Boolean);
         const porTipo = new Map();
         for (const item of items) {
+            const texto = normalizar(item.etiqueta);
+            if (!palabras.every(p => texto.includes(p))) continue;
             const tipo = item.tipo || 'Otros';
             if (!porTipo.has(tipo)) porTipo.set(tipo, []);
             porTipo.get(tipo).push(item);
         }
         return [...porTipo];
-    }, [items]);
+    }, [items, busqueda]);
 
     const cambiar = (item, delta) => setCantidades(prev => {
         const next = new Map(prev);
@@ -123,6 +130,34 @@ const RegalosModal = ({ order, seleccion, onGuardar, onClose }) => {
                             <p className="text-[11px] font-semibold text-slate-500 leading-snug">
                                 Se descuenta del Inventario de Regalos al marcar el pedido como Empaquetado.
                             </p>
+                            <div className="sticky -top-4 z-10 -mx-4 -mt-2 px-4 py-2 bg-white">
+                                <div className="relative">
+                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                    <input
+                                        type="text"
+                                        enterKeyHint="search"
+                                        value={busqueda}
+                                        onChange={e => setBusqueda(e.target.value)}
+                                        placeholder="Buscar: gorro negro, billetera alianza…"
+                                        aria-label="Buscar regalo"
+                                        className="w-full h-11 pl-9 pr-10 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-pink-400"
+                                    />
+                                    {busqueda && (
+                                        <button
+                                            onClick={() => setBusqueda('')}
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700"
+                                            aria-label="Limpiar búsqueda"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            {grupos.length === 0 && (
+                                <p className="py-8 text-center text-xs font-semibold text-slate-400">
+                                    Ningún regalo coincide con "{busqueda}".
+                                </p>
+                            )}
                             {grupos.map(([tipo, lista]) => (
                                 <section key={tipo}>
                                     <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-1.5">{tipo}</h3>
