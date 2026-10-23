@@ -127,9 +127,6 @@ const RegalosModal = ({ order, seleccion, onGuardar, onClose }) => {
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">
-                            <p className="text-[11px] font-semibold text-slate-500 leading-snug">
-                                Se descuenta del Inventario de Regalos al marcar el pedido como Empaquetado.
-                            </p>
                             <div className="sticky -top-4 z-10 -mx-4 -mt-2 px-4 py-2 bg-white">
                                 <div className="relative">
                                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -170,7 +167,7 @@ const RegalosModal = ({ order, seleccion, onGuardar, onClose }) => {
                                                     className={`flex items-center gap-2 p-2 rounded-xl border ${cantidad ? 'border-pink-300 bg-pink-50' : 'border-slate-200'}`}
                                                 >
                                                     <div className="min-w-0 flex-1">
-                                                        <p className="text-sm font-bold text-slate-800 leading-tight truncate">{item.etiqueta}</p>
+                                                        <p className="text-sm font-bold text-slate-800 leading-tight truncate">{item.attrs?.Color || 'Sin color'}</p>
                                                         <p className={`text-[11px] font-semibold ${item.stock > 0 ? 'text-slate-500' : 'text-red-600'}`}>
                                                             Stock: {item.stock}
                                                         </p>
