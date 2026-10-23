@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Gift, X, Loader2, AlertTriangle, Minus, Plus, Search } from 'lucide-react';
 import { cargarRegalos, etiquetaRegalo } from '../services/regalos';
 
-// "marrón" encuentra "Marron" y "gorro negro" encuentra "Gorro Negro Alianza".
+// "marrón" encuentra "Marron" y "gorro negro" encuentra "Gorro Negro".
 const normalizar = texto => String(texto).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 /**
@@ -138,7 +138,7 @@ const RegalosModal = ({ order, seleccion, onGuardar, onClose }) => {
                                         enterKeyHint="search"
                                         value={busqueda}
                                         onChange={e => setBusqueda(e.target.value)}
-                                        placeholder="Buscar: gorro negro, billetera alianza…"
+                                        placeholder="Buscar: gorro negro, billetera beige…"
                                         aria-label="Buscar regalo"
                                         className="w-full h-11 pl-9 pr-10 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-pink-400"
                                     />

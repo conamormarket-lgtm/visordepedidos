@@ -2,15 +2,20 @@ import { db } from "../firebase/config";
 import { collection, doc, getDocs, serverTimestamp } from "firebase/firestore";
 
 // En el ERP esta colección se muestra como "Inventario de Regalos": billeteras,
-// gorros, placas, collares… por color y marca / diseño.
+// gorros, placas, collares… por producto y color.
 export const INVENTARIO_REGALOS = "inventario-accesorios";
 const COLLECTION_MOVIMIENTOS = "movimientosInventarioGlobal";
 
-// Firestore no conserva el orden de los atributos: "Color" va antes que "Marca / Diseño".
+// Desde el 23/10/2026 los regalos se cuentan solo por color. Los pedidos empaquetados antes
+// guardaron el regalo con su marca y con el nombre viejo del tipo: se muestran igual que hoy.
+const MARCA = "Marca / Diseño";
+const TIPO_ACTUAL = { Collar: "Collar Sol y luna" };
+
+// Firestore no conserva el orden de los atributos: se ordenan para que la etiqueta no cambie.
 export const etiquetaRegalo = item => [
-    item.tipo,
-    ...Object.entries(item.attrs || {}).sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v)
-        .filter(v => v && v !== "Sin marca"),
+    TIPO_ACTUAL[item.tipo] ?? item.tipo,
+    ...Object.entries(item.attrs || {}).filter(([k]) => k !== MARCA)
+        .sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v).filter(Boolean),
 ].join(" ");
 
 const stockDe = data => data.quantity ?? data.cantidad ?? 0;
