@@ -426,6 +426,7 @@ export const subscribeToOrders = (callback, onError) => {
     let localOrders = [];
     let active = true;
     let isFirstSnapshot = true;
+    let loadedFromServer = false;
     void readOrdersCache().then(cached => {
         // Una lectura lenta de disco nunca reemplaza un snapshot más reciente.
         if (!active || !isFirstSnapshot || !cached.length) return;
@@ -456,8 +457,12 @@ export const subscribeToOrders = (callback, onError) => {
                 }
             });
         }
-        // Registrar el número de documentos leídos/cambiados
-        securityMonitor.registerOperation(snapshot.docChanges().length);
+        // Registrar el número de documentos leídos/cambiados. La carga inicial
+        // trae toda la cola de una vez (~250 docs): es una lectura acotada, no
+        // un bucle, y en una tablet lenta puede llegar fuera del periodo de
+        // gracia del monitor y activar el freno por sí sola.
+        if (loadedFromServer) securityMonitor.registerOperation(snapshot.docChanges().length);
+        if (!snapshot.metadata.fromCache) loadedFromServer = true;
 
         let hasChanges = false;
 
