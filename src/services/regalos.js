@@ -9,7 +9,7 @@ const COLLECTION_MOVIMIENTOS = "movimientosInventarioGlobal";
 // Desde el 23/10/2026 los regalos se cuentan solo por color. Los pedidos empaquetados antes
 // guardaron el regalo con su marca y con el nombre viejo del tipo: se muestran igual que hoy.
 const MARCA = "Marca / Diseño";
-const TIPO_ACTUAL = { Collar: "Collar Sol y luna" };
+const TIPO_ACTUAL = { Collar: "Collar Sol y luna", Pulsera: "Pulsera Sol y luna" };
 
 // Firestore no conserva el orden de los atributos: se ordenan para que la etiqueta no cambie.
 export const etiquetaRegalo = item => [

@@ -22,3 +22,8 @@ test('el collar viejo se muestra con su nombre actual', () => {
     assert.equal(etiquetaRegalo({ tipo: 'Collar', attrs: { Color: 'Plateado', 'Marca / Diseño': 'Sol y luna' } }), 'Collar Sol y luna Plateado');
     assert.equal(etiquetaRegalo({ tipo: 'Collar Sol y luna', attrs: { Color: 'Plateado' } }), 'Collar Sol y luna Plateado');
 });
+
+test('la pulsera vieja se muestra con su nombre actual', () => {
+    assert.equal(etiquetaRegalo({ tipo: 'Pulsera', attrs: { Color: 'Plateado' } }), 'Pulsera Sol y luna Plateado');
+    assert.equal(etiquetaRegalo({ tipo: 'Pulsera Sol y luna', attrs: { Color: 'Plateado' } }), 'Pulsera Sol y luna Plateado');
+});
