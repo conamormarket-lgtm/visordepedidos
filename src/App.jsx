@@ -11,7 +11,6 @@ const HistorialEnviosModal = lazy(() => import('./components/HistorialEnviosModa
 const RegalosModal = lazy(() => import('./components/RegalosModal'));
 import { startStage, subscribeToOrders, updateOrderStage, assignOperator, subscribeToOperators, undoOrderStage, updateOrderTag } from './services/orders';
 import { ORDER_VIEWS, STAGES, ZONAS, isZonaSplitEnabled, isEnviarErpEnabled } from './constants';
-import { securityMonitor } from './utils/securityMonitor';
 import * as deviceStats from './utils/deviceStats';
 import { triggerConfetti } from './utils/confetti';
 import { getOrdersForView, isOrderInView, zonaDe } from './utils/orderQueue';
@@ -46,8 +45,6 @@ function App() {
     const [allOrders, setAllOrders] = useState([]); // Store all fetched orders for the stage
     const [currentIndex, setCurrentIndex] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
-    const [isLocked, setIsLocked] = useState(securityMonitor.getIsLocked());
-    const [lockReason, setLockReason] = useState("");
     const [operators, setOperators] = useState(["Sin Asignar"]);
     const [lastAction, setLastAction] = useState(null); // { orderId, prevStage, completedStage, prevSnapshot }
     const [stats, setStats] = useState(deviceStats.getStats());
@@ -78,14 +75,8 @@ function App() {
     const [animDirection, setAnimDirection] = useState('right'); // 'right' means sliding IN from right (Next), 'left' means IN from left (Prev)
     const minSwipeDistance = 50;
 
-    // Monitor de seguridad y Suscripción Global de Pedidos (Ahorro de lecturas)
+    // Suscripción global de pedidos (ahorro de lecturas).
     useEffect(() => {
-        // Suscripción al monitor
-        const unsubMonitor = securityMonitor.subscribe((status, reason) => {
-            setIsLocked(status);
-            if (reason) setLockReason(reason);
-        });
-
         // Suscripción ÚNICA a Firebase para todas las etapas relevantes
         // Esto evita volver a leer los mismos ~250 docs cada vez que se cambia de pestaña
         const unsubscribeOrders = subscribeToOrders((fetchedOrders) => {
@@ -102,7 +93,6 @@ function App() {
         });
 
         return () => {
-            unsubMonitor();
             unsubscribeOrders();
             unsubscribeOperators();
         };
@@ -602,29 +592,7 @@ function App() {
                 />
             )}
 
-            {/* Emergency Brake Overlay */}
             </Suspense>
-            {isLocked && (
-                <div className="fixed inset-0 z-[9999] bg-red-600/95 backdrop-blur-md flex flex-col items-center justify-center text-white p-8 text-center">
-                    <div className="bg-white text-red-600 rounded-full p-6 mb-6 animate-bounce">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
-                    </div>
-                    <h1 className="text-5xl font-black mb-4 tracking-tighter">SISTEMA BLOQUEADO</h1>
-                    <p className="text-2xl font-light max-w-2xl mb-8">
-                        Se ha detectado un consumo inusual de recursos (posible bucle de sincronización).
-                        El freno de emergencia se ha activado para evitar cargos excesivos.
-                    </p>
-                    <div className="bg-black/20 p-4 rounded-lg font-mono text-sm border border-white/20">
-                        Motivo: {lockReason || `>${'300'} op/seg o ráfaga inusual.`}
-                    </div>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="mt-10 px-8 py-3 bg-white text-red-600 rounded-xl font-bold hover:bg-red-50 transition-colors shadow-lg"
-                    >
-                        RECARGAR APLICACIÓN
-                    </button>
-                </div>
-            )}
         </Layout>
     );
 }
