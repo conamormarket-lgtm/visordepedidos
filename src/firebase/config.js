@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "./observed.js";
 import { getAuth, signInAnonymously } from "firebase/auth";
+import { configureReadTelemetry } from '../observability/firestore-read-client.mjs';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDnQ5TPUyQfUTJ7GcgDHB71PncDj0De5pc",
@@ -17,6 +18,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+configureReadTelemetry({
+    project: firebaseConfig.projectId,
+    endpoint: `https://us-central1-${firebaseConfig.projectId}.cloudfunctions.net/collectClientFirestoreReads`,
+    enabled: import.meta.env.PROD && import.meta.env.VITE_FIRESTORE_READ_TELEMETRY !== 'false',
+    token: async () => auth.currentUser ? auth.currentUser.getIdToken() : null,
+});
 let authAttempt = null;
 
 // Las reglas compartidas con el ERP requieren request.auth. Esperar también

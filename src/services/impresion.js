@@ -1,5 +1,5 @@
 import { db } from "../firebase/config";
-import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from "../firebase/observed.js";
 import { securityMonitor } from "../utils/securityMonitor";
 
 /**

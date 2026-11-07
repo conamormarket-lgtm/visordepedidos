@@ -1,5 +1,5 @@
 import { db } from "../firebase/config";
-import { collection, doc, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDocs, serverTimestamp } from "../firebase/observed.js";
 
 // En el ERP esta colección se muestra como "Inventario de Regalos": billeteras,
 // gorros, placas, collares… por producto y color.

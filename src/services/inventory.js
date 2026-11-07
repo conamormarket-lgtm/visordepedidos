@@ -1,5 +1,5 @@
 import { db } from "../firebase/config";
-import { doc, collection, runTransaction, serverTimestamp } from "firebase/firestore";
+import { doc, collection, runTransaction, serverTimestamp } from "../firebase/observed.js";
 
 const COLLECTION_INVENTARIO = "inventarioPrendas";
 const COLLECTION_HISTORIAL = "historialInventarioPrendas";

@@ -9,7 +9,7 @@
  */
 
 import { db, ensureFirebaseAuth } from '../firebase/config.js';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from '../firebase/observed.js';
 
 // ── Generador de ZPL ─────────────────────────────────────────────────────────
 /**

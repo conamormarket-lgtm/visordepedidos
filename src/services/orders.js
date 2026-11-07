@@ -10,7 +10,7 @@ import {
     runTransaction,
     arrayUnion,
     serverTimestamp
-} from "firebase/firestore";
+} from "../firebase/observed.js";
 import { securityMonitor } from "../utils/securityMonitor";
 import { descontarInventarioPorPedido } from "./inventory";
 import { prepararDescuentoRegalos } from "./regalos";
