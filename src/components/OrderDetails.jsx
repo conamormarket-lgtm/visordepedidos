@@ -3,6 +3,7 @@ import { Phone, Package, AlertTriangle, Truck, Home, Ruler, PlusCircle, Building
 import { formatearPagoCero } from '../utils/cobranza';
 import { STAGE_LABELS, ZONAS } from '../constants';
 import AreaIcon from './AreaIcon';
+import PossibleMarketingCheck from './PossibleMarketingCheck';
 
 // fechaEnvio puede llegar como Timestamp ({ seconds }), string, número o Date.
 // Antes solo se leía .seconds y los demás formatos pintaban "Invalid Date".
@@ -45,7 +46,7 @@ const OrderDetails = ({ order, fullWidth = false, showStage = false }) => {
                 <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
                         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Orden de Producción</span>
-                        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">#{order.orderId}</h2>
+                        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">#{order.orderId}<PossibleMarketingCheck key={order.id} order={order} /></h2>
                     </div>
 
                     {order.etiquetaEmpaquetado && (
