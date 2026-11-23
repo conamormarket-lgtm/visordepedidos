@@ -6,4 +6,4 @@ Marketing aprueba/desaprueba en ERP Marketing y recibe los cambios de estado de 
 
 `PossibleMarketingCheck.jsx` presenta el control; `services/orders.js` incorpora los dos campos a la normalización y caché ya existentes. No se agregan listeners por pedido. El campo sigue visible al navegar entre áreas y su título explica el resultado de Marketing.
 
-Validación: build Vite y 19 pruebas de transacciones/caché, incluyendo un caso que avanza cada área con decisiones pendiente, aprobada, rechazada y finalizada. Integración y activación documentadas en `docs/pedidos-para-contenido.md` del proyecto ERP Marketing. El despliegue de producción sigue pendiente.
+Validación: build Vite y 19 pruebas de transacciones/caché, incluyendo un caso que avanza cada área con decisiones pendiente, aprobada, rechazada y finalizada. Integración y activación documentadas en `docs/pedidos-para-contenido.md` del proyecto ERP Marketing. El puente de producción está conectado al ERP Marketing local. Las marcas se enrutan según su configuración explícita.

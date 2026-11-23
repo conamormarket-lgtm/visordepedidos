@@ -275,6 +275,8 @@ const normalizeOrder = (doc) => {
         sizes: data.prendas,
         notasDiseño: data.notasDiseño || data.notasDiseno || data.diseño?.notasDiseño || data.diseno?.notasDiseño || null,
         observations: data.observacion,
+        posibleMarketing: data.posibleMarketing === true,
+        marketingEstado: data.marketingEstado || null,
         comments: commentText,
         status: internalStatus,
         estadoGeneral: estGen,

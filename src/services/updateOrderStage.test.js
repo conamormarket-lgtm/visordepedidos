@@ -122,6 +122,18 @@ test('repetir un avance confirmado no escribe ni vuelve a contar el pedido', asy
     }
 });
 
+test('la decisión de marketing no bloquea preparación, estampado ni despacho', async () => {
+    for (const stage of Object.keys(STATES)) {
+        for (const marketingEstado of ['pending', 'approved', 'rejected', 'closed']) {
+            const { state, run } = setup({ stage });
+            Object.assign(state.get('pedidos/1'), { posibleMarketing: true, marketingEstado });
+            assert.equal((await run()).advanced, true);
+            assert.equal(state.get('pedidos/1').marketingEstado, marketingEstado);
+            assert.equal(state.get('pedidos/1').posibleMarketing, true);
+        }
+    }
+});
+
 test('una etapa distinta conserva su estado y el conflicto no se disfraza de inventario', async () => {
     for (const status of ['En Pausa por Stock', 'En Reparto', 'Anulado', 'En Estampado']) {
         const { state, run } = setup();
